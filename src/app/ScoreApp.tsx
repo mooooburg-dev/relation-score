@@ -264,7 +264,9 @@ function HomeContent() {
       if (navigator.share) {
         await navigator.share({
           title: "몇점이야?",
-          text: "우리 궁합 점수 보러와",
+          text: result
+            ? `우리 ${result.score}점 나왔는데 너넨 몇점이야? 🔮`
+            : "너도 궁합 점수 보러와 🔮",
           url,
         });
         return;
