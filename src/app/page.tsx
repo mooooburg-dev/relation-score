@@ -233,7 +233,7 @@ function HomeContent() {
   return (
     <main
       className={`mx-auto flex min-h-screen w-full max-w-[480px] flex-col px-5 pt-8 ${
-        step === 1 && SHOW_BANNER ? "pb-32" : "pb-12"
+        step === 1 && SHOW_BANNER ? "pb-24" : "pb-12"
       }`}
     >
       <header className="mb-6 text-center">
@@ -271,15 +271,11 @@ function HomeContent() {
       )}
 
       {step === 1 && SHOW_BANNER && (
-        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[480px] border-t border-foreground/10 bg-white/95 px-3 pb-2 pt-1 backdrop-blur">
+        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[480px] flex-col items-center border-t border-foreground/10 bg-white/95 px-3 pb-2 pt-1 backdrop-blur">
           <p className="text-center text-[10px] leading-none text-foreground/30">
             광고
           </p>
-          <AdUnit
-            slot={SLOT_BANNER}
-            format="horizontal"
-            className="h-[60px] w-full"
-          />
+          <AdUnit slot={SLOT_BANNER} fixedWidth={320} fixedHeight={50} />
         </div>
       )}
 
