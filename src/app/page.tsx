@@ -20,11 +20,6 @@ const MBTI_LIST = [
 ];
 const GENDERS = ["여자", "남자"];
 const BLOODS = ["A형", "B형", "O형", "AB형"];
-const STARS = [
-  "양자리", "황소자리", "쌍둥이자리", "게자리",
-  "사자자리", "처녀자리", "천칭자리", "전갈자리",
-  "사수자리", "염소자리", "물병자리", "물고기자리",
-];
 const RELATIONS = [
   { value: "연인", label: "연인", emoji: "💕" },
   { value: "친구", label: "친구", emoji: "🤝" },
@@ -39,7 +34,6 @@ interface Person {
   gender: string;
   age: string;
   blood: string;
-  star: string;
 }
 
 interface Result {
@@ -57,7 +51,6 @@ const EMPTY_PERSON: Person = {
   gender: "",
   age: "",
   blood: "",
-  star: "",
 };
 
 // ---- 내 정보 로컬 캐싱 ----
@@ -74,7 +67,6 @@ function loadMe(): Person | null {
         gender: data.gender || "",
         age: data.age || "",
         blood: data.blood || "",
-        star: data.star || "",
       };
     }
   } catch {
@@ -143,12 +135,10 @@ function HomeContent() {
           myGender: m.gender,
           myAge: m.age,
           myBlood: m.blood,
-          myStar: m.star,
           otherMbti: o.mbti,
           otherGender: o.gender,
           otherAge: o.age,
           otherBlood: o.blood,
-          otherStar: o.star,
           relation: rel,
         }),
       });
@@ -174,14 +164,12 @@ function HomeContent() {
         gender: searchParams.get("mg") || "",
         age: searchParams.get("ma") || "",
         blood: searchParams.get("mb") || "",
-        star: searchParams.get("ms") || "",
       };
       const o: Person = {
         mbti: om,
         gender: searchParams.get("og") || "",
         age: searchParams.get("oa") || "",
         blood: searchParams.get("ob") || "",
-        star: searchParams.get("os") || "",
       };
       setMe(m);
       setOther(o);
@@ -202,12 +190,10 @@ function HomeContent() {
       mg: me.gender,
       ma: me.age,
       mb: me.blood,
-      ms: me.star,
       om: other.mbti,
       og: other.gender,
       oa: other.age,
       ob: other.blood,
-      os: other.star,
       rel: relation,
     });
     // 빈 값 제거
@@ -326,7 +312,7 @@ function StepInput({
   setRelation: (v: string) => void;
   onSubmit: () => void;
 }) {
-  const meFilled = me.mbti || me.gender || me.age || me.blood || me.star;
+  const meFilled = me.mbti || me.gender || me.age || me.blood;
   const canSubmit = me.mbti && other.mbti && relation;
   const hint = !me.mbti || !other.mbti ? "MBTI를 골라줘" : "관계를 골라줘";
   return (
@@ -434,14 +420,6 @@ function PersonCard({
             onChange={(v) => set("blood", v)}
             placeholder="선택"
             options={BLOODS}
-          />
-        </Field>
-        <Field label="별자리">
-          <Select
-            value={person.star}
-            onChange={(v) => set("star", v)}
-            placeholder="선택"
-            options={STARS}
           />
         </Field>
       </div>

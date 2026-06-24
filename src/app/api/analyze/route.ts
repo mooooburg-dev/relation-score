@@ -17,7 +17,6 @@ interface Person {
   gender?: string;
   age?: string;
   blood?: string;
-  star?: string;
 }
 
 interface AnalyzeBody {
@@ -25,12 +24,10 @@ interface AnalyzeBody {
   myGender?: string;
   myAge?: string;
   myBlood?: string;
-  myStar?: string;
   otherMbti: string;
   otherGender?: string;
   otherAge?: string;
   otherBlood?: string;
-  otherStar?: string;
   relation: string;
 }
 
@@ -41,7 +38,6 @@ function describePerson(label: string, p: Person) {
     p.gender && `성별 ${p.gender}`,
     p.age && `나이 ${p.age}`,
     p.blood && `혈액형 ${p.blood}`,
-    p.star && `별자리 ${p.star}`,
   ].filter(Boolean);
   return `${label}: ${parts.join(", ")}`;
 }
@@ -98,14 +94,12 @@ export async function POST(request: Request) {
     gender: body.myGender,
     age: body.myAge,
     blood: body.myBlood,
-    star: body.myStar,
   };
   const other: Person = {
     mbti: body.otherMbti,
     gender: body.otherGender,
     age: body.otherAge,
     blood: body.otherBlood,
-    star: body.otherStar,
   };
 
   const focus = RELATION_FOCUS[body.relation] ?? "전반적인 케미";

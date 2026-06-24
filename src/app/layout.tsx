@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 const SITE_URL = "https://score.drawyourmind.com";
 const SITE_NAME = "몇점이야?";
 const DESCRIPTION =
-  "두 사람의 MBTI, 나이, 혈액형, 별자리를 입력하면 연인·친구·썸·소개팅 등 관계별 궁합 점수를 AI가 분석해주는 무료 테스트. B급 감성 한 줄 평과 결과 공유까지.";
+  "두 사람의 MBTI, 나이, 혈액형을 입력하면 연인·친구·썸·소개팅 등 관계별 궁합 점수를 AI가 분석해주는 무료 테스트. B급 감성 한 줄 평과 결과 공유까지.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -36,7 +36,6 @@ export const metadata: Metadata = {
     "썸 궁합",
     "소개팅 궁합",
     "혈액형 궁합",
-    "별자리 궁합",
     "MBTI 케미",
     "궁합 테스트 무료",
   ],
@@ -111,7 +110,7 @@ const jsonLd = {
           name: "몇점이야?는 어떤 서비스인가요?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "두 사람의 MBTI, 나이, 성별, 혈액형, 별자리를 입력하면 연인·친구·직장동료·가족·소개팅·썸 등 관계 유형에 맞춰 궁합 점수를 AI가 분석해주는 무료 테스트입니다.",
+            text: "두 사람의 MBTI, 나이, 성별, 혈액형을 입력하면 연인·친구·직장동료·가족·소개팅·썸 등 관계 유형에 맞춰 궁합 점수를 AI가 분석해주는 무료 테스트입니다.",
           },
         },
         {
@@ -135,7 +134,7 @@ const jsonLd = {
           name: "어떤 정보를 입력해야 하나요?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "두 사람의 MBTI만 있으면 분석할 수 있고, 나이·성별·혈액형·별자리는 선택 입력입니다. 정보를 더 넣을수록 분석이 구체적으로 나옵니다.",
+            text: "두 사람의 MBTI만 있으면 분석할 수 있고, 나이·성별·혈액형은 선택 입력입니다. 정보를 더 넣을수록 분석이 구체적으로 나옵니다.",
           },
         },
         {
@@ -178,7 +177,7 @@ export default function RootLayout({
         {children}
         <footer className="mx-auto w-full max-w-[480px] px-5 pb-10 pt-2 text-center text-xs leading-relaxed text-foreground/40">
           <p>
-            <strong>몇점이야?</strong>는 두 사람의 MBTI·나이·혈액형·별자리로 연인,
+            <strong>몇점이야?</strong>는 두 사람의 MBTI·나이·혈액형으로 연인,
             친구, 썸, 소개팅 등 관계별 궁합 점수를 AI가 분석해주는 무료
             테스트입니다.
           </p>

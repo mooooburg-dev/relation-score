@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "몇점이야? - 우리 궁합 점수",
     short_name: "몇점이야?",
     description:
-      "MBTI·나이·혈액형·별자리로 보는 관계별 궁합 점수 테스트",
+      "MBTI·나이·혈액형으로 보는 관계별 궁합 점수 테스트",
     start_url: "/",
     display: "standalone",
     background_color: "#f4f2fb",
