@@ -792,6 +792,22 @@ function ResultSkeleton() {
             🔮
           </div>
         </div>
+        <div className="flex items-center justify-center gap-2 text-sm text-foreground/50">
+          <span>AI가 둘 사이를 캐는 중</span>
+          <span className="inline-flex gap-1">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="inline-block h-1.5 w-1.5 rounded-full bg-primary/60"
+                style={{
+                  animation: "skeleton-pulse 1s ease-in-out infinite",
+                  animationDelay: `${i * 0.2}s`,
+                }}
+              />
+            ))}
+          </span>
+          <span>🕵️</span>
+        </div>
         <div className="h-6 w-48 rounded-lg bg-primary/15" style={pulse} />
         <div className="h-4 w-full rounded bg-primary/10" style={pulse} />
         <div className="h-4 w-3/4 rounded bg-primary/10" style={pulse} />
@@ -820,22 +836,6 @@ function ResultSkeleton() {
           />
         </section>
       )}
-      <div className="flex items-center justify-center gap-2 text-sm text-foreground/50">
-        <span>AI가 둘 사이를 캐는 중</span>
-        <span className="inline-flex gap-1">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="inline-block h-1.5 w-1.5 rounded-full bg-primary/60"
-              style={{
-                animation: "skeleton-pulse 1s ease-in-out infinite",
-                animationDelay: `${i * 0.2}s`,
-              }}
-            />
-          ))}
-        </span>
-        <span>🕵️</span>
-      </div>
     </div>
   );
 }
