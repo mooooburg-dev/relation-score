@@ -764,11 +764,16 @@ function ResultSkeleton() {
         ))}
       </section>
       {SHOW_LOADING_AD && (
-        <section className="flex flex-col items-center rounded-3xl bg-white p-4 shadow-sm">
-          <p className="mb-1 text-center text-[10px] leading-none text-foreground/30">
+        <section className="overflow-hidden rounded-3xl bg-white p-4 shadow-sm">
+          <p className="mb-2 text-center text-[10px] leading-none text-foreground/30">
             광고
           </p>
-          <AdUnit slot={SLOT_LOADING} fixedWidth={300} fixedHeight={250} />
+          {/* 반응형 광고를 카드 폭 안에 가둠 (full-width-responsive=false + overflow-hidden) */}
+          <AdUnit
+            slot={SLOT_LOADING}
+            responsive={false}
+            className="block w-full"
+          />
         </section>
       )}
       <div className="flex items-center justify-center gap-2 text-sm text-foreground/50">
