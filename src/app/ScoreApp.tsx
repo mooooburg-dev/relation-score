@@ -265,13 +265,8 @@ function HomeContent() {
     const url = buildShareUrl();
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: "몇점이야?",
-          text: result
-            ? `우리 ${result.score}점 나왔어 보러와 🔮`
-            : "너도 궁합 점수 보러와 🔮",
-          url,
-        });
+        // 링크만 공유 (불필요한 텍스트 제외, 미리보기는 OG가 처리)
+        await navigator.share({ title: "몇점이야?", url });
         return;
       }
       await navigator.clipboard.writeText(url);
