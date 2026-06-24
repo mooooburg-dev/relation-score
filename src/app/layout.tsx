@@ -78,6 +78,11 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  verification: {
+    other: {
+      "naver-site-verification": "e9c8237136ff2db49ee4bbc8b8280c7d407cadf9",
+    },
+  },
   ...(ADSENSE_CLIENT
     ? { other: { "google-adsense-account": ADSENSE_CLIENT } }
     : {}),
