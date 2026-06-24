@@ -101,6 +101,7 @@ function HomeContent() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
+  const [fromShare, setFromShare] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
 
@@ -127,6 +128,7 @@ function HomeContent() {
     setError("");
     setResult(null);
     setResultId(null);
+    setFromShare(false);
     setStep(3);
     try {
       const res = await fetch("/api/analyze", {
@@ -182,6 +184,7 @@ function HomeContent() {
       setRelation(data.relation || inp.relation || "");
       setResult(data.result as Result);
       setResultId(id);
+      setFromShare(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "알 수 없는 오류");
     } finally {
@@ -265,7 +268,7 @@ function HomeContent() {
         await navigator.share({
           title: "몇점이야?",
           text: result
-            ? `우리 ${result.score}점 나왔는데 너넨 몇점이야? 🔮`
+            ? `우리 ${result.score}점 나왔어 보러와 🔮`
             : "너도 궁합 점수 보러와 🔮",
           url,
         });
@@ -287,6 +290,20 @@ function HomeContent() {
     setResult(null);
     setResultId(null);
     setError("");
+    window.history.replaceState(null, "", window.location.pathname);
+  };
+
+  // 공유로 들어온 사용자가 '나도 해보기' → 나/상대방을 뒤바꿔 첫 화면으로
+  // (공유받은 사람이 '나'가 되도록)
+  const tryYourself = () => {
+    setMe({ ...other });
+    setOther({ ...me });
+    // relation은 그대로 유지
+    setResult(null);
+    setResultId(null);
+    setFromShare(false);
+    setError("");
+    setStep(1);
     window.history.replaceState(null, "", window.location.pathname);
   };
 
@@ -324,8 +341,10 @@ function HomeContent() {
           result={result}
           error={error}
           relation={relation}
+          fromShare={fromShare}
           onShare={handleShare}
           onReset={reset}
+          onTryYourself={tryYourself}
           onRetry={() => analyze(me, other, relation)}
         />
       )}
@@ -538,16 +557,20 @@ function StepResult({
   result,
   error,
   relation,
+  fromShare,
   onShare,
   onReset,
+  onTryYourself,
   onRetry,
 }: {
   loading: boolean;
   result: Result | null;
   error: string;
   relation: string;
+  fromShare: boolean;
   onShare: () => void;
   onReset: () => void;
+  onTryYourself: () => void;
   onRetry: () => void;
 }) {
   if (loading) return <ResultSkeleton />;
@@ -600,18 +623,37 @@ function StepResult({
       </section>
 
       <div className="flex gap-3">
-        <button
-          onClick={onReset}
-          className="rounded-2xl border-2 border-foreground/10 px-6 py-4 text-base font-bold text-foreground/70 transition active:scale-[0.98]"
-        >
-          다시하기
-        </button>
-        <button
-          onClick={onShare}
-          className="flex-1 rounded-2xl bg-primary py-4 text-base font-bold text-white shadow-md transition active:scale-[0.98]"
-        >
-          결과 공유하기 🔗
-        </button>
+        {fromShare ? (
+          <>
+            <button
+              onClick={onShare}
+              className="rounded-2xl border-2 border-foreground/10 px-6 py-4 text-base font-bold text-foreground/70 transition active:scale-[0.98]"
+            >
+              공유 🔗
+            </button>
+            <button
+              onClick={onTryYourself}
+              className="flex-1 rounded-2xl bg-primary py-4 text-base font-bold text-white shadow-md transition active:scale-[0.98]"
+            >
+              나도 해보기 🔮
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onReset}
+              className="rounded-2xl border-2 border-foreground/10 px-6 py-4 text-base font-bold text-foreground/70 transition active:scale-[0.98]"
+            >
+              다시하기
+            </button>
+            <button
+              onClick={onShare}
+              className="flex-1 rounded-2xl bg-primary py-4 text-base font-bold text-white shadow-md transition active:scale-[0.98]"
+            >
+              결과 공유하기 🔗
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
