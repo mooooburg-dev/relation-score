@@ -226,14 +226,17 @@ function HomeContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 스텝1 고정 배너가 푸터를 가리지 않도록 body 하단 여백 확보
+  // 고정 배너 노출 여부 (스텝1 + 스텝3 결과 화면, 단 로딩 중 제외 → 이중 광고 방지)
+  const bannerVisible =
+    SHOW_BANNER && (step === 1 || (step === 3 && !loading));
+
+  // 고정 배너가 콘텐츠/푸터를 가리지 않도록 body 하단 여백 확보
   useEffect(() => {
-    const show = step === 1 && SHOW_BANNER;
-    document.body.style.paddingBottom = show ? "84px" : "";
+    document.body.style.paddingBottom = bannerVisible ? "84px" : "";
     return () => {
       document.body.style.paddingBottom = "";
     };
-  }, [step]);
+  }, [bannerVisible]);
 
   const buildShareUrl = () => {
     const base = `${window.location.origin}${window.location.pathname}`;
@@ -288,7 +291,7 @@ function HomeContent() {
   return (
     <main
       className={`mx-auto flex min-h-screen w-full max-w-[480px] flex-col px-5 pt-8 ${
-        step === 1 && SHOW_BANNER ? "pb-24" : "pb-12"
+        bannerVisible ? "pb-24" : "pb-12"
       }`}
     >
       <header className="mb-6 text-center">
@@ -325,7 +328,7 @@ function HomeContent() {
         />
       )}
 
-      {step === 1 && SHOW_BANNER && (
+      {bannerVisible && (
         <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[480px] flex-col items-center border-t border-foreground/10 bg-white/95 px-3 pb-2 pt-1 backdrop-blur">
           <p className="text-center text-[10px] leading-none text-foreground/30">
             광고
@@ -462,7 +465,7 @@ function PersonCard({
             value={person.age}
             onChange={(e) => set("age", e.target.value)}
             placeholder="나이"
-            className="w-full rounded-xl border border-foreground/10 bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            className="w-full rounded-xl border border-foreground/10 bg-background px-3 py-2.5 text-base outline-none focus:border-primary"
           />
         </Field>
         <Field label="혈액형">
@@ -513,7 +516,7 @@ function Select({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full appearance-none rounded-xl border border-foreground/10 bg-background px-3 py-2.5 text-sm outline-none focus:border-primary ${
+      className={`w-full appearance-none rounded-xl border border-foreground/10 bg-background px-3 py-2.5 text-base outline-none focus:border-primary ${
         value ? "text-foreground" : "text-foreground/40"
       }`}
     >
