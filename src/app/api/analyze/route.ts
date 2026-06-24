@@ -8,6 +8,18 @@ import {
 
 const ai = new GoogleGenAI({ apiKey: process.env.GENAI_API_KEY });
 
+// IP 기반 rate limit (스팸/비용 방어). 저장된 분석 row 수로 카운트.
+const RATE_PER_MIN = 10;
+const RATE_PER_DAY = 100;
+
+function getClientIp(request: Request): string | null {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    null
+  );
+}
+
 // 관계 유형별 분석 포커스
 const RELATION_FOCUS: Record<string, string> = {
   연인: "설렘, 애정 표현, 다툼 후 화해, 장기적 안정감",
@@ -95,6 +107,40 @@ export async function POST(request: Request) {
     );
   }
 
+  const ip = getClientIp(request);
+
+  // rate limit: 같은 IP의 최근 분석 횟수 확인 (실패 시 통과 = fail open)
+  if (ip) {
+    try {
+      const now = Date.now();
+      const minAgo = new Date(now - 60_000).toISOString();
+      const dayAgo = new Date(now - 24 * 60 * 60_000).toISOString();
+      const [perMin, perDay] = await Promise.all([
+        supabaseAdmin
+          .from(SCORE_TABLE)
+          .select("id", { count: "exact", head: true })
+          .eq("ip", ip)
+          .gte("created_at", minAgo),
+        supabaseAdmin
+          .from(SCORE_TABLE)
+          .select("id", { count: "exact", head: true })
+          .eq("ip", ip)
+          .gte("created_at", dayAgo),
+      ]);
+      if (
+        (perMin.count ?? 0) >= RATE_PER_MIN ||
+        (perDay.count ?? 0) >= RATE_PER_DAY
+      ) {
+        return Response.json(
+          { error: "요청이 너무 많아! 잠깐 쉬었다 다시 해줘 🥵" },
+          { status: 429 },
+        );
+      }
+    } catch (e) {
+      console.error("rate limit check failed:", e);
+    }
+  }
+
   const me: Person = {
     mbti: body.myMbti,
     gender: body.myGender,
@@ -152,10 +198,6 @@ ${describePerson("상대방", other)}
     // Supabase 저장 (실패해도 분석 결과는 그대로 반환 → UX 보호)
     let id: string | null = null;
     try {
-      const ip =
-        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        request.headers.get("x-real-ip") ||
-        null;
       const inputs: AnalysisInputs = {
         myMbti: body.myMbti,
         myGender: body.myGender,
