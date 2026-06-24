@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
+
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,6 +70,9 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  ...(ADSENSE_CLIENT
+    ? { other: { "google-adsense-account": ADSENSE_CLIENT } }
+    : {}),
 };
 
 export const viewport: Viewport = {
@@ -152,6 +158,15 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {ADSENSE_CLIENT && (
+          <Script
+            id="adsbygoogle-init"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
         {children}
         <footer className="mx-auto w-full max-w-[480px] px-5 pb-10 pt-2 text-center text-xs leading-relaxed text-foreground/40">
           <p>

@@ -2,6 +2,14 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import AdUnit from "./AdUnit";
+
+// AdSense 설정 (환경변수 미설정 시 광고 영역 자체를 렌더하지 않음)
+const ADS_ON = Boolean(process.env.NEXT_PUBLIC_ADSENSE_CLIENT);
+const SLOT_BANNER = process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER;
+const SLOT_LOADING = process.env.NEXT_PUBLIC_ADSENSE_SLOT_LOADING;
+const SHOW_BANNER = ADS_ON && Boolean(SLOT_BANNER);
+const SHOW_LOADING_AD = ADS_ON && Boolean(SLOT_LOADING);
 
 // ---- 선택지 상수 ----
 const MBTI_LIST = [
@@ -237,7 +245,11 @@ function HomeContent() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col px-5 pb-12 pt-8">
+    <main
+      className={`mx-auto flex min-h-screen w-full max-w-[480px] flex-col px-5 pt-8 ${
+        step === 1 && SHOW_BANNER ? "pb-32" : "pb-12"
+      }`}
+    >
       <header className="mb-6 text-center">
         <h1 className="text-2xl font-extrabold tracking-tight text-primary">
           몇점이야? 🔮
@@ -272,8 +284,21 @@ function HomeContent() {
         />
       )}
 
+      {step === 1 && SHOW_BANNER && (
+        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[480px] border-t border-foreground/10 bg-white/95 px-3 pb-2 pt-1 backdrop-blur">
+          <p className="text-center text-[10px] leading-none text-foreground/30">
+            광고
+          </p>
+          <AdUnit
+            slot={SLOT_BANNER}
+            format="horizontal"
+            className="h-[60px] w-full"
+          />
+        </div>
+      )}
+
       {toast && (
-        <div className="fixed inset-x-0 bottom-6 mx-auto w-fit rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white shadow-lg">
+        <div className="fixed inset-x-0 bottom-24 mx-auto w-fit rounded-full bg-foreground px-4 py-2 text-sm font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
@@ -706,6 +731,14 @@ function ResultSkeleton() {
           </div>
         ))}
       </section>
+      {SHOW_LOADING_AD && (
+        <section className="rounded-3xl bg-white p-4 shadow-sm">
+          <p className="mb-1 text-center text-[10px] leading-none text-foreground/30">
+            광고
+          </p>
+          <AdUnit slot={SLOT_LOADING} className="block min-h-[200px] w-full" />
+        </section>
+      )}
       <div className="flex items-center justify-center gap-2 text-sm text-foreground/50">
         <span>AI가 둘 사이를 캐는 중</span>
         <span className="inline-flex gap-1">
