@@ -1,4 +1,10 @@
 import { GoogleGenAI, Type, ApiError } from "@google/genai";
+import {
+  supabaseAdmin,
+  SCORE_TABLE,
+  type AnalysisInputs,
+  type AnalysisResult,
+} from "@/lib/supabase";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GENAI_API_KEY });
 
@@ -141,8 +147,46 @@ ${describePerson("상대방", other)}
       return Response.json({ error: "분석 결과를 못 받았어" }, { status: 502 });
     }
 
-    const result = JSON.parse(text);
-    return Response.json(result);
+    const result: AnalysisResult = JSON.parse(text);
+
+    // Supabase 저장 (실패해도 분석 결과는 그대로 반환 → UX 보호)
+    let id: string | null = null;
+    try {
+      const ip =
+        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        null;
+      const inputs: AnalysisInputs = {
+        myMbti: body.myMbti,
+        myGender: body.myGender,
+        myAge: body.myAge,
+        myBlood: body.myBlood,
+        otherMbti: body.otherMbti,
+        otherGender: body.otherGender,
+        otherAge: body.otherAge,
+        otherBlood: body.otherBlood,
+        relation: body.relation,
+      };
+      const { data, error } = await supabaseAdmin
+        .from(SCORE_TABLE)
+        .insert({
+          ip,
+          user_agent: request.headers.get("user-agent"),
+          relation: body.relation,
+          score: result.score,
+          inputs,
+          result,
+          model: "gemini-2.5-flash",
+        })
+        .select("id")
+        .single();
+      if (error) console.error("supabase insert error:", error.message);
+      else id = data.id as string;
+    } catch (e) {
+      console.error("supabase insert exception:", e);
+    }
+
+    return Response.json({ ...result, id });
   } catch (error) {
     if (error instanceof ApiError) {
       console.error("Gemini API error:", error.status, error.message);

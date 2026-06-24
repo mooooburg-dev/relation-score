@@ -100,6 +100,7 @@ function HomeContent() {
   const [relation, setRelation] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
 
@@ -125,6 +126,7 @@ function HomeContent() {
     setLoading(true);
     setError("");
     setResult(null);
+    setResultId(null);
     setStep(3);
     try {
       const res = await fetch("/api/analyze", {
@@ -144,7 +146,9 @@ function HomeContent() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "분석 실패");
-      setResult(data as Result);
+      const { id, ...rest } = data as Result & { id?: string };
+      setResult(rest);
+      setResultId(id ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "알 수 없는 오류");
     } finally {
@@ -152,9 +156,47 @@ function HomeContent() {
     }
   }, []);
 
-  // URL 파라미터로 들어오면 자동 분석
+  // 공유 링크(id)로 진입 시 저장된 결과를 불러와 렌더 (AI 재호출 없음)
+  const loadById = useCallback(async (id: string) => {
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setStep(3);
+    try {
+      const res = await fetch(`/api/result/${id}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "결과를 못 불러왔어");
+      const inp = data.inputs ?? {};
+      setMe({
+        mbti: inp.myMbti || "",
+        gender: inp.myGender || "",
+        age: inp.myAge || "",
+        blood: inp.myBlood || "",
+      });
+      setOther({
+        mbti: inp.otherMbti || "",
+        gender: inp.otherGender || "",
+        age: inp.otherAge || "",
+        blood: inp.otherBlood || "",
+      });
+      setRelation(data.relation || inp.relation || "");
+      setResult(data.result as Result);
+      setResultId(id);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "알 수 없는 오류");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // URL 파라미터 처리: id(저장값) 우선 → 레거시 입력 파라미터 → 캐시 복원
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
+    const sharedId = searchParams.get("id");
+    if (sharedId) {
+      loadById(sharedId);
+      return;
+    }
     const mm = searchParams.get("mm");
     const om = searchParams.get("om");
     const rel = searchParams.get("rel");
@@ -194,6 +236,10 @@ function HomeContent() {
   }, [step]);
 
   const buildShareUrl = () => {
+    const base = `${window.location.origin}${window.location.pathname}`;
+    // 저장된 결과 id가 있으면 짧은 링크로 (열 때 AI 재호출 없이 DB에서 렌더)
+    if (resultId) return `${base}?id=${resultId}`;
+    // 폴백: 저장 실패 시 입력값 파라미터로 (열면 재분석)
     const p = new URLSearchParams({
       mm: me.mbti,
       mg: me.gender,
@@ -205,9 +251,8 @@ function HomeContent() {
       ob: other.blood,
       rel: relation,
     });
-    // 빈 값 제거
     for (const [k, v] of [...p.entries()]) if (!v) p.delete(k);
-    return `${window.location.origin}${window.location.pathname}?${p.toString()}`;
+    return `${base}?${p.toString()}`;
   };
 
   const handleShare = async () => {
@@ -235,6 +280,7 @@ function HomeContent() {
     setOther({ ...EMPTY_PERSON });
     setRelation("");
     setResult(null);
+    setResultId(null);
     setError("");
     window.history.replaceState(null, "", window.location.pathname);
   };
