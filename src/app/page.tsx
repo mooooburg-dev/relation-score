@@ -184,6 +184,15 @@ function HomeContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 스텝1 고정 배너가 푸터를 가리지 않도록 body 하단 여백 확보
+  useEffect(() => {
+    const show = step === 1 && SHOW_BANNER;
+    document.body.style.paddingBottom = show ? "84px" : "";
+    return () => {
+      document.body.style.paddingBottom = "";
+    };
+  }, [step]);
+
   const buildShareUrl = () => {
     const p = new URLSearchParams({
       mm: me.mbti,
@@ -706,11 +715,11 @@ function ResultSkeleton() {
         ))}
       </section>
       {SHOW_LOADING_AD && (
-        <section className="rounded-3xl bg-white p-4 shadow-sm">
+        <section className="flex flex-col items-center rounded-3xl bg-white p-4 shadow-sm">
           <p className="mb-1 text-center text-[10px] leading-none text-foreground/30">
             광고
           </p>
-          <AdUnit slot={SLOT_LOADING} className="block min-h-[200px] w-full" />
+          <AdUnit slot={SLOT_LOADING} fixedWidth={300} fixedHeight={250} />
         </section>
       )}
       <div className="flex items-center justify-center gap-2 text-sm text-foreground/50">
