@@ -306,7 +306,7 @@ function HomeContent({ initialId }: { initialId?: string }) {
 
   return (
     <main
-      className={`mx-auto flex min-h-screen w-full max-w-[480px] flex-col px-5 pt-8 ${
+      className={`mx-auto flex w-full max-w-[480px] flex-col px-5 pt-8 ${
         bannerVisible ? "pb-24" : "pb-12"
       }`}
     >
