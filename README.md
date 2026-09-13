@@ -21,7 +21,7 @@ npm run lint
 | `/mbti` | MBTI 궁합표 인덱스 |
 | `/mbti/[type]` | 유형별 궁합 순위 (16장, 정적 생성) |
 | `/pair/[a-b]` | 조합별 궁합 상세 (136장, 정적 생성, 알파벳순 slug가 canonical) |
-| `/api/analyze` | Gemini 분석 + Supabase 저장 |
+| `/api/analyze` | OpenAI(gpt-5.4-mini) 분석 + Supabase 저장. `OPENAI_BASE_URL`로 게이트웨이 교체 가능 |
 | `/api/og` | 결과 공유용 동적 OG 이미지 |
 
 레거시 공유 링크 `/?id=uuid`는 `next.config.ts`에서 `/r/uuid`로 301 리다이렉트된다.

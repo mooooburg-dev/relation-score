@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, ApiError } from "@google/genai";
+import OpenAI from "openai";
 import {
   supabaseAdmin,
   SCORE_TABLE,
@@ -6,7 +6,12 @@ import {
   type AnalysisResult,
 } from "@/lib/supabase";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GENAI_API_KEY });
+// OpenAI 호환 엔드포인트. OPENAI_BASE_URL을 바꾸면 Vercel AI Gateway 등으로 교체 가능
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL || undefined,
+});
+const MODEL = process.env.OPENAI_MODEL || "gpt-5.4-mini";
 
 // IP 기반 rate limit (스팸/비용 방어). 저장된 분석 row 수로 카운트.
 const RATE_PER_MIN = 10;
@@ -60,17 +65,17 @@ function describePerson(label: string, p: Person) {
   return `${label}: ${parts.join(", ")}`;
 }
 
-// 구조화 출력 스키마 (점수 범위는 프롬프트로 안내)
+// 구조화 출력 스키마 (JSON Schema strict, 점수 범위는 프롬프트로 안내)
 const RESULT_SCHEMA = {
-  type: Type.OBJECT,
+  type: "object",
   properties: {
-    score: { type: Type.INTEGER, description: "총 궁합 점수 0~100" },
-    tag: { type: Type.STRING, description: "한 줄 제목, B급 감성" },
-    summary: { type: Type.STRING, description: "2~3문장 밈 느낌 분석" },
-    mbti_score: { type: Type.INTEGER, description: "MBTI 궁합 0~100" },
-    comm_score: { type: Type.INTEGER, description: "소통 스타일 0~100" },
-    emotion_score: { type: Type.INTEGER, description: "감성 케미 0~100" },
-    longterm_score: { type: Type.INTEGER, description: "장기 관계 0~100" },
+    score: { type: "integer", description: "총 궁합 점수 0~100" },
+    tag: { type: "string", description: "한 줄 제목, B급 감성" },
+    summary: { type: "string", description: "2~3문장 밈 느낌 분석" },
+    mbti_score: { type: "integer", description: "MBTI 궁합 0~100" },
+    comm_score: { type: "integer", description: "소통 스타일 0~100" },
+    emotion_score: { type: "integer", description: "감성 케미 0~100" },
+    longterm_score: { type: "integer", description: "장기 관계 0~100" },
   },
   required: [
     "score",
@@ -81,16 +86,8 @@ const RESULT_SCHEMA = {
     "emotion_score",
     "longterm_score",
   ],
-  propertyOrdering: [
-    "score",
-    "tag",
-    "summary",
-    "mbti_score",
-    "comm_score",
-    "emotion_score",
-    "longterm_score",
-  ],
-};
+  additionalProperties: false,
+} as const;
 
 export async function POST(request: Request) {
   let body: AnalyzeBody;
@@ -177,19 +174,27 @@ ${describePerson("상대방", other)}
 - 모든 점수는 0~100 사이 정수.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        systemInstruction:
-          "너는 B급 감성의 MBTI 궁합 분석가야. 진지하지 않고 밈스럽게, 한국어로 답해.",
-        responseMimeType: "application/json",
-        responseSchema: RESULT_SCHEMA,
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      reasoning_effort: "low",
+      max_completion_tokens: 2000,
+      messages: [
+        {
+          role: "system",
+          content:
+            "너는 B급 감성의 MBTI 궁합 분석가야. 진지하지 않고 밈스럽게, 한국어로 답해.",
+        },
+        { role: "user", content: prompt },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: { name: "score_result", strict: true, schema: RESULT_SCHEMA },
       },
     });
 
-    const text = response.text;
-    if (!text) {
+    const message = completion.choices[0]?.message;
+    const text = message?.content;
+    if (!text || message?.refusal) {
       return Response.json({ error: "분석 결과를 못 받았어" }, { status: 502 });
     }
 
@@ -218,7 +223,7 @@ ${describePerson("상대방", other)}
           score: result.score,
           inputs,
           result,
-          model: "gemini-2.5-flash",
+          model: MODEL,
         })
         .select("id")
         .single();
@@ -230,8 +235,8 @@ ${describePerson("상대방", other)}
 
     return Response.json({ ...result, id });
   } catch (error) {
-    if (error instanceof ApiError) {
-      console.error("Gemini API error:", error.status, error.message);
+    if (error instanceof OpenAI.APIError) {
+      console.error("OpenAI API error:", error.status, error.message);
     } else {
       console.error("analyze error:", error);
     }
