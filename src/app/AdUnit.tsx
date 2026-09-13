@@ -18,10 +18,12 @@ const CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
  * - 기본: 반응형 광고 (data-ad-format + full-width-responsive)
  * - fixedWidth/fixedHeight 지정 시: 고정 크기 광고 (반응형 속성 제거)
  *   → 하단 고정 배너처럼 커지면 안 되는 자리에 사용
+ * - layout="in-article" 지정 시: 인아티클 광고 (format="fluid" 와 함께 사용)
  */
 export default function AdUnit({
   slot,
   format = "auto",
+  layout,
   responsive = true,
   fixedWidth,
   fixedHeight,
@@ -30,6 +32,7 @@ export default function AdUnit({
 }: {
   slot?: string;
   format?: string;
+  layout?: "in-article";
   responsive?: boolean;
   fixedWidth?: number;
   fixedHeight?: number;
@@ -76,8 +79,11 @@ export default function AdUnit({
       style={{ display: "block", ...style }}
       data-ad-client={CLIENT}
       data-ad-slot={slot}
-      data-ad-format={format}
-      data-full-width-responsive={responsive ? "true" : "false"}
+      data-ad-format={layout === "in-article" ? "fluid" : format}
+      {...(layout ? { "data-ad-layout": layout } : {})}
+      {...(layout
+        ? {}
+        : { "data-full-width-responsive": responsive ? "true" : "false" })}
     />
   );
 }
