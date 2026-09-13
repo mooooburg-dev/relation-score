@@ -3,6 +3,7 @@ import {
   MBTI_LIST,
   RELATIONS,
   SITE_URL,
+  ko,
   scoreEmoji,
   scoreLabel,
   typePath,
@@ -160,13 +161,14 @@ export function TypeGrid({ current, base = "" }: { current?: Mbti; base?: string
         <li key={t}>
           <Link
             href={base ? `${base}${t.toLowerCase()}` : typePath(t)}
-            className={`block rounded-xl border-2 py-2 text-center text-sm font-bold transition ${
+            className={`flex flex-col items-center rounded-xl border-2 py-1.5 text-sm font-bold transition ${
               t === current
                 ? "border-primary bg-primary/10 text-primary"
                 : "border-foreground/10 bg-background hover:border-primary/50"
             }`}
           >
-            {t}
+            <span>{t}</span>
+            <span className="text-[10px] font-semibold text-foreground/50">{ko(t)}</span>
           </Link>
         </li>
       ))}

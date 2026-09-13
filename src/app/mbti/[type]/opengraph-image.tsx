@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { loadKoreanFont } from "@/lib/og";
-import { MBTI_LIST, getRanking, getType, normalizeMbti } from "@/lib/mbti";
+import { MBTI_LIST, getRanking, getType, ko, normalizeMbti } from "@/lib/mbti";
 
 export const alt = "MBTI 궁합 순위";
 export const size = { width: 1200, height: 630 };
@@ -20,7 +20,7 @@ export default async function OgImage({
   const content = t ? getType(t) : null;
   const top = t ? getRanking(t).slice(0, 3) : [];
   const title = t ?? "MBTI";
-  const nickname = content?.nickname ?? "궁합 순위";
+  const nickname = t ? `${ko(t)} · ${content?.nickname ?? ""}` : "궁합 순위";
   const topText = top.map((r, i) => `${i + 1}위 ${r.other} ${r.score}점`).join("   ");
   const text = `${title} 궁합 순위 ${nickname} ${topText} 몇점이야? · score.drawyourmind.com`;
   const fontData = await loadKoreanFont(text);

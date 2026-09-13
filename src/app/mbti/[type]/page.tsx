@@ -19,6 +19,7 @@ import {
   SITE_URL,
   getRanking,
   getType,
+  ko,
   normalizeMbti,
   pairPath,
   scoreEmoji,
@@ -48,8 +49,9 @@ export async function generateMetadata({
 
   const ranking = getRanking(t);
   const best = ranking.slice(0, 3).map((r) => r.other).join(", ");
-  const title = `${t} 궁합 순위 - ${t}와 잘 맞는 MBTI, 안 맞는 MBTI`;
-  const description = `${t}(${content.nickname})와 가장 잘 맞는 MBTI는 ${best}. 16가지 유형별 궁합 점수와 연인·친구·직장동료·썸 관계별 순위, ${t} 연애 스타일까지 정리했어.`;
+  const k = ko(t);
+  const title = `${t}(${k}) 궁합 순위 - ${t}와 잘 맞는 MBTI, 안 맞는 MBTI`;
+  const description = `${t} ${k}(${content.nickname})와 가장 잘 맞는 MBTI는 ${best}. 16가지 유형별 궁합 점수와 연인·친구·직장동료·썸 관계별 순위, ${k} 연애 스타일과 특징까지 정리했어.`;
   const path = typePath(t);
 
   return {
@@ -57,11 +59,16 @@ export async function generateMetadata({
     description,
     keywords: [
       `${t} 궁합`,
+      `${k} 궁합`,
       `${t} 궁합 순위`,
+      `${k} 궁합 순위`,
       `${t} 잘 맞는 MBTI`,
+      `${k} 잘 맞는 MBTI`,
       `${t} 안 맞는 MBTI`,
       `${t} 연애`,
+      `${k} 연애`,
       `${t} 특징`,
+      `${k} 특징`,
       `${t} 성격`,
     ],
     alternates: { canonical: path },
@@ -93,7 +100,8 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
     "@graph": [
       {
         "@type": "Article",
-        headline: `${t} 궁합 순위 - ${t}와 잘 맞는 MBTI`,
+        headline: `${t}(${ko(t)}) 궁합 순위 - ${t}와 잘 맞는 MBTI`,
+        alternativeHeadline: `${ko(t)} 궁합 순위`,
         description: content.tagline,
         url: `${SITE_URL}${path}`,
         inLanguage: "ko-KR",
@@ -127,12 +135,15 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
       />
 
       <header>
-        <p className="text-sm font-bold text-primary">{content.nickname}</p>
+        <p className="text-sm font-bold text-primary">
+          {ko(t)} · {content.nickname}
+        </p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
           {t} 궁합 순위
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-foreground/70">
-          {content.tagline}
+          {content.tagline}. 흔히 {ko(t)}라고 부르는 {t}와 잘 맞는 MBTI, 덜 맞는
+          MBTI를 16개 유형 전부 점수로 정리했어.
         </p>
         <ul className="mt-3 flex flex-wrap gap-1.5">
           {content.keywords.map((k) => (
@@ -267,7 +278,12 @@ function RankList({
               {i + 1}
             </span>
             <span className="flex flex-1 flex-col">
-              <span className="text-base font-extrabold">{r.other}</span>
+              <span className="text-base font-extrabold">
+                {r.other}{" "}
+                <span className="text-xs font-semibold text-foreground/50">
+                  {ko(r.other)}
+                </span>
+              </span>
               <span className="text-xs text-foreground/60">{r.pair.headline}</span>
             </span>
             <span className="flex flex-col items-end">
