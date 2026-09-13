@@ -226,13 +226,13 @@ export function RelationChips({
   );
 }
 
-/** 본문 중간 광고 (슬롯 미설정 시 렌더 안 함) */
+/** 본문 중간 인아티클 광고 (슬롯 미설정 시 렌더 안 함) */
 export function ArticleAd() {
   if (!ADS_ON || !SLOT_ARTICLE) return null;
   return (
     <div className="my-2 flex flex-col items-center">
       <p className="text-[10px] leading-none text-foreground/30">광고</p>
-      <AdUnit slot={SLOT_ARTICLE} className="w-full" />
+      <AdUnit slot={SLOT_ARTICLE} layout="in-article" className="w-full" />
     </div>
   );
 }
