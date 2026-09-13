@@ -1,6 +1,6 @@
 import Link from "next/link";
 import ScoreApp from "./ScoreApp";
-import { TypeGrid } from "@/components/seo";
+import { ArticleAd, TypeGrid } from "@/components/seo";
 import { getTopPairs, pairPath, scoreEmoji } from "@/lib/mbti";
 
 export default function Page() {
@@ -10,6 +10,7 @@ export default function Page() {
       <ScoreApp />
       {/* 검색 유입/크롤링용 콘텐츠 링크 (앱 아래) */}
       <section className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-8">
+        <ArticleAd />
         <div className="rounded-3xl bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-extrabold">MBTI별 궁합 순위</h2>
