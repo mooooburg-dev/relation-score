@@ -21,6 +21,7 @@ import {
   getPair,
   getRanking,
   getType,
+  ko,
   pairPath,
   pairSlug,
   parsePairSlug,
@@ -52,11 +53,13 @@ export async function generateMetadata({
   const { a, b } = pair;
   const lover = pair.relations.find((r) => r.relation === "연인")?.score ?? pair.overall;
   const friend = pair.relations.find((r) => r.relation === "친구")?.score ?? pair.overall;
+  const ka = ko(a);
+  const kb = ko(b);
   const title =
     a === b
-      ? `${a} ${b} 궁합 ${pair.overall}점 - 같은 유형끼리 만나면`
-      : `${a} ${b} 궁합 ${pair.overall}점 - 연인 ${lover}점, 친구 ${friend}점`;
-  const description = `${a}와 ${b}의 MBTI 궁합 점수는 ${pair.overall}점. ${pair.headline} 연인·친구·직장동료·가족·소개팅·썸 6가지 관계별 궁합과 잘 맞는 이유, 부딪히는 포인트, 실전 팁까지 정리했어.`;
+      ? `${a} ${b} 궁합 ${pair.overall}점 (${ka} ${kb}) - 같은 유형끼리 만나면`
+      : `${a} ${b} 궁합 ${pair.overall}점 (${ka} ${kb}) - 연인 ${lover}점, 친구 ${friend}점`;
+  const description = `${a}(${ka})와 ${b}(${kb})의 MBTI 궁합 점수는 ${pair.overall}점. ${pair.headline} 연인·친구·직장동료·가족·소개팅·썸 6가지 관계별 궁합과 잘 맞는 이유, 부딪히는 포인트, 실전 팁까지 정리했어.`;
   const path = pairPath(a, b);
 
   return {
@@ -65,7 +68,10 @@ export async function generateMetadata({
     keywords: [
       `${a} ${b} 궁합`,
       `${b} ${a} 궁합`,
+      `${ka} ${kb} 궁합`,
+      `${kb} ${ka} 궁합`,
       `${a} ${b} 연애`,
+      `${ka} ${kb} 연애`,
       `${a} ${b} 친구`,
       `${a} ${b} 커플`,
       `${a} ${b} 케미`,
@@ -103,6 +109,7 @@ export default async function PairPage({ params }: { params: Promise<Params> }) 
       {
         "@type": "Article",
         headline: `${a} ${b} 궁합 ${pair.overall}점`,
+        alternativeHeadline: `${ko(a)} ${ko(b)} 궁합`,
         description: pair.headline,
         url: `${SITE_URL}${path}`,
         inLanguage: "ko-KR",
@@ -135,7 +142,10 @@ export default async function PairPage({ params }: { params: Promise<Params> }) 
       />
 
       <header className="text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight">
+        <p className="text-sm font-bold text-foreground/50">
+          {ko(a)} × {ko(b)}
+        </p>
+        <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
           {a} × {b} 궁합
         </h1>
         <p className="mt-2 text-base font-bold text-primary">{pair.headline}</p>
@@ -247,7 +257,9 @@ function TypeMini({ t, nickname }: { t: Mbti; nickname?: string }) {
       href={typePath(t)}
       className="flex flex-1 flex-col rounded-2xl border-2 border-foreground/10 bg-background px-3 py-2 transition hover:border-primary/50"
     >
-      <span className="text-base font-extrabold">{t}</span>
+      <span className="text-base font-extrabold">
+        {t} <span className="text-xs font-semibold text-foreground/50">{ko(t)}</span>
+      </span>
       <span className="text-foreground/60">{nickname ?? `${t} 궁합 순위`}</span>
     </Link>
   );

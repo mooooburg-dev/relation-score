@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { loadKoreanFont } from "@/lib/og";
-import { getAllPairs, getPair, pairSlug, parsePairSlug, scoreEmoji } from "@/lib/mbti";
+import { getAllPairs, getPair, ko, pairSlug, parsePairSlug, scoreEmoji } from "@/lib/mbti";
 
 export const alt = "MBTI 궁합 점수";
 export const size = { width: 1200, height: 630 };
@@ -22,7 +22,8 @@ export default async function OgImage({
   const b = pair?.b ?? "궁합";
   const score = pair?.overall ?? 0;
   const headline = pair?.headline ?? "MBTI 궁합 점수";
-  const text = `${a} × ${b} 궁합 ${score}점 ${headline} 몇점이야? · score.drawyourmind.com`;
+  const sub = pair ? `${ko(pair.a)} × ${ko(pair.b)} 궁합` : "MBTI 궁합";
+  const text = `${sub}${a} × ${b} 궁합 ${score}점 ${headline} 몇점이야? · score.drawyourmind.com`;
   const fontData = await loadKoreanFont(text);
 
   return new ImageResponse(
@@ -41,7 +42,7 @@ export default async function OgImage({
           padding: 60,
         }}
       >
-        <div style={{ display: "flex", fontSize: 40, opacity: 0.85 }}>MBTI 궁합</div>
+        <div style={{ display: "flex", fontSize: 40, opacity: 0.85 }}>{sub}</div>
         <div style={{ display: "flex", fontSize: 96, fontWeight: 800, marginTop: 8 }}>
           {a} × {b}
         </div>

@@ -12,6 +12,29 @@ export const MBTI_LIST = [
 ] as const;
 export type Mbti = (typeof MBTI_LIST)[number];
 
+/** 커뮤니티에서 흔히 쓰는 한글 표기 (검색 키워드용: "인프제 엔프피 궁합") */
+export const MBTI_KO: Record<Mbti, string> = {
+  ISTJ: "잇티제",
+  ISFJ: "잇프제",
+  INFJ: "인프제",
+  INTJ: "인티제",
+  ISTP: "잇팁",
+  ISFP: "잇프피",
+  INFP: "인프피",
+  INTP: "인팁",
+  ESTP: "엣팁",
+  ESFP: "엣프피",
+  ENFP: "엔프피",
+  ENTP: "엔팁",
+  ESTJ: "엣티제",
+  ESFJ: "엣프제",
+  ENFJ: "엔프제",
+  ENTJ: "엔티제",
+};
+export function ko(t: Mbti): string {
+  return MBTI_KO[t];
+}
+
 export const RELATIONS = [
   { value: "연인", emoji: "💕" },
   { value: "친구", emoji: "🤝" },
