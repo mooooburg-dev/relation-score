@@ -91,7 +91,7 @@ function clearMe() {
   }
 }
 
-function HomeContent() {
+function HomeContent({ initialId }: { initialId?: string }) {
   const searchParams = useSearchParams();
 
   const [step, setStep] = useState(1);
@@ -195,7 +195,8 @@ function HomeContent() {
   // URL 파라미터 처리: id(저장값) 우선 → 레거시 입력 파라미터 → 캐시 복원
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
-    const sharedId = searchParams.get("id");
+    // /r/[id] 경로(initialId) 우선, 레거시 ?id= 도 호환
+    const sharedId = initialId || searchParams.get("id");
     if (sharedId) {
       loadById(sharedId);
       return;
@@ -242,9 +243,10 @@ function HomeContent() {
   }, [bannerVisible]);
 
   const buildShareUrl = () => {
-    const base = `${window.location.origin}${window.location.pathname}`;
-    // 저장된 결과 id가 있으면 짧은 링크로 (열 때 AI 재호출 없이 DB에서 렌더)
-    if (resultId) return `${base}?id=${resultId}`;
+    const origin = window.location.origin;
+    // 저장된 결과 id가 있으면 고유 경로로 (열 때 AI 재호출 없이 DB에서 렌더, OG 메타 서버 생성)
+    if (resultId) return `${origin}/r/${resultId}`;
+    const base = `${origin}/`;
     // 폴백: 저장 실패 시 입력값 파라미터로 (열면 재분석)
     const p = new URLSearchParams({
       mm: me.mbti,
@@ -285,7 +287,7 @@ function HomeContent() {
     setResult(null);
     setResultId(null);
     setError("");
-    window.history.replaceState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", "/");
   };
 
   // 공유로 들어온 사용자가 '나도 해보기' → 나/상대방을 뒤바꿔 첫 화면으로
@@ -299,7 +301,7 @@ function HomeContent() {
     setFromShare(false);
     setError("");
     setStep(1);
-    window.history.replaceState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", "/");
   };
 
   return (
@@ -835,10 +837,10 @@ function ResultSkeleton() {
   );
 }
 
-export default function ScoreApp() {
+export default function ScoreApp({ initialId }: { initialId?: string }) {
   return (
     <Suspense fallback={null}>
-      <HomeContent />
+      <HomeContent initialId={initialId} />
     </Suspense>
   );
 }

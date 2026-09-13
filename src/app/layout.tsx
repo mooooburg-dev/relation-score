@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import Link from "next/link";
 import "./globals.css";
+import { MBTI_LIST, typePath } from "@/lib/mbti";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -199,6 +201,22 @@ export default function RootLayout({
         )}
         {children}
         <footer className="mx-auto w-full max-w-[480px] px-5 pb-10 pt-2 text-center text-xs leading-relaxed text-foreground/40">
+          <nav aria-label="MBTI 궁합 바로가기" className="mb-4">
+            <p className="mb-2 font-bold text-foreground/60">
+              <Link href="/mbti" className="hover:text-primary">
+                MBTI 궁합표
+              </Link>
+            </p>
+            <ul className="flex flex-wrap justify-center gap-x-2 gap-y-1">
+              {MBTI_LIST.map((t) => (
+                <li key={t}>
+                  <Link href={typePath(t)} className="hover:text-primary">
+                    {t}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
           <p>
             <strong>몇점이야?</strong>는 두 사람의 MBTI·나이·혈액형으로 연인,
             친구, 썸, 소개팅 등 관계별 궁합 점수를 AI가 분석해주는 무료
