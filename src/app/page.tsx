@@ -1,63 +1,45 @@
-import type { Metadata } from "next";
-import {
-  supabaseAdmin,
-  SCORE_TABLE,
-  type AnalysisInputs,
-  type AnalysisResult,
-} from "@/lib/supabase";
+import Link from "next/link";
 import ScoreApp from "./ScoreApp";
-
-// 공유 링크(?id=)로 진입 시 저장된 결과로 OG/제목/설명을 동적 생성
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ id?: string }>;
-}): Promise<Metadata> {
-  try {
-    const { id } = await searchParams;
-    if (!id) return {};
-
-    const { data } = await supabaseAdmin
-      .from(SCORE_TABLE)
-      .select("inputs, result, relation")
-      .eq("id", id)
-      .single();
-    if (!data) return {};
-
-    const inputs = data.inputs as AnalysisInputs;
-    const result = data.result as AnalysisResult;
-    const rel = (data.relation as string) || inputs.relation || "";
-    const emoji = result.score >= 80 ? "🔥" : result.score >= 50 ? "💜" : "💧";
-
-    const title = `${result.score}점! ${inputs.myMbti} × ${inputs.otherMbti} ${emoji}`;
-    const description = result.tag || `${rel} 궁합 결과 확인하기`;
-    const ogUrl =
-      `/api/og?score=${result.score}` +
-      `&mm=${encodeURIComponent(inputs.myMbti)}` +
-      `&om=${encodeURIComponent(inputs.otherMbti)}` +
-      `&rel=${encodeURIComponent(rel)}` +
-      `&tag=${encodeURIComponent(result.tag ?? "")}`;
-
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        images: [{ url: ogUrl, width: 1200, height: 630 }],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description,
-        images: [ogUrl],
-      },
-    };
-  } catch {
-    return {};
-  }
-}
+import { TypeGrid } from "@/components/seo";
+import { getTopPairs, pairPath, scoreEmoji } from "@/lib/mbti";
 
 export default function Page() {
-  return <ScoreApp />;
+  const top = getTopPairs(6);
+  return (
+    <>
+      <ScoreApp />
+      {/* 검색 유입/크롤링용 콘텐츠 링크 (앱 아래) */}
+      <section className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-8">
+        <div className="rounded-3xl bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-extrabold">MBTI별 궁합 순위</h2>
+            <Link href="/mbti" className="text-xs font-bold text-primary underline underline-offset-2">
+              전체 궁합표 →
+            </Link>
+          </div>
+          <TypeGrid />
+        </div>
+        <div className="rounded-3xl bg-white p-4 shadow-sm">
+          <h2 className="mb-3 text-base font-extrabold">궁합 점수 높은 조합</h2>
+          <ul className="grid grid-cols-2 gap-2">
+            {top.map((p) => (
+              <li key={`${p.a}-${p.b}`}>
+                <Link
+                  href={pairPath(p.a, p.b)}
+                  className="flex items-center justify-between rounded-xl border-2 border-foreground/10 bg-background px-3 py-2 text-sm transition hover:border-primary/50"
+                >
+                  <span className="font-bold">
+                    {p.a} × {p.b}
+                  </span>
+                  <span className="font-extrabold text-primary">
+                    {scoreEmoji(p.overall)} {p.overall}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    </>
+  );
 }
