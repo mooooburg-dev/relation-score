@@ -14,6 +14,7 @@ import {
   breadcrumbLd,
   faqLd,
 } from "@/components/seo";
+import { FamilyCard } from "@/components/family";
 import {
   RELATIONS,
   SITE_URL,
@@ -247,6 +248,8 @@ export default async function PairPage({ params }: { params: Promise<Params> }) 
           <RelatedList me={b} exclude={a} />
         </Card>
       )}
+
+      <FamilyCard seed={`${a}-${b}`} campaign="pair" />
     </main>
   );
 }
