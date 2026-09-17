@@ -13,6 +13,7 @@ import {
   breadcrumbLd,
   faqLd,
 } from "@/components/seo";
+import { FamilyCard } from "@/components/family";
 import {
   MBTI_LIST,
   RELATIONS,
@@ -255,6 +256,8 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
         <SectionTitle>다른 유형 궁합 보기</SectionTitle>
         <TypeGrid current={t} />
       </Card>
+
+      <FamilyCard seed={t} campaign="type" />
     </main>
   );
 }

@@ -4,6 +4,7 @@ import Script from "next/script";
 import Link from "next/link";
 import "./globals.css";
 import { MBTI_LIST, typePath } from "@/lib/mbti";
+import { FamilyLinks } from "@/components/family";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -217,6 +218,7 @@ export default function RootLayout({
               ))}
             </ul>
           </nav>
+          <FamilyLinks />
           <p>
             <strong>몇점이야?</strong>는 두 사람의 MBTI·나이·혈액형으로 연인,
             친구, 썸, 소개팅 등 관계별 궁합 점수를 AI가 분석해주는 무료

@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import AdUnit from "./AdUnit";
+import { FamilyCard } from "@/components/family";
 
 // AdSense 설정 (환경변수 미설정 시 광고 영역 자체를 렌더하지 않음)
 const ADS_ON = Boolean(process.env.NEXT_PUBLIC_ADSENSE_CLIENT);
@@ -338,6 +339,7 @@ function HomeContent({ initialId }: { initialId?: string }) {
           result={result}
           error={error}
           relation={relation}
+          age={me.age}
           fromShare={fromShare}
           onShare={handleShare}
           onReset={reset}
@@ -554,6 +556,7 @@ function StepResult({
   result,
   error,
   relation,
+  age,
   fromShare,
   onShare,
   onReset,
@@ -564,6 +567,7 @@ function StepResult({
   result: Result | null;
   error: string;
   relation: string;
+  age: string;
   fromShare: boolean;
   onShare: () => void;
   onReset: () => void;
@@ -652,6 +656,12 @@ function StepResult({
           </>
         )}
       </div>
+
+      <FamilyCard
+        relation={relation}
+        age={age}
+        campaign={fromShare ? "shared" : "result"}
+      />
     </div>
   );
 }
