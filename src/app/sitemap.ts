@@ -1,8 +1,12 @@
 import type { MetadataRoute } from "next";
-import { MBTI_LIST, SITE_URL, getAllPairs, pairPath, typePath } from "@/lib/mbti";
-
-// 콘텐츠 갱신일 (데이터 재생성 시 갱신)
-const CONTENT_UPDATED = new Date("2026-09-14");
+import {
+  CONTENT_UPDATED,
+  MBTI_LIST,
+  SITE_URL,
+  getAllPairs,
+  pairPath,
+  typePath,
+} from "@/lib/mbti";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const home: MetadataRoute.Sitemap = [
