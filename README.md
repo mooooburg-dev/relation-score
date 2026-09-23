@@ -23,8 +23,10 @@ npm run lint
 | `/pair/[a-b]` | 조합별 궁합 상세 (136장, 정적 생성, 알파벳순 slug가 canonical) |
 | `/api/analyze` | OpenAI(gpt-5.4-mini) 분석 + Supabase 저장. `OPENAI_BASE_URL`로 게이트웨이 교체 가능 |
 | `/api/og` | 결과 공유용 동적 OG 이미지 |
+| `/sitemap.xml` | 154개 URL (URL별 `lastmod` 포함) |
+| `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/pair/*`를 앞쪽에 배치 |
 
-레거시 공유 링크 `/?id=uuid`는 `next.config.ts`에서 `/r/uuid`로 301 리다이렉트된다.
+레거시 공유 링크 `/?id=uuid`는 `src/proxy.ts`에서 `/r/uuid`로 301 리다이렉트된다.
 
 ## 정적 콘텐츠 생성
 
@@ -40,7 +42,29 @@ node scripts/generate-content.mjs all --provider openai   # OpenAI(gpt-5.4)로 �
 
 - 기본 provider는 Anthropic(Claude Opus 5, `ANTHROPIC_API_KEY`), `--provider openai`는 `OPENAI_API_KEY` 사용
 - 이미 생성된 항목은 건너뛰므로 중단돼도 이어서 실행 가능
-- 데이터를 재생성했으면 `src/app/sitemap.ts`의 `CONTENT_UPDATED`를 갱신한다
+- 데이터를 재생성했으면 `src/lib/mbti.ts`의 `CONTENT_UPDATED`를 갱신한다
+
+## 갱신일(lastmod) 관리
+
+`sitemap.xml`의 `lastmod`와 `rss.xml`의 `pubDate`는 `src/data/lastmod.json`에서 읽는다.
+소스 파일의 커밋 날짜를 쓰지 않는데, 메타 태그 추가처럼 렌더 결과가 그대로인 변경까지
+갱신일을 밀어올리면 거짓 신호가 되고 검색엔진이 `lastmod`를 통째로 무시하기 때문이다.
+
+```bash
+npm run build && npm run lastmod   # 빌드 결과 본문을 해시해 실제로 바뀐 URL만 날짜 갱신
+```
+
+`scripts/update-lastmod.mjs`가 각 페이지의 `<title>` + meta description + `<body>`를 해시해
+이전 기록과 비교한다. 본문이 같으면 날짜를 유지하므로 재빌드만으로는 값이 흔들리지 않는다.
+결과 JSON은 커밋해야 배포에 반영되며, 한 배포 뒤에 sitemap에 나타난다.
+
+- `<body>` 전체를 보므로 footer 같은 layout 공통 영역이 바뀌면 154개 URL이 함께 갱신된다
+- `<script>`와 AdSense 마크업(`data-ad` 블록, `.adsbygoogle`)은 해시에서 제외한다.
+  광고 env 유무로 마크업이 통째로 생겼다 사라져서, 빼지 않으면 광고 slot이 설정된 환경에서
+  빌드했다는 이유만으로 152개 URL이 전부 "변경"으로 뒤집힌다
+- 홈(`/`)은 `ScoreApp`이 CSR로 bail out 되어 본문이 프리렌더 HTML에 없다.
+  따라서 홈은 layout·메타 변경만 감지되고 앱 UI 변경은 잡히지 않는다
+- `src/data/lastmod.json`은 `src/lib/lastmod.ts`가 정적 import 하므로 지우면 빌드가 깨진다
 
 ## 환경 변수
 

@@ -228,11 +228,15 @@ export function RelationChips({
   );
 }
 
-/** 본문 중간 인아티클 광고 (슬롯 미설정 시 렌더 안 함) */
+/**
+ * 본문 중간 인아티클 광고 (슬롯 미설정 시 렌더 안 함).
+ * data-ad 마커는 scripts/update-lastmod.mjs 가 해시에서 광고를 걷어낼 때 쓴다
+ * (광고 env 유무에 따라 lastmod 가 흔들리면 안 되므로).
+ */
 export function ArticleAd() {
   if (!ADS_ON || !SLOT_ARTICLE) return null;
   return (
-    <div className="my-2 flex flex-col items-center">
+    <div data-ad="article" className="my-2 flex flex-col items-center">
       <p className="text-[10px] leading-none text-foreground/30">광고</p>
       <AdUnit slot={SLOT_ARTICLE} layout="in-article" className="w-full" />
     </div>

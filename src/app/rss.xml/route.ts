@@ -1,3 +1,4 @@
+import { lastmodFor } from "@/lib/lastmod";
 import {
   CONTENT_UPDATED,
   SITE_NAME,
@@ -73,9 +74,9 @@ function feedItems(): FeedItem[] {
 }
 
 export async function GET() {
-  const pubDate = CONTENT_UPDATED.toUTCString();
+  const entries = feedItems();
 
-  const items = feedItems()
+  const items = entries
     .map((it) => {
       const url = `${SITE_URL}${it.path}`;
       return `    <item>
@@ -83,10 +84,18 @@ export async function GET() {
       <link>${esc(url)}</link>
       <guid isPermaLink="true">${esc(url)}</guid>
       <description>${esc(it.description)}</description>
-      <pubDate>${pubDate}</pubDate>
+      <pubDate>${lastmodFor(it.path).toUTCString()}</pubDate>
     </item>`;
     })
     .join("\n");
+
+  // 채널 갱신일은 가장 최근에 바뀐 문서 기준
+  const lastBuildDate = new Date(
+    Math.max(
+      CONTENT_UPDATED.getTime(),
+      ...entries.map((it) => lastmodFor(it.path).getTime()),
+    ),
+  ).toUTCString();
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -95,7 +104,7 @@ export async function GET() {
     <link>${SITE_URL}</link>
     <description>${esc(FEED_DESCRIPTION)}</description>
     <language>ko</language>
-    <lastBuildDate>${pubDate}</lastBuildDate>
+    <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <atom:link href="${SITE_URL}/rss.xml" rel="self" type="application/rss+xml" />
 ${items}
   </channel>
