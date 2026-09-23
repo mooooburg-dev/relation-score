@@ -48,6 +48,10 @@ export const metadata: Metadata = {
   category: "lifestyle",
   alternates: {
     canonical: "/",
+    types: {
+      // 네이버 서치어드바이저 RSS 제출용 피드
+      "application/rss+xml": `${SITE_URL}/rss.xml`,
+    },
   },
   manifest: "/manifest.webmanifest",
   icons: {

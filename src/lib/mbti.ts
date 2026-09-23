@@ -4,6 +4,9 @@ import pairsJson from "@/data/pairs.json";
 export const SITE_URL = "https://score.drawyourmind.com";
 export const SITE_NAME = "몇점이야?";
 
+/** 정적 콘텐츠(types.json / pairs.json) 갱신일. 데이터 재생성 시 함께 갱신한다. */
+export const CONTENT_UPDATED = new Date("2026-09-14T00:00:00Z");
+
 export const MBTI_LIST = [
   "ISTJ", "ISFJ", "INFJ", "INTJ",
   "ISTP", "ISFP", "INFP", "INTP",
