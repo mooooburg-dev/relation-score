@@ -103,6 +103,8 @@ export default async function PairPage({ params }: { params: Promise<Params> }) 
   const tb = getType(b);
   const path = pairPath(a, b);
   const same = a === b;
+  const scoreOf = (rel: string) =>
+    pair.relations.find((r) => r.relation === rel)?.score ?? pair.overall;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -143,13 +145,27 @@ export default async function PairPage({ params }: { params: Promise<Params> }) 
       />
 
       <header className="text-center">
-        <p className="text-sm font-bold text-foreground/50">
-          {ko(a)} × {ko(b)}
-        </p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
+        <h1 className="text-3xl font-extrabold tracking-tight">
           {a} × {b} 궁합
+          <span className="mt-1 block text-base font-bold text-foreground/50">
+            {ko(a)} × {ko(b)} 궁합
+          </span>
         </h1>
         <p className="mt-2 text-base font-bold text-primary">{pair.headline}</p>
+        <p className="mt-2 text-left text-sm leading-relaxed text-foreground/70">
+          {same ? (
+            <>
+              {ko(a)}({a})끼리 만나면 궁합 점수는 100점 만점에 {pair.overall}점이야.
+            </>
+          ) : (
+            <>
+              {ko(a)}({a})와 {ko(b)}({b})의 궁합 점수는 100점 만점에{" "}
+              {pair.overall}점. {ko(b)} {ko(a)} 궁합으로 찾아와도 결과는 같아.
+            </>
+          )}{" "}
+          연인 {scoreOf("연인")}점, 친구 {scoreOf("친구")}점, 직장동료{" "}
+          {scoreOf("직장동료")}점이야.
+        </p>
       </header>
 
       <Card className="flex flex-col items-center gap-4">
@@ -280,8 +296,13 @@ function RelatedList({ me, exclude }: { me: Mbti; exclude: Mbti }) {
             href={pairPath(me, r.other)}
             className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-background"
           >
-            <span className="w-24 shrink-0 text-sm font-bold">
-              {me} × {r.other}
+            <span className="flex w-24 shrink-0 flex-col leading-tight">
+              <span className="text-sm font-bold">
+                {me} × {r.other}
+              </span>
+              <span className="text-[10px] font-semibold text-foreground/50">
+                {ko(me)} × {ko(r.other)}
+              </span>
             </span>
             <span className="flex-1 truncate text-xs text-foreground/60">
               {r.pair.headline}

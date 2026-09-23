@@ -136,14 +136,15 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
       />
 
       <header>
-        <p className="text-sm font-bold text-primary">
-          {ko(t)} · {content.nickname}
-        </p>
+        <p className="text-sm font-bold text-primary">{content.nickname}</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight">
           {t} 궁합 순위
+          <span className="mt-1 block text-base font-bold text-foreground/50">
+            {ko(t)} 궁합 순위
+          </span>
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-foreground/70">
-          {content.tagline}. 흔히 {ko(t)}라고 부르는 {t}와 잘 맞는 MBTI, 덜 맞는
+          {content.tagline}. 흔히 {ko(t)}라고 부르는 {t}와 잘 맞는 MBTI, 안 맞는
           MBTI를 16개 유형 전부 점수로 정리했어.
         </p>
         <ul className="mt-3 flex flex-wrap gap-1.5">
@@ -159,12 +160,16 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
       </header>
 
       <Card>
-        <SectionTitle>{t}와 잘 맞는 MBTI TOP 5</SectionTitle>
+        <SectionTitle>
+          {t} 잘 맞는 MBTI TOP 5 ({ko(t)} 궁합 순위)
+        </SectionTitle>
         <RankList me={t} items={best} />
       </Card>
 
       <Card>
-        <SectionTitle>{t}와 상대적으로 덜 맞는 MBTI 5</SectionTitle>
+        <SectionTitle>
+          {t} 안 맞는 MBTI 5 ({ko(t)} 하위 궁합)
+        </SectionTitle>
         <RankList me={t} items={worst} />
         <p className="mt-3 text-xs leading-relaxed text-foreground/50">
           16개 유형 중 점수가 낮은 순이야. 못 만나는 조합이라는 뜻은 아니고,
@@ -211,7 +216,12 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
                   <span className="w-20 shrink-0 text-sm font-semibold">
                     {rel.emoji} {rel.value}
                   </span>
-                  <span className="flex-1 text-sm font-bold">{top.other}</span>
+                  <span className="flex-1 text-sm font-bold">
+                    {top.other}{" "}
+                    <span className="text-xs font-semibold text-foreground/50">
+                      {ko(top.other)}
+                    </span>
+                  </span>
                   <span className="text-sm font-extrabold text-primary">
                     {top.score}점
                   </span>
@@ -234,7 +244,12 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
                 <span className="w-6 text-center text-xs font-bold text-foreground/40">
                   {i + 1}
                 </span>
-                <span className="w-12 shrink-0 text-sm font-bold">{r.other}</span>
+                <span className="flex w-16 shrink-0 flex-col leading-tight">
+                  <span className="text-sm font-bold">{r.other}</span>
+                  <span className="text-[10px] font-semibold text-foreground/50">
+                    {ko(r.other)}
+                  </span>
+                </span>
                 <span className="flex-1 truncate text-xs text-foreground/60">
                   {r.pair.headline}
                 </span>
