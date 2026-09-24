@@ -14,6 +14,10 @@ npm run lint
 
 ## 구조
 
+공개 페이지는 `src/app/(site)/` 안에 있다. SEO 메타·구조화 데이터·GA·AdSense·footer는
+`(site)/layout.tsx` 소관이고, root `layout.tsx`에는 `<html>`·폰트·파비콘만 남긴다.
+`/admin`은 root layout만 상속하므로 어드민 화면에 사이트 footer나 추적 스크립트가 붙지 않는다.
+
 | 경로 | 설명 |
 |---|---|
 | `/` | 입력 → AI 분석 → 결과 (클라이언트 앱 `src/app/ScoreApp.tsx`) |
@@ -23,6 +27,8 @@ npm run lint
 | `/pair/[a-b]` | 조합별 궁합 상세 (136장, 정적 생성, 알파벳순 slug가 canonical) |
 | `/api/analyze` | OpenAI(gpt-5.4-mini) 분석 + Supabase 저장. `OPENAI_BASE_URL`로 게이트웨이 교체 가능 |
 | `/api/og` | 결과 공유용 동적 OG 이미지 |
+| `/admin` | 운영 대시보드 (통계) — `ADMIN_PASSWORD` 로그인, noindex |
+| `/admin/analyses` | 분석 목록 (필터·정렬·페이지네이션, 행 펼치면 AI 응답 원문) |
 | `/sitemap.xml` | 154개 URL (URL별 `lastmod` 포함) |
 | `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/pair/*`를 앞쪽에 배치 |
 
@@ -65,6 +71,24 @@ npm run build && npm run lastmod   # 빌드 결과 본문을 해시해 실제로
 - 홈(`/`)은 `ScoreApp`이 CSR로 bail out 되어 본문이 프리렌더 HTML에 없다.
   따라서 홈은 layout·메타 변경만 감지되고 앱 UI 변경은 잡히지 않는다
 - `src/data/lastmod.json`은 `src/lib/lastmod.ts`가 정적 import 하므로 지우면 빌드가 깨진다
+
+## 어드민
+
+`/admin`은 `score_analyses` 테이블을 그대로 읽어 보여준다. 쓰기 기능은 없다.
+
+- 대시보드: 누적/오늘/최근 7일 건수, 평균 점수, 공유 결과 조회수, 최근 14일 추이,
+  관계 유형별·점수 구간별 분포, 많이 입력된 MBTI·조합 TOP 10
+- 분석 목록: 관계·MBTI·점수 구간·기간 필터, 정렬, 20건씩 페이지네이션.
+  행을 펼치면 입력값 전체, 세부 점수 4종, AI 응답 원문, 모델·IP·UA, 공유 링크가 보인다
+
+인증은 `ADMIN_PASSWORD` 하나로 한다. 환경 변수가 없으면 어드민은 **항상 잠긴다**(fail closed).
+쿠키에는 비밀번호가 아니라 거기서 파생한 HMAC 토큰이 들어간다(`src/lib/admin/auth.ts`).
+
+인증 검사는 두 군데에 있다. `src/app/admin/layout.tsx`는 로그인 폼을 대신 렌더하는 화면용이고,
+실제 방어선은 `src/lib/admin/data.ts`의 쿼리 함수다. page는 layout과 병렬로 렌더될 수 있어
+layout에서만 막으면 데이터 쿼리가 먼저 나가는 구멍이 생긴다.
+
+날짜 집계는 모두 KST(Asia/Seoul) 기준이다.
 
 ## 환경 변수
 
