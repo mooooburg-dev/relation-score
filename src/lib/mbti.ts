@@ -112,6 +112,15 @@ export function typePath(t: Mbti): string {
 }
 
 /** slug("enfp-infj") → [ENFP, INFJ] (정렬 여부와 무관하게 파싱) */
+export function giftPath(t: Mbti): string {
+  return `/gift/${t.toLowerCase()}`;
+}
+
+/** 선물 페이지의 관계별 섹션 앵커 */
+export function giftRelationAnchor(relation: string): string {
+  return `rel-${encodeURIComponent(relation)}`;
+}
+
 export function parsePairSlug(slug: string): [Mbti, Mbti] | null {
   const [x, y] = slug.split("-");
   const a = normalizeMbti(x);

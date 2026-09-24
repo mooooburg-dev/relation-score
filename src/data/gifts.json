@@ -1,0 +1,1192 @@
+{
+  "version": 1,
+  "note": "선물 카탈로그 + 타입별 픽 + 관계별 필터. 쿠팡 딥링크는 catalog 항목당 1개만 필요하다(= API 호출 대상).",
+  "bandsNote": "관계별 bands 는 하드 필터가 아니라 노출 우선순위다.",
+  "priceBands": {
+    "low": "예산 1~2만원",
+    "mid": "예산 3~5만원",
+    "high": "예산 5만원+"
+  },
+  "tagNotes": {
+    "practical": "실용/사무 — 관계 무관하게 안전",
+    "home": "집·인테리어 — 대부분 안전",
+    "food": "먹거리 — 가장 안전",
+    "tech": "전자기기",
+    "hobby": "취미·장비",
+    "scent": "향 — 취향 개입, 직장/소개팅 부적합",
+    "personal": "사적 영역(피부·수면·화장) — 직장/소개팅 부적합",
+    "wearable": "착용품 — 사이즈·취향 리스크, 직장/소개팅 부적합"
+  },
+  "relations": {
+    "연인": {
+      "deny": [],
+      "bands": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "take": 4,
+      "lead": "가격대 신경 안 쓰고, 오래 두고 쓸 것 위주로 골랐어.",
+      "heading": "연인인 {t}에게"
+    },
+    "썸": {
+      "deny": [
+        "personal"
+      ],
+      "bands": [
+        "low",
+        "mid"
+      ],
+      "take": 3,
+      "lead": "아직 부담 주면 안 되는 사이라 사적인 건 뺐어.",
+      "heading": "썸 타는 {t}에게"
+    },
+    "친구": {
+      "deny": [],
+      "bands": [
+        "low",
+        "mid"
+      ],
+      "take": 4,
+      "lead": "실제로 쓸 만한 것 위주. 가격대는 부담 없는 선으로.",
+      "heading": "친구인 {t}에게"
+    },
+    "직장동료": {
+      "deny": [
+        "personal",
+        "scent",
+        "wearable"
+      ],
+      "bands": [
+        "low",
+        "mid"
+      ],
+      "take": 3,
+      "lead": "향·화장품·옷처럼 취향이 깊게 개입하는 건 뺐어.",
+      "heading": "직장동료 {t}에게"
+    },
+    "가족": {
+      "deny": [],
+      "bands": [
+        "mid",
+        "high"
+      ],
+      "take": 4,
+      "lead": "조금 더 쓰더라도 오래 가는 걸로 골랐어.",
+      "heading": "가족인 {t}에게"
+    },
+    "소개팅": {
+      "deny": [
+        "personal",
+        "scent",
+        "wearable"
+      ],
+      "bands": [
+        "low"
+      ],
+      "take": 3,
+      "lead": "가볍고 부담 없는 것만. 아직 취향을 모르니까.",
+      "heading": "소개팅에서 만난 {t}에게"
+    }
+  },
+  "catalog": {
+    "leather-cardcase": {
+      "label": "가죽 명함지갑",
+      "query": "가죽 명함지갑 선물",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "fountain-pen": {
+      "label": "만년필 선물세트",
+      "query": "만년필 선물세트",
+      "tags": [
+        "practical"
+      ],
+      "band": "mid"
+    },
+    "desk-organizer": {
+      "label": "데스크 오거나이저",
+      "query": "데스크 오거나이저 정리함",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "tumbler": {
+      "label": "보온 텀블러",
+      "query": "보온 텀블러 선물",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "umbrella": {
+      "label": "자동 장우산",
+      "query": "고급 자동우산 선물",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "planner": {
+      "label": "다이어리 플래너",
+      "query": "다이어리 플래너",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "book-light": {
+      "label": "클립 독서등",
+      "query": "클립형 독서등",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "leather-diary": {
+      "label": "가죽 다이어리",
+      "query": "가죽 다이어리 커버",
+      "tags": [
+        "practical"
+      ],
+      "band": "mid"
+    },
+    "laptop-sleeve": {
+      "label": "가죽 노트북 파우치",
+      "query": "가죽 노트북 파우치",
+      "tags": [
+        "practical"
+      ],
+      "band": "mid"
+    },
+    "briefcase": {
+      "label": "비즈니스 서류가방",
+      "query": "비즈니스 서류가방",
+      "tags": [
+        "practical"
+      ],
+      "band": "high"
+    },
+    "premium-pen": {
+      "label": "고급 볼펜",
+      "query": "고급 볼펜 선물세트",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "travel-pouch": {
+      "label": "여행 파우치 세트",
+      "query": "여행용 파우치 세트",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "monitor-stand": {
+      "label": "모니터 받침대",
+      "query": "모니터 받침대 수납",
+      "tags": [
+        "practical",
+        "tech"
+      ],
+      "band": "low"
+    },
+    "laptop-stand": {
+      "label": "노트북 거치대",
+      "query": "노트북 스탠드 거치대",
+      "tags": [
+        "practical",
+        "tech"
+      ],
+      "band": "low"
+    },
+    "car-vacuum": {
+      "label": "차량용 무선청소기",
+      "query": "차량용 무선청소기",
+      "tags": [
+        "practical"
+      ],
+      "band": "mid"
+    },
+    "tool-pouch": {
+      "label": "공구 파우치",
+      "query": "공구 정리 파우치",
+      "tags": [
+        "practical",
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "mood-lamp": {
+      "label": "무드등",
+      "query": "무드등 인테리어 조명",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "blanket": {
+      "label": "극세사 담요",
+      "query": "극세사 담요 선물",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "tea-set": {
+      "label": "홈카페 찻잔세트",
+      "query": "홈카페 찻잔세트",
+      "tags": [
+        "home"
+      ],
+      "band": "mid"
+    },
+    "mug-set": {
+      "label": "홈카페 머그세트",
+      "query": "홈카페 머그컵 세트",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "plant-pot": {
+      "label": "인테리어 화분",
+      "query": "인테리어 공기정화 화분",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "string-light": {
+      "label": "LED 스트링 조명",
+      "query": "LED 스트링 조명 무드",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "air-fryer": {
+      "label": "에어프라이어",
+      "query": "에어프라이어",
+      "tags": [
+        "home"
+      ],
+      "band": "mid"
+    },
+    "espresso": {
+      "label": "캡슐 커피머신",
+      "query": "캡슐 커피머신",
+      "tags": [
+        "home"
+      ],
+      "band": "high"
+    },
+    "floor-lamp": {
+      "label": "인테리어 스탠드 조명",
+      "query": "인테리어 스탠드 조명",
+      "tags": [
+        "home"
+      ],
+      "band": "mid"
+    },
+    "heat-pad": {
+      "label": "온열 찜질 패드",
+      "query": "온열 찜질 패드",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "apron": {
+      "label": "주방 앞치마",
+      "query": "주방 앞치마 선물",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "massager": {
+      "label": "목어깨 마사지기",
+      "query": "목어깨 마사지기",
+      "tags": [
+        "home"
+      ],
+      "band": "mid"
+    },
+    "candle-set": {
+      "label": "향초 선물세트",
+      "query": "향초 선물세트",
+      "tags": [
+        "scent",
+        "home"
+      ],
+      "band": "low"
+    },
+    "diffuser": {
+      "label": "리드 디퓨저",
+      "query": "리드 디퓨저 선물세트",
+      "tags": [
+        "scent",
+        "home"
+      ],
+      "band": "low"
+    },
+    "perfume": {
+      "label": "향수",
+      "query": "향수 선물세트",
+      "tags": [
+        "scent",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "handcream": {
+      "label": "핸드크림 세트",
+      "query": "핸드크림 선물세트",
+      "tags": [
+        "personal"
+      ],
+      "band": "low"
+    },
+    "sleep-mask": {
+      "label": "온열 수면안대",
+      "query": "온열 수면안대",
+      "tags": [
+        "personal"
+      ],
+      "band": "low"
+    },
+    "makeup-brush": {
+      "label": "메이크업 브러시 세트",
+      "query": "메이크업 브러시 세트",
+      "tags": [
+        "personal"
+      ],
+      "band": "low"
+    },
+    "watch": {
+      "label": "손목시계",
+      "query": "남녀 손목시계 선물",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "sports-socks": {
+      "label": "스포츠 양말 세트",
+      "query": "스포츠 양말 선물세트",
+      "tags": [
+        "wearable"
+      ],
+      "band": "low"
+    },
+    "watch-band": {
+      "label": "스마트워치 밴드",
+      "query": "스마트워치 밴드",
+      "tags": [
+        "wearable",
+        "tech"
+      ],
+      "band": "low"
+    },
+    "necktie": {
+      "label": "넥타이",
+      "query": "넥타이 선물세트",
+      "tags": [
+        "wearable"
+      ],
+      "band": "low"
+    },
+    "anc-earbuds": {
+      "label": "노이즈캔슬링 이어폰",
+      "query": "노이즈캔슬링 무선이어폰",
+      "tags": [
+        "tech"
+      ],
+      "band": "high"
+    },
+    "anc-headphone": {
+      "label": "노이즈캔슬링 헤드폰",
+      "query": "노이즈캔슬링 헤드폰",
+      "tags": [
+        "tech"
+      ],
+      "band": "high"
+    },
+    "ereader": {
+      "label": "전자책 리더기",
+      "query": "전자책 리더기",
+      "tags": [
+        "tech"
+      ],
+      "band": "high"
+    },
+    "bt-speaker": {
+      "label": "방수 블루투스 스피커",
+      "query": "방수 블루투스 스피커",
+      "tags": [
+        "tech"
+      ],
+      "band": "mid"
+    },
+    "mech-keyboard": {
+      "label": "기계식 키보드",
+      "query": "기계식 키보드",
+      "tags": [
+        "tech"
+      ],
+      "band": "mid"
+    },
+    "vertical-mouse": {
+      "label": "버티컬 무선마우스",
+      "query": "버티컬 무선마우스",
+      "tags": [
+        "tech"
+      ],
+      "band": "low"
+    },
+    "mini-projector": {
+      "label": "미니 빔프로젝터",
+      "query": "미니 빔프로젝터",
+      "tags": [
+        "tech"
+      ],
+      "band": "high"
+    },
+    "photo-printer": {
+      "label": "휴대용 포토프린터",
+      "query": "휴대용 포토프린터",
+      "tags": [
+        "tech"
+      ],
+      "band": "mid"
+    },
+    "ring-light": {
+      "label": "셀카 링라이트",
+      "query": "셀카 링라이트",
+      "tags": [
+        "tech"
+      ],
+      "band": "low"
+    },
+    "wireless-charger": {
+      "label": "무선충전 거치대",
+      "query": "무선충전 거치대",
+      "tags": [
+        "tech"
+      ],
+      "band": "low"
+    },
+    "smart-tag": {
+      "label": "분실방지 스마트태그",
+      "query": "스마트 분실방지 태그",
+      "tags": [
+        "tech"
+      ],
+      "band": "low"
+    },
+    "instax": {
+      "label": "즉석카메라",
+      "query": "즉석카메라 인스탁스",
+      "tags": [
+        "hobby",
+        "tech"
+      ],
+      "band": "mid"
+    },
+    "instax-film": {
+      "label": "즉석카메라 필름",
+      "query": "인스탁스 필름",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "watercolor": {
+      "label": "수채화 물감 세트",
+      "query": "수채화 물감 세트",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "colored-pencil": {
+      "label": "전문가 색연필 세트",
+      "query": "전문가용 색연필 세트",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "drawing-tablet": {
+      "label": "드로잉 태블릿",
+      "query": "드로잉 태블릿",
+      "tags": [
+        "hobby",
+        "tech"
+      ],
+      "band": "mid"
+    },
+    "boardgame": {
+      "label": "전략 보드게임",
+      "query": "전략 보드게임",
+      "tags": [
+        "hobby"
+      ],
+      "band": "mid"
+    },
+    "puzzle": {
+      "label": "두뇌 퍼즐 큐브",
+      "query": "두뇌 퍼즐 큐브",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "escape-game": {
+      "label": "방탈출 추리게임",
+      "query": "방탈출 추리게임 보드",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "multitool": {
+      "label": "멀티툴 나이프",
+      "query": "멀티툴 나이프",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "e-driver": {
+      "label": "전동 드라이버 세트",
+      "query": "전동 드라이버 세트",
+      "tags": [
+        "hobby"
+      ],
+      "band": "mid"
+    },
+    "lantern": {
+      "label": "캠핑 랜턴",
+      "query": "캠핑 랜턴 충전식",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "camp-chair": {
+      "label": "경량 캠핑체어",
+      "query": "경량 캠핑체어",
+      "tags": [
+        "hobby"
+      ],
+      "band": "mid"
+    },
+    "cooler-bag": {
+      "label": "캠핑 아이스박스",
+      "query": "캠핑 아이스박스",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "drone": {
+      "label": "입문용 드론",
+      "query": "입문용 카메라 드론",
+      "tags": [
+        "hobby",
+        "tech"
+      ],
+      "band": "high"
+    },
+    "turntable": {
+      "label": "LP 턴테이블",
+      "query": "LP 턴테이블",
+      "tags": [
+        "hobby"
+      ],
+      "band": "high"
+    },
+    "ink-set": {
+      "label": "만년필 잉크 세트",
+      "query": "만년필 잉크 세트",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "calligraphy": {
+      "label": "필사 노트 세트",
+      "query": "필사 노트 세트",
+      "tags": [
+        "hobby",
+        "practical"
+      ],
+      "band": "low"
+    },
+    "bt-mic": {
+      "label": "블루투스 마이크",
+      "query": "블루투스 노래방 마이크",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "drip-coffee": {
+      "label": "핸드드립 커피세트",
+      "query": "핸드드립 커피 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "mid"
+    },
+    "tea-gift": {
+      "label": "허브티 선물세트",
+      "query": "허브티 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    },
+    "snack-box": {
+      "label": "간식 선물박스",
+      "query": "간식 선물세트 박스",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    },
+    "fruit-box": {
+      "label": "과일 선물세트",
+      "query": "과일 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "mid"
+    },
+    "redginseng": {
+      "label": "홍삼 선물세트",
+      "query": "홍삼 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "high"
+    },
+    "protein": {
+      "label": "단백질 보충제",
+      "query": "단백질 보충제",
+      "tags": [
+        "food"
+      ],
+      "band": "mid"
+    },
+    "chocolate": {
+      "label": "수제 초콜릿 세트",
+      "query": "수제 초콜릿 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    }
+  },
+  "types": {
+    "ISTJ": {
+      "angle": "취향을 넘겨짚는 것보다, 오래 잘 쓰는 물건이 확실히 먹혀.",
+      "picks": [
+        [
+          "leather-cardcase",
+          "쓰던 물건을 오래 쓰는 타입이라, 매일 들고 다니는 걸 한 급 올려주는 게 제일 반응이 좋아."
+        ],
+        [
+          "fountain-pen",
+          "기록하고 정리하는 습관이 몸에 배어 있어서, 필기구에 진심인 경우가 많아."
+        ],
+        [
+          "desk-organizer",
+          "자리가 어질러져 있는 걸 못 견디는 편이라 정리 도구는 거의 실패가 없어."
+        ],
+        [
+          "tumbler",
+          "쓰던 걸 계속 쓰는 성향이라 매일 쓰는 소모품 교체를 오히려 고마워해."
+        ],
+        [
+          "umbrella",
+          "만일에 대비해두는 걸 좋아하는 타입이라 이런 실용템을 의외로 아껴 써."
+        ],
+        [
+          "wireless-charger",
+          "정해진 자리에 정해진 물건이 있는 걸 좋아해서 거치대류가 잘 맞아."
+        ]
+      ]
+    },
+    "ISFJ": {
+      "angle": "화려한 것보다, 집에서 혼자 쓸 때 따뜻해지는 물건을 골라.",
+      "picks": [
+        [
+          "handcream",
+          "남 챙기느라 자기 건 뒤로 미루는 타입이라, 대신 챙겨주는 느낌의 선물이 크게 와닿아."
+        ],
+        [
+          "blanket",
+          "집에서 보내는 시간을 소중하게 여겨서 포근한 물건에 약해."
+        ],
+        [
+          "diffuser",
+          "공간 분위기를 조용히 신경 쓰는 편이라 향 제품을 잘 써."
+        ],
+        [
+          "tea-set",
+          "누가 오면 뭐라도 내주고 싶어 하는 타입이라 찻잔 세트는 오래 쓰게 돼."
+        ],
+        [
+          "sleep-mask",
+          "신경 쓸 게 많아서 잠을 얕게 자는 편이라 수면 관련 선물이 의외로 고마워."
+        ],
+        [
+          "heat-pad",
+          "몸이 피곤해도 티를 잘 안 내는 타입이라, 이런 걸 챙겨주면 마음을 읽혔다고 느껴."
+        ],
+        [
+          "mug-set",
+          "일상에서 매일 쓰는 걸 바꿔주면 계속 생각나는 선물이 돼."
+        ]
+      ]
+    },
+    "INFJ": {
+      "angle": "혼자 정리하는 시간이 꼭 필요한 타입이라, 그 시간을 좋게 만드는 물건이 맞아.",
+      "picks": [
+        [
+          "mood-lamp",
+          "혼자 있는 밤 시간을 중요하게 여겨서, 그 공간의 조명을 바꿔주는 선물이 오래 남아."
+        ],
+        [
+          "candle-set",
+          "생각이 많을 때 감각을 가라앉히는 걸 좋아해서 향초가 잘 맞아."
+        ],
+        [
+          "leather-diary",
+          "속마음을 말로 다 안 하고 글로 정리하는 편이라 노트를 진짜 써."
+        ],
+        [
+          "book-light",
+          "혼자 읽고 생각하는 시간이 긴 타입이라 사소하지만 매일 쓰게 돼."
+        ],
+        [
+          "anc-earbuds",
+          "주변 자극에 쉽게 지쳐서, 소리를 끊어주는 물건을 제일 고마워해."
+        ],
+        [
+          "tea-gift",
+          "카페인보다 차를 오래 두고 마시는 쪽이 많아서 부담 없이 잘 써."
+        ]
+      ]
+    },
+    "INTJ": {
+      "angle": "감동보다 효율이야. 쓸모가 분명한 걸 주면 오히려 마음을 알아줘.",
+      "picks": [
+        [
+          "ereader",
+          "읽고 쌓는 걸 좋아하는데 공간 낭비는 싫어해서 딱 맞는 조합이야."
+        ],
+        [
+          "monitor-stand",
+          "작업 환경을 계속 개선하는 타입이라, 책상 셋업 관련 선물은 거의 실패가 없어."
+        ],
+        [
+          "laptop-stand",
+          "자세나 동선의 비효율을 못 참는 편이라 이런 걸 직접 사고 있었을 확률이 높아."
+        ],
+        [
+          "drip-coffee",
+          "루틴을 정해놓고 지키는 쪽이라 커피 루틴에 투자하는 경우가 많아."
+        ],
+        [
+          "fountain-pen",
+          "기능이 확실한 물건을 오래 쓰는 성향이라 필기구에 돈을 써."
+        ],
+        [
+          "anc-headphone",
+          "집중을 방해받는 걸 제일 싫어해서 차음 장비를 높게 쳐."
+        ],
+        [
+          "puzzle",
+          "머리 쓰는 걸 놀이로 받아들이는 타입이라 가볍게 던져주기 좋아."
+        ]
+      ]
+    },
+    "ISTP": {
+      "angle": "말로 고맙다고는 안 해도, 손에 잡히는 도구를 주면 바로 써봐.",
+      "picks": [
+        [
+          "multitool",
+          "직접 만지고 고치는 걸 좋아해서 도구류는 거의 무조건 먹혀."
+        ],
+        [
+          "e-driver",
+          "집에 뭔가 고장 나면 남 부르기 전에 자기가 뜯어보는 타입이야."
+        ],
+        [
+          "lantern",
+          "밖으로 나가서 혼자 뭔가 하는 걸 좋아해서 야외 장비를 잘 써."
+        ],
+        [
+          "tool-pouch",
+          "장비는 많은데 정리는 귀찮아하는 편이라 수납 도구가 의외로 유용해."
+        ],
+        [
+          "bt-speaker",
+          "작업하면서 음악 틀어두는 경우가 많아서 튼튼한 스피커가 잘 맞아."
+        ],
+        [
+          "car-vacuum",
+          "차나 장비를 자기 손으로 관리하는 쪽이라 관리 도구를 아껴 써."
+        ]
+      ]
+    },
+    "ISFP": {
+      "angle": "예쁜 걸 알아보는 눈이 있어서, 기능보다 감각이 먼저야.",
+      "picks": [
+        [
+          "watercolor",
+          "직접 만들고 그리는 걸 좋아하는 타입이라 재료 선물이 잘 맞아."
+        ],
+        [
+          "instax",
+          "순간의 분위기를 남기고 싶어 해서 사진 관련 물건에 약해."
+        ],
+        [
+          "plant-pot",
+          "자기 공간을 천천히 꾸미는 걸 좋아해서 초록 식물을 잘 들여."
+        ],
+        [
+          "perfume",
+          "취향이 확실한 대신 남들이 안 쓰는 걸 좋아해서 향에 관심이 많아."
+        ],
+        [
+          "drawing-tablet",
+          "표현하고 싶은 게 많은데 도구가 없어서 미뤄둔 경우가 꽤 있어."
+        ],
+        [
+          "candle-set",
+          "분위기를 만드는 걸 중요하게 여겨서 향초를 실제로 태워 써."
+        ],
+        [
+          "colored-pencil",
+          "부담 없이 시작할 수 있는 취미 재료를 주면 바로 손을 대."
+        ]
+      ]
+    },
+    "INFP": {
+      "angle": "값보다 의미야. 왜 골랐는지 한 줄 적어주면 선물값이 두 배가 돼.",
+      "picks": [
+        [
+          "ink-set",
+          "쓰는 걸로 마음을 정리하는 타입이라 필기 도구에 애착이 커."
+        ],
+        [
+          "mood-lamp",
+          "자기만의 공간과 분위기를 아주 중요하게 여겨."
+        ],
+        [
+          "calligraphy",
+          "좋아하는 문장을 모아두는 습관이 있는 경우가 많아."
+        ],
+        [
+          "tea-gift",
+          "혼자 있는 시간을 길게 갖는 편이라 차를 두고 마셔."
+        ],
+        [
+          "candle-set",
+          "감정 기복이 있는 편이라 마음을 가라앉히는 물건을 잘 써."
+        ],
+        [
+          "turntable",
+          "음악을 배경이 아니라 하나의 경험으로 듣는 타입이야."
+        ]
+      ]
+    },
+    "INTP": {
+      "angle": "쓸데없어 보여도 머리 쓸 거리가 있으면 제일 좋아해.",
+      "picks": [
+        [
+          "mech-keyboard",
+          "취향이 확고한 분야가 있고, 입력 장치는 그 대표 격이야."
+        ],
+        [
+          "puzzle",
+          "풀 거리를 주면 며칠을 혼자 파고드는 타입이야."
+        ],
+        [
+          "vertical-mouse",
+          "오래 앉아 있는 편이라 손목 관련 장비를 실제로 필요로 해."
+        ],
+        [
+          "drip-coffee",
+          "과정 자체를 실험처럼 즐기는 쪽이라 드립 도구가 잘 맞아."
+        ],
+        [
+          "boardgame",
+          "규칙이 복잡할수록 재미있어하는 타입이야."
+        ],
+        [
+          "mini-projector",
+          "혼자 몰아보는 시간이 긴 편이라 영상 장비를 오래 써."
+        ],
+        [
+          "escape-game",
+          "추리하고 단서 맞추는 걸 좋아해서 가볍게 주기 좋아."
+        ]
+      ]
+    },
+    "ESTP": {
+      "angle": "쌓아두는 물건보다, 당장 들고 나가서 쓸 수 있는 게 맞아.",
+      "picks": [
+        [
+          "sports-socks",
+          "몸 쓰는 활동이 일상이라 소모품 교체를 제일 실용적으로 받아."
+        ],
+        [
+          "bt-speaker",
+          "어디든 분위기를 만들고 다니는 타입이라 휴대용 스피커를 잘 써."
+        ],
+        [
+          "camp-chair",
+          "주말에 가만히 못 있는 편이라 야외 장비가 바로 쓰여."
+        ],
+        [
+          "watch-band",
+          "지금 쓰는 걸 바꿔 끼우는 걸 좋아해서 가볍게 바꿔줄 만한 게 좋아."
+        ],
+        [
+          "protein",
+          "운동을 취미가 아니라 생활로 하는 경우가 많아."
+        ],
+        [
+          "cooler-bag",
+          "즉흥적으로 놀러 가는 일이 잦아서 이런 게 은근히 자주 쓰여."
+        ],
+        [
+          "lantern",
+          "밤에 밖에서 노는 일이 많아서 조명 장비가 실제로 필요해."
+        ]
+      ]
+    },
+    "ESFP": {
+      "angle": "혼자 쓰는 것보다, 사람들이랑 같이 쓸 때 빛나는 물건을 골라.",
+      "picks": [
+        [
+          "photo-printer",
+          "그 순간을 남기고 보여주는 걸 좋아해서 사진 관련 물건을 제일 잘 써."
+        ],
+        [
+          "string-light",
+          "공간 분위기를 만드는 데 진심이라 조명류가 바로 걸려."
+        ],
+        [
+          "makeup-brush",
+          "꾸미는 걸 즐기는 타입이라 도구 업그레이드를 반가워해."
+        ],
+        [
+          "bt-mic",
+          "사람들 모이면 분위기를 띄우는 역할이라 이런 게 실제로 쓰여."
+        ],
+        [
+          "perfume",
+          "자기 이미지를 만드는 데 신경 쓰는 편이라 향에 관심이 많아."
+        ],
+        [
+          "ring-light",
+          "사진이나 영상 찍는 일이 잦아서 조명 장비가 바로 쓰여."
+        ]
+      ]
+    },
+    "ENFP": {
+      "angle": "물건 자체보다 '이걸로 뭘 해볼까'가 떠오르는 걸 줘야 해.",
+      "picks": [
+        [
+          "instax-film",
+          "즉석카메라를 이미 갖고 있을 확률이 높고, 필름은 늘 모자라."
+        ],
+        [
+          "boardgame",
+          "사람 모으는 걸 좋아해서 같이 할 거리를 제일 반겨."
+        ],
+        [
+          "travel-pouch",
+          "어디든 떠날 계획을 늘 세워두는 타입이야."
+        ],
+        [
+          "colored-pencil",
+          "새로운 걸 시작하는 데 망설임이 없어서 취미 재료가 잘 맞아."
+        ],
+        [
+          "snack-box",
+          "나눠 먹는 걸 좋아해서 간식 선물은 거의 실패가 없어."
+        ],
+        [
+          "mini-projector",
+          "집에서 사람 불러 뭔가 같이 보는 걸 좋아해."
+        ]
+      ]
+    },
+    "ENTP": {
+      "angle": "새롭고 말거리가 되는 물건이면 가격이랑 상관없이 좋아해.",
+      "picks": [
+        [
+          "boardgame",
+          "머리 싸움을 즐기는 타입이라 전략 게임을 제일 반겨."
+        ],
+        [
+          "smart-tag",
+          "새로 나온 물건을 먼저 써보고 얘기하는 걸 좋아해."
+        ],
+        [
+          "drone",
+          "일단 해보고 판단하는 쪽이라 장비형 취미에 잘 붙어."
+        ],
+        [
+          "espresso",
+          "관심이 생기면 장비부터 갖추는 타입이야."
+        ],
+        [
+          "mech-keyboard",
+          "커스텀할 여지가 있는 물건을 특히 좋아해."
+        ],
+        [
+          "escape-game",
+          "논리로 푸는 놀이를 즐겨서 부담 없이 던져주기 좋아."
+        ]
+      ]
+    },
+    "ESTJ": {
+      "angle": "감성보다 격식이야. '제대로 된 물건'이라는 인상이 중요해.",
+      "picks": [
+        [
+          "briefcase",
+          "밖에서 보이는 물건의 완성도를 중요하게 생각해."
+        ],
+        [
+          "desk-organizer",
+          "일하는 환경이 정돈돼 있어야 능률이 난다고 믿는 타입이야."
+        ],
+        [
+          "leather-cardcase",
+          "사람 만나는 일이 많아서 이런 소품을 실제로 매일 써."
+        ],
+        [
+          "premium-pen",
+          "서류에 직접 사인하는 일이 잦아서 필기구를 신경 써."
+        ],
+        [
+          "redginseng",
+          "본인 건강도 관리 대상으로 보는 편이라 챙겨 먹어."
+        ],
+        [
+          "necktie",
+          "차려입는 자리가 많아서 정장 소품이 바로 쓰여."
+        ]
+      ]
+    },
+    "ESFJ": {
+      "angle": "본인이 쓸 것보다, 남한테 대접할 때 쓰는 물건을 더 좋아해.",
+      "picks": [
+        [
+          "mug-set",
+          "사람 초대하는 걸 좋아해서 손님용 식기를 계속 늘려."
+        ],
+        [
+          "air-fryer",
+          "뭐라도 만들어 먹이는 걸 좋아하는 타입이라 주방 가전을 잘 써."
+        ],
+        [
+          "handcream",
+          "남 챙기느라 자기 건 뒤로 미루는 편이라 대신 챙겨주면 크게 와닿아."
+        ],
+        [
+          "fruit-box",
+          "나눠 먹는 걸 좋아해서 먹거리 선물이 제일 자연스러워."
+        ],
+        [
+          "diffuser",
+          "집에 오는 사람이 편하게 느끼길 바라서 공간 향을 신경 써."
+        ],
+        [
+          "apron",
+          "주방에 서 있는 시간이 긴 타입이라 실제로 매일 써."
+        ],
+        [
+          "chocolate",
+          "받은 걸 주변에 나누는 성향이라 나눠 먹기 좋은 게 잘 맞아."
+        ]
+      ]
+    },
+    "ENFJ": {
+      "angle": "남을 챙기느라 자기를 뒤로 미루는 타입이라, 본인용 선물이 제일 귀해.",
+      "picks": [
+        [
+          "planner",
+          "사람들 일정까지 같이 챙기는 편이라 기록 도구를 실제로 써."
+        ],
+        [
+          "tumbler",
+          "밖에서 사람 만나는 시간이 길어서 들고 다니는 물건이 잘 맞아."
+        ],
+        [
+          "candle-set",
+          "감정 소모가 큰 타입이라 혼자 회복하는 시간을 돕는 게 좋아."
+        ],
+        [
+          "tea-gift",
+          "카페인보다 몸에 부담 적은 쪽을 챙기는 경우가 많아."
+        ],
+        [
+          "massager",
+          "티는 안 내는데 실제로는 지쳐 있을 확률이 높아."
+        ],
+        [
+          "floor-lamp",
+          "집을 쉬는 공간으로 만드는 데 관심이 많아."
+        ]
+      ]
+    },
+    "ENTJ": {
+      "angle": "싸구려는 안 쓰고 방치해. 개수보다 하나를 제대로 주는 게 나아.",
+      "picks": [
+        [
+          "laptop-sleeve",
+          "일하는 도구의 완성도를 중요하게 생각하는 타입이야."
+        ],
+        [
+          "espresso",
+          "시간 아끼는 걸 최우선으로 봐서 집에서 바로 해결되는 걸 좋아해."
+        ],
+        [
+          "watch",
+          "보이는 물건에 기준이 확실해서 시계에 투자하는 경우가 많아."
+        ],
+        [
+          "planner",
+          "목표를 쪼개서 관리하는 습관이 있어 기록 도구를 실제로 써."
+        ],
+        [
+          "redginseng",
+          "체력도 성과의 조건으로 보는 편이라 건강 관리에 돈을 써."
+        ],
+        [
+          "anc-headphone",
+          "집중 시간을 방해받는 걸 제일 싫어해."
+        ],
+        [
+          "drip-coffee",
+          "루틴을 정해두고 지키는 타입이라 커피 루틴에 신경 써."
+        ]
+      ]
+    }
+  },
+  "priceNote": "실제 판매가가 아니라 선물 예산 가이드다. 링크는 검색 결과라 가격이 제각각."
+}
