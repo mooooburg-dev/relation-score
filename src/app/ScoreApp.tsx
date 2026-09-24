@@ -1,9 +1,13 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AdUnit from "./AdUnit";
 import { FamilyCard } from "@/components/family";
+// 딥링크가 아직 없으면 선물 CTA를 숨긴다. gifts.ts 가 아니라 이 모듈을 쓰는 건
+// 클라이언트 번들에 types/pairs.json 까지 끌려들어오지 않게 하려는 것.
+import { GIFT_LINKS_READY } from "@/lib/gift-ready";
 
 // AdSense 설정 (환경변수 미설정 시 광고 영역 자체를 렌더하지 않음)
 const ADS_ON = Boolean(process.env.NEXT_PUBLIC_ADSENSE_CLIENT);
@@ -339,6 +343,7 @@ function HomeContent({ initialId }: { initialId?: string }) {
           result={result}
           error={error}
           relation={relation}
+          otherMbti={other.mbti}
           age={me.age}
           fromShare={fromShare}
           onShare={handleShare}
@@ -556,6 +561,7 @@ function StepResult({
   result,
   error,
   relation,
+  otherMbti,
   age,
   fromShare,
   onShare,
@@ -567,6 +573,7 @@ function StepResult({
   result: Result | null;
   error: string;
   relation: string;
+  otherMbti: string;
   age: string;
   fromShare: boolean;
   onShare: () => void;
@@ -656,6 +663,28 @@ function StepResult({
           </>
         )}
       </div>
+
+      {GIFT_LINKS_READY && otherMbti && (
+        <Link
+          href={`/gift/${otherMbti.toLowerCase()}#rel-${encodeURIComponent(relation)}`}
+          className="flex items-center gap-3 rounded-3xl bg-white p-5 shadow-sm transition active:scale-[0.99]"
+        >
+          <span className="text-3xl" aria-hidden>
+            🎁
+          </span>
+          <span className="flex flex-1 flex-col leading-tight">
+            <span className="text-base font-extrabold">
+              {otherMbti}에게 선물한다면?
+            </span>
+            <span className="mt-0.5 text-xs text-foreground/60">
+              {relation} 사이에 딱 맞는 선물만 골라뒀어
+            </span>
+          </span>
+          <span className="text-lg font-bold text-primary" aria-hidden>
+            →
+          </span>
+        </Link>
+      )}
 
       <FamilyCard
         relation={relation}
