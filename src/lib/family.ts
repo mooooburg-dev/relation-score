@@ -1,4 +1,9 @@
 // 만든 사람의 다른 서비스(drawyourmind 패밀리) 크로스링크 데이터.
+//
+// ⚠️ 이 문구들에 "쿠팡" 상호를 넣지 말 것. 운영정책 4.1 6) 은 쿠팡/쿠팡 파트너스
+// 상호 자체의 사용을 제재 대상으로 삼고, 실제로 채널명에 상호를 넣어 계정이 해지된
+// 전례가 있다(goldbox-today/docs/coupang-partners-policy-notes.md §1).
+// 서비스명은 "골드박스투데이" 이므로 "골드박스" 만으로 의미 전달이 충분하다.
 // 결과 화면에서는 관계 유형(+나이)에 맞춰 한 사이트만 골라 보여주고,
 // 푸터에서는 전체 목록을 나열한다. 링크마다 UTM을 붙여 GA에서 유입을 측정한다.
 
@@ -20,7 +25,7 @@ export const FAMILY_SITES: FamilySite[] = [
     name: "골드박스투데이",
     url: "https://goldbox.today",
     emoji: "🎁",
-    tagline: "쿠팡 골드박스 오늘의 특가와 역대 최저가",
+    tagline: "골드박스 오늘의 특가와 역대 최저가",
   },
   {
     id: "ratebox",
@@ -61,7 +66,7 @@ const BY_RELATION: Record<Relation, Copy> = {
   연인: {
     siteId: "goldbox",
     title: "궁합은 확인했고, 이제 선물 살 차례 🎁",
-    description: "오늘 쿠팡 골드박스 특가에서 선물 미리 찜해두기",
+    description: "오늘 골드박스 특가에서 선물 미리 찜해두기",
     cta: "오늘의 특가 보기",
   },
   썸: {
@@ -73,13 +78,13 @@ const BY_RELATION: Record<Relation, Copy> = {
   소개팅: {
     siteId: "goldbox",
     title: "애프터 준비물, 특가로 챙기기 ☕",
-    description: "오늘 쿠팡 골드박스에 뜬 특가 한눈에",
+    description: "오늘 골드박스에 뜬 특가 한눈에",
     cta: "오늘의 특가 보기",
   },
   친구: {
     siteId: "goldbox",
     title: "찐친 인증 완료. 생일 선물 미리 찜 🎁",
-    description: "쿠팡 골드박스 오늘의 특가와 역대 최저가 확인",
+    description: "골드박스 오늘의 특가와 역대 최저가 확인",
     cta: "오늘의 특가 보기",
   },
   직장동료: {
@@ -123,7 +128,7 @@ const GENERIC: Copy[] = [
   {
     siteId: "goldbox",
     title: "궁합 보다가 생각난 그 선물 🎁",
-    description: "쿠팡 골드박스 오늘의 특가와 역대 최저가",
+    description: "골드박스 오늘의 특가와 역대 최저가",
     cta: "오늘의 특가 보기",
   },
   {
