@@ -161,6 +161,28 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
 
       <Card>
         <SectionTitle>
+          {t} 궁합표 ({ko(t)} 16유형 점수)
+        </SectionTitle>
+        {/*
+          next/image 대신 순수 img 를 쓴다. /_next/image 로 감싸면 검색엔진이
+          원본 이미지를 집어가기 어렵고, 본문에 실제 <img> 가 있어야
+          네이버 웹문서 결과에 썸네일이 붙는다.
+        */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`${typePath(t)}/chart.png`}
+          alt={`${t}(${ko(t)}) 궁합표 - 16가지 MBTI 유형별 궁합 점수 한눈에 보기`}
+          width={1000}
+          height={1150}
+          className="w-full rounded-2xl"
+        />
+        <p className="mt-2 text-xs leading-relaxed text-foreground/50">
+          점수가 높을수록 진한 색이야. 이미지를 저장해서 공유해도 좋아.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle>
           {t} 잘 맞는 MBTI TOP 5 ({ko(t)} 궁합 순위)
         </SectionTitle>
         <RankList me={t} items={best} />
