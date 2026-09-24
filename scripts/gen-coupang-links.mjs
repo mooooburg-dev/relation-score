@@ -36,7 +36,11 @@ const FORCE = process.argv.includes("--force");
 const DRY = process.argv.includes("--dry");
 
 const CHUNK = 20;      // 한 호출에 URL 여러 개 — 호출 수를 줄인다
-const DELAY_MS = 1000; // 골드박스투데이와 계정을 공유하므로 여유를 둔다
+// 호출 간격. 1초로 두면 4콜이 3초 안에 몰려 한 분 윈도에 전부 들어간다.
+// 15초면 같은 배치가 2~3개 분 윈도로 흩어져, 분당 피크가 4 → 1~2 로 떨어진다.
+// 쿠팡이 공개하지 않은 버스트/시간당 감지가 있더라도 걸릴 여지를 줄이는 쪽이 싸다.
+// (배치는 사람이 수동으로 돌리는 것이라 총 소요가 1분 늘어나는 건 비용이 아니다)
+const DELAY_MS = 15000;
 
 // ---- 계정 공용 호출 장부 ----
 // 파트너스 API 한도는 액세스키(계정) 단위다. 골드박스·랭킹박스·프라이스갭이 같은 계정을
@@ -63,6 +67,79 @@ function ledger() {
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
   return createClient(url, key, { auth: { persistSession: false } });
+}
+
+/**
+ * 쏘기 전에 남은 여유를 읽어 보고한다.
+ *
+ * RPC(consumeQuota)는 콜 단위로 막아주지만, "지금 계정이 얼마나 달아올라 있는지"는
+ * 알려주지 않는다. 다른 서비스가 이미 시간당 한도 근처까지 썼다면 배치를 나중으로
+ * 미루는 편이 낫다 — 경고 3회면 계정이 묶인다.
+ *
+ * 테이블 직접 조회는 service role 이 필요하다. anon 키뿐이면 못 읽지만, 그때도
+ * RPC 가드는 그대로 동작하므로 경고만 남기고 진행한다.
+ */
+async function reportHeadroom(db, callsNeeded) {
+  if (!db) return true;
+
+  const wanted = [
+    ["account", "all"],
+    ["account", "deeplink"],
+    [LEDGER_SITE, LEDGER_BUCKET],
+  ];
+
+  const { data: pol, error: pe } = await db
+    .from("cp_api_policy")
+    .select("scope,bucket,window_seconds,max_count");
+  const { data: rows, error: qe } = await db
+    .from("cp_api_quota")
+    .select("bucket,window_start,count")
+    .gte("window_start", new Date(Date.now() - 86400_000).toISOString());
+
+  if (pe || qe || !pol || !rows) {
+    console.warn("⚠ 장부를 직접 읽지 못했어 (service role 키 필요). RPC 가드로만 진행할게.");
+    return true;
+  }
+
+  // 버킷 키는 '<scope>:<bucket>:<window>'.
+  // 아직 안 닫힌 윈도의 행만 현재 사용량이다. 최신 행을 그냥 집으면, 이미 지나간
+  // 분 윈도의 숫자를 현재치로 읽어 멀쩡한 배치를 막는다.
+  const now = Date.now();
+  const current = new Map();
+  for (const r of rows) {
+    const w = Number(r.bucket.split(":").pop());
+    if (!Number.isFinite(w)) continue;
+    if (new Date(r.window_start).getTime() + w * 1000 <= now) continue; // 닫힌 윈도
+    const cur = current.get(r.bucket);
+    if (!cur || new Date(r.window_start) > new Date(cur.window_start)) current.set(r.bucket, r);
+  }
+
+  console.log("\n남은 여유:");
+  let tightest = Infinity;
+  for (const [scope, bucket] of wanted) {
+    for (const w of [60, 3600, 86400]) {
+      const rule = pol.find(
+        (x) => x.scope === scope && x.bucket === bucket && x.window_seconds === w,
+      );
+      if (!rule) continue;
+      const key = `${scope}:${bucket}:${w}`;
+      const used = current.get(key)?.count ?? 0;
+      const left = rule.max_count - used;
+      const label = w === 60 ? "분당" : w === 3600 ? "시간당" : "일간";
+      console.log(`  ${key.padEnd(34)} ${label.padEnd(4)} ${used}/${rule.max_count}  남음 ${left}`);
+      if (left < tightest) tightest = left;
+    }
+  }
+
+  if (tightest < callsNeeded) {
+    console.error(
+      `\n⛔ 가장 빡빡한 버킷의 남은 여유(${tightest})가 필요한 호출 수(${callsNeeded})보다 적어. 중단.\n` +
+        "   잠시 뒤 다시 돌리면 윈도가 넘어가면서 풀려.",
+    );
+    return false;
+  }
+  console.log(`  → 필요 ${callsNeeded}콜, 가장 빡빡한 여유 ${tightest}. 진행.\n`);
+  return true;
 }
 
 /**
@@ -115,6 +192,7 @@ async function main() {
 
   if (DRY) {
     todo.forEach((t) => console.log(`  ${t.id}\t${t.url}`));
+    await reportHeadroom(ledger(), calls); // 읽기 전용 — 소비하지 않는다
     return;
   }
   if (!ACCESS || !SECRET) {
@@ -124,6 +202,8 @@ async function main() {
 
   const client = new CoupangPartnersClient({ accessKey: ACCESS, secretKey: SECRET });
   const db = ledger();
+
+  if (!(await reportHeadroom(db, calls))) process.exit(1);
 
   for (let i = 0; i < todo.length; i += CHUNK) {
     const batch = todo.slice(i, i + CHUNK);
