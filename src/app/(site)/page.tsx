@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ScoreApp from "./ScoreApp";
+import ScoreApp from "@/app/ScoreApp";
 import { ArticleAd, TypeGrid } from "@/components/seo";
 import { getTopPairs, pairPath, scoreEmoji } from "@/lib/mbti";
 
