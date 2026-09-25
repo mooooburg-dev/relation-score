@@ -4,6 +4,7 @@ import { isAdminConfigured, verifyAdmin } from "@/lib/admin/auth";
 import { logoutAction } from "@/lib/admin/actions";
 import LoginForm from "./login-form";
 import AdminNav from "./nav";
+import AdminFloating from "./floating";
 
 export const metadata: Metadata = {
   title: "어드민",
@@ -51,6 +52,7 @@ export default async function AdminLayout({
       <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-6">
         {children}
       </main>
+      <AdminFloating />
     </div>
   );
 }
