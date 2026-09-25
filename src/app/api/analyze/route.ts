@@ -5,6 +5,7 @@ import {
   type AnalysisInputs,
   type AnalysisResult,
 } from "@/lib/supabase";
+import { isOperatorRequest } from "@/lib/admin/operator";
 
 // OpenAI 호환 엔드포인트. OPENAI_BASE_URL을 바꾸면 Vercel AI Gateway 등으로 교체 가능
 const openai = new OpenAI({
@@ -224,6 +225,8 @@ ${describePerson("상대방", other)}
           inputs,
           result,
           model: MODEL,
+          // 운영자 본인 분석은 통계에서 뺀다 (행은 남긴다 — /r/[id] 공유의 실체)
+          is_admin: isOperatorRequest(request),
         })
         .select("id")
         .single();

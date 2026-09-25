@@ -96,6 +96,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     .select("created_at, relation, score, inputs, view_count, model", {
       count: "exact",
     })
+    .eq("is_admin", false) // 운영자 본인 활동 제외
     .order("created_at", { ascending: false })
     .limit(STAT_LIMIT);
 
@@ -246,7 +247,10 @@ export async function listAnalyses(params: ListParams): Promise<ListResult> {
   const perPage = params.perPage ?? PER_PAGE;
   const page = Math.max(1, params.page ?? 1);
 
-  let query = supabaseAdmin.from(SCORE_TABLE).select("*", { count: "exact" });
+  let query = supabaseAdmin
+    .from(SCORE_TABLE)
+    .select("*", { count: "exact" })
+    .eq("is_admin", false); // 운영자 본인 활동 제외
 
   if (params.relation) query = query.eq("relation", params.relation);
   if (params.mbti) {
@@ -299,6 +303,7 @@ export async function getRecentAnalyses(limit = 5): Promise<AnalysisRow[]> {
   const { data, error } = await supabaseAdmin
     .from(SCORE_TABLE)
     .select("*")
+    .eq("is_admin", false) // 운영자 본인 활동 제외
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw new Error(`최근 분석 조회 실패: ${error.message}`);
@@ -367,6 +372,7 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
   const { data } = await supabaseAdmin
     .from("gift_clicks")
     .select("id, created_at, gift_id, mbti, surface, relation, entry")
+    .eq("is_admin", false) // 운영자 본인 클릭 제외
     .order("created_at", { ascending: false })
     .limit(2000);
 

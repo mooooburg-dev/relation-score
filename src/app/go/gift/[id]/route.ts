@@ -2,6 +2,7 @@ import { after, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import linksJson from "@/data/gift-links.json";
 import { MBTI_LIST } from "@/lib/mbti";
+import { isOperatorRequest } from "@/lib/admin/operator";
 
 /**
  * 선물 링크 클릭 기록 후 쿠팡 파트너스 링크로 302.
@@ -41,6 +42,7 @@ export async function GET(
   const surface = q.get("s");
   const relation = q.get("r");
   const entry = q.get("f");
+  const isAdmin = isOperatorRequest(req);
 
   after(async () => {
     try {
@@ -50,6 +52,7 @@ export async function GET(
         surface: surface && SURFACES.has(surface) ? surface : "list",
         relation: relation && RELATIONS.has(relation) ? relation : null,
         entry: entry && ENTRIES.has(entry) ? entry : null,
+        is_admin: isAdmin,
       });
     } catch {
       // 기록 실패가 이동을 막지 않는다
