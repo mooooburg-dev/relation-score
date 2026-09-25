@@ -13,7 +13,7 @@ import {
   faqLd,
 } from "@/components/seo";
 import { FamilyCard } from "@/components/family";
-import { AffiliateNotice, GiftButton } from "@/components/gift";
+import { AffiliateNotice, GiftButton, GoldboxCta } from "@/components/gift";
 import {
   MBTI_LIST,
   RELATIONS,
@@ -208,6 +208,9 @@ export default async function GiftTypePage({
           ))}
         </ul>
       </Card>
+
+      {/* 뭘 줄지 정한 직후가 얼마에 살지로 넘어가기 제일 좋은 지점 */}
+      <GoldboxCta />
 
       <ArticleAd />
 
