@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import {
   ADMIN_COOKIE,
   ADMIN_COOKIE_MAX_AGE,
+  ADMIN_HINT_COOKIE,
   adminSessionToken,
   checkAdminPassword,
 } from "@/lib/admin/auth";
@@ -38,6 +39,15 @@ export async function loginAction(
     path: "/",
   });
 
+  // 공개 화면의 어드민 버튼이 읽을 마커 (httpOnly 아님 — 권한이 아니라 힌트)
+  store.set(ADMIN_HINT_COOKIE, "1", {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+    path: "/",
+  });
+
   revalidatePath("/admin", "layout");
   return {};
 }
@@ -45,6 +55,7 @@ export async function loginAction(
 export async function logoutAction() {
   const store = await cookies();
   store.delete(ADMIN_COOKIE);
+  store.delete(ADMIN_HINT_COOKIE);
   revalidatePath("/admin", "layout");
   redirect("/admin");
 }

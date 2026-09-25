@@ -357,7 +357,7 @@ function HomeContent({ initialId }: { initialId?: string }) {
       )}
 
       {bannerVisible && (
-        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[480px] flex-col items-center border-t border-foreground/10 bg-white/95 px-3 pb-2 pt-1 backdrop-blur">
+        <div data-bottom-banner className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[480px] flex-col items-center border-t border-foreground/10 bg-white/95 px-3 pb-2 pt-1 backdrop-blur">
           <p className="text-center text-[10px] leading-none text-foreground/30">
             광고
           </p>
