@@ -3,6 +3,7 @@ import Script from "next/script";
 import Link from "next/link";
 import { MBTI_LIST, typePath } from "@/lib/mbti";
 import { FamilyLinks } from "@/components/family";
+import AdminEntry from "@/components/admin-entry";
 
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -201,6 +202,8 @@ export default function SiteLayout({
         </p>
         <p className="mt-2">© 2026 몇점이야?</p>
       </footer>
+      {/* 운영자 브라우저에만 렌더된다 — SSG HTML 에는 들어가지 않는다 */}
+      <AdminEntry />
     </>
   );
 }

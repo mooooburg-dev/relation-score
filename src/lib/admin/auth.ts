@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
+import { ADMIN_COOKIE } from "./cookies";
 
 /**
  * 어드민 인증.
@@ -10,8 +11,11 @@ import { createHmac, timingSafeEqual } from "crypto";
  * - 비교는 상수 시간(timingSafeEqual).
  */
 
-export const ADMIN_COOKIE = "rs_admin";
-export const ADMIN_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7일
+export {
+  ADMIN_COOKIE,
+  ADMIN_HINT_COOKIE,
+  ADMIN_COOKIE_MAX_AGE,
+} from "./cookies";
 
 /** ADMIN_PASSWORD 에서 결정론적 세션 토큰 파생. env 미설정 시 null */
 export function adminSessionToken(): string | null {
