@@ -190,7 +190,7 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
       </Card>
 
       {/* 유입이 실제로 떨어지는 페이지라 선물 게이트를 위쪽에 둔다 */}
-      <GiftCta type={t} />
+      <GiftCta type={t} entry="type" />
 
       <Card>
         <SectionTitle>

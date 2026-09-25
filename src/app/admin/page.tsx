@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { getDashboardStats, getRecentAnalyses } from "@/lib/admin/data";
+import {
+  getDashboardStats,
+  getGiftClickStats,
+  getRecentAnalyses,
+} from "@/lib/admin/data";
 import { verifyAdmin } from "@/lib/admin/auth";
 import { RELATIONS, ko, isMbti } from "@/lib/mbti";
 import {
@@ -29,9 +33,10 @@ export default async function AdminDashboard() {
   // 여기서 한 번 더 끊어줘야 데이터 계층이 throw 하지 않는다.
   if (!(await verifyAdmin())) return null;
 
-  const [stats, recent] = await Promise.all([
+  const [stats, recent, gift] = await Promise.all([
     getDashboardStats(),
     getRecentAnalyses(6),
+    getGiftClickStats(),
   ]);
 
   return (
@@ -56,6 +61,79 @@ export default async function AdminDashboard() {
 
       <Panel title="최근 14일 분석 추이" hint="KST · 막대 위 숫자는 건수">
         <ColumnChart data={stats.daily} />
+      </Panel>
+
+      <h2 className="mt-2 text-lg font-bold">선물 클릭</h2>
+      <p className="-mt-2 text-xs text-foreground/50">
+        쿠팡으로 넘어간 클릭. subId 는 채널 귀속 때문에 scoregift 하나라
+        파트너스 리포트로는 화면 구분이 안 돼서, 여기서만 갈라 볼 수 있어.
+      </p>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat label="누적 클릭" value={gift.total.toLocaleString()} />
+        <Stat label="오늘" value={gift.today.toLocaleString()} sub="KST 기준" />
+        <Stat label="최근 7일" value={gift.last7.toLocaleString()} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="유입 게이트" hint="어느 화면을 거쳐 눌렀나">
+          {gift.byEntry.length ? (
+            <BarList items={gift.byEntry} />
+          ) : (
+            <Empty>아직 클릭이 없어</Empty>
+          )}
+        </Panel>
+        <Panel title="클릭 위치" hint="선물 페이지의 어느 자리">
+          {gift.bySurface.length ? (
+            <BarList items={gift.bySurface} />
+          ) : (
+            <Empty>아직 클릭이 없어</Empty>
+          )}
+        </Panel>
+        <Panel title="많이 눌린 선물" hint="상위 10">
+          {gift.byGift.length ? (
+            <BarList items={gift.byGift} />
+          ) : (
+            <Empty>아직 클릭이 없어</Empty>
+          )}
+        </Panel>
+        <Panel title="대상 유형" hint="상위 10">
+          {gift.byMbti.length ? (
+            <BarList items={gift.byMbti} />
+          ) : (
+            <Empty>아직 클릭이 없어</Empty>
+          )}
+        </Panel>
+      </div>
+
+      <Panel title="최근 선물 클릭" hint="최대 20건">
+        {gift.recent.length ? (
+          <ul className="flex flex-col divide-y divide-foreground/5">
+            {gift.recent.map((c) => (
+              <li key={c.id} className="flex items-center gap-3 py-2 text-sm">
+                <span className="w-32 shrink-0 text-xs text-foreground/50">
+                  {formatDateTime(c.created_at)}
+                </span>
+                <span className="w-14 shrink-0 font-bold">{c.mbti ?? "-"}</span>
+                <span className="min-w-0 flex-1 truncate">{c.gift_id}</span>
+                <span className="shrink-0 text-xs text-foreground/50">
+                  {c.relation ?? (c.surface === "list" ? "본문" : "관계")}
+                </span>
+                <span className="w-20 shrink-0 text-right text-xs font-semibold text-foreground/60">
+                  {c.entry === "type"
+                    ? "유형"
+                    : c.entry === "pair"
+                      ? "궁합"
+                      : c.entry === "result"
+                        ? "결과"
+                        : "직접"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty>아직 클릭이 없어</Empty>
+        )}
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">

@@ -29,23 +29,40 @@ export function AffiliateNotice() {
   );
 }
 
-/** 쿠팡 검색 결과로 보내는 제휴 버튼. 링크가 아직 없으면 렌더하지 않는다. */
+/**
+ * 쿠팡으로 보내는 제휴 버튼. 링크가 아직 없으면 렌더하지 않는다.
+ *
+ * href 는 파트너스 링크가 아니라 /go/gift/[id] 다. subId 를 'scoregift' 단일로
+ * 고정했기 때문에(채널 귀속) 어느 화면에서 눌렀는지는 우리가 직접 남긴다.
+ * 그 라우트가 한 줄 기록하고 파트너스 링크로 302 한다.
+ */
 export function GiftButton({
   item,
+  type,
+  surface,
+  relation,
   compact = false,
 }: {
   item: GiftPick;
+  type: Mbti;
+  surface: "list" | "relation";
+  relation?: string;
   compact?: boolean;
 }) {
   if (!item.url) return null;
 
-  // rel="sponsored nofollow" — 제휴 링크임을 검색엔진에 명시
+  const q = new URLSearchParams({ t: type, s: surface });
+  if (relation) q.set("r", relation);
+  const href = `/go/gift/${item.id}?${q.toString()}`;
+
+  // rel="sponsored nofollow" — 수익 링크임을 검색엔진에 명시
   const rel = "sponsored nofollow noopener noreferrer";
 
   if (compact) {
     return (
       <a
-        href={item.url}
+        href={href}
+        data-gift-go
         target="_blank"
         rel={rel}
         className="shrink-0 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-bold text-primary"
@@ -57,7 +74,8 @@ export function GiftButton({
 
   return (
     <a
-      href={item.url}
+      href={href}
+      data-gift-go
       target="_blank"
       rel={rel}
       className="mt-2.5 block rounded-xl bg-primary py-2.5 text-center text-sm font-bold text-white transition active:scale-[0.98]"
@@ -79,19 +97,22 @@ export function GiftButton({
 export function GiftCta({
   type,
   relation,
+  entry,
   className = "",
 }: {
   type: Mbti;
   relation?: string;
+  entry: "type" | "pair" | "result";
   className?: string;
 }) {
   if (!GIFT_LINKS_READY) return null;
   const set = relation ? giftsFor(type, relation) : allGiftsFor(type);
   if (!set) return null;
 
-  const href = relation
-    ? `${giftPath(type)}#${giftRelationAnchor(relation)}`
-    : giftPath(type);
+  // entry: 어느 게이트로 /gift 에 들어왔는지. 선물 페이지의 클라이언트가
+  // 이 값을 읽어 /go 링크에 붙인다 (페이지는 정적이라 서버에서 못 읽는다).
+  const base = `${giftPath(type)}?from=${entry}`;
+  const href = relation ? `${base}#${giftRelationAnchor(relation)}` : base;
 
   return (
     <Link
@@ -180,7 +201,7 @@ export function GoldboxCta({ className = "" }: { className?: string }) {
  */
 export function GiftCtaPair({ a, b }: { a: Mbti; b: Mbti }) {
   if (!GIFT_LINKS_READY) return null;
-  if (a === b) return <GiftCta type={a} />;
+  if (a === b) return <GiftCta type={a} entry="pair" />;
 
   const sets = [a, b]
     .map((t) => ({ type: t, set: allGiftsFor(t) }))
@@ -207,7 +228,7 @@ export function GiftCtaPair({ a, b }: { a: Mbti; b: Mbti }) {
         {sets.map(({ type, set }) => (
           <li key={type}>
             <Link
-              href={giftPath(type)}
+              href={`${giftPath(type)}?from=pair`}
               className="group flex items-center gap-3 rounded-2xl bg-white/70 px-3 py-2.5 transition hover:bg-white"
             >
               <span className="flex w-16 shrink-0 flex-col leading-tight">
@@ -229,3 +250,4 @@ export function GiftCtaPair({ a, b }: { a: Mbti; b: Mbti }) {
     </section>
   );
 }
+

@@ -14,6 +14,7 @@ import {
 } from "@/components/seo";
 import { FamilyCard } from "@/components/family";
 import { AffiliateNotice, GiftButton, GoldboxCta } from "@/components/gift";
+import GiftEntryTagger from "@/components/gift-entry-tagger";
 import {
   MBTI_LIST,
   RELATIONS,
@@ -147,6 +148,7 @@ export default async function GiftTypePage({
   return (
     <main className="mx-auto flex w-full max-w-[480px] flex-col gap-5 px-5 pb-12 pt-8">
       <JsonLd data={jsonLd} />
+      <GiftEntryTagger />
       <Breadcrumb
         items={[
           { name: "MBTI 선물 추천", path: "/gift" },
@@ -203,7 +205,7 @@ export default async function GiftTypePage({
               <p className="mt-1 text-sm leading-relaxed text-foreground/70">
                 {p.why}
               </p>
-              <GiftButton item={p} />
+              <GiftButton item={p} type={t} surface="list" />
             </li>
           ))}
         </ul>
@@ -243,7 +245,13 @@ export default async function GiftTypePage({
                       {p.priceLabel}
                     </span>
                   </a>
-                  <GiftButton item={p} compact />
+                  <GiftButton
+                    item={p}
+                    type={t}
+                    surface="relation"
+                    relation={r.value}
+                    compact
+                  />
                 </li>
               ))}
             </ul>

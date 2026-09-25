@@ -304,3 +304,84 @@ export async function getRecentAnalyses(limit = 5): Promise<AnalysisRow[]> {
   if (error) throw new Error(`최근 분석 조회 실패: ${error.message}`);
   return (data ?? []) as AnalysisRow[];
 }
+
+// ---- 선물 클릭 ----
+
+export interface GiftClickRow {
+  id: number;
+  created_at: string;
+  gift_id: string;
+  mbti: string | null;
+  surface: string;
+  relation: string | null;
+  entry: string | null;
+}
+
+export interface GiftClickStats {
+  total: number;
+  today: number;
+  last7: number;
+  /** 어느 게이트를 타고 들어와 눌렀나 (직접 진입 포함) */
+  byEntry: { key: string; label: string; count: number }[];
+  /** 선물 페이지의 어느 자리에서 눌렀나 */
+  bySurface: { key: string; label: string; count: number }[];
+  byGift: { key: string; label: string; count: number }[];
+  byMbti: { key: string; label: string; count: number }[];
+  recent: GiftClickRow[];
+}
+
+const ENTRY_LABEL: Record<string, string> = {
+  type: "유형 페이지",
+  pair: "궁합 페이지",
+  result: "결과 화면",
+};
+const SURFACE_LABEL: Record<string, string> = {
+  list: "본문 목록",
+  relation: "관계 섹션",
+};
+
+function tally<T>(
+  rows: T[],
+  key: keyof T,
+  label: (v: string | null) => string,
+): { key: string; label: string; count: number }[] {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    const k = label((r[key] as string | null) ?? null);
+    m.set(k, (m.get(k) ?? 0) + 1);
+  }
+  return [...m.entries()]
+    .map(([label, count]) => ({ key: label, label, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * 선물 클릭 집계.
+ *
+ * 쿠팡 subId 는 채널 귀속 때문에 'scoregift' 단일이라 파트너스 리포트로는
+ * 화면 구분이 안 된다. /go/gift/[id] 가 남긴 이 기록이 유일한 구분 근거다.
+ */
+export async function getGiftClickStats(): Promise<GiftClickStats> {
+  await requireAdmin();
+
+  const { data } = await supabaseAdmin
+    .from("gift_clicks")
+    .select("id, created_at, gift_id, mbti, surface, relation, entry")
+    .order("created_at", { ascending: false })
+    .limit(2000);
+
+  const rows = (data ?? []) as GiftClickRow[];
+  const today = kstDate(new Date());
+  const weekAgo = kstDateBefore(6);
+
+  return {
+    total: rows.length,
+    today: rows.filter((r) => kstDate(r.created_at) === today).length,
+    last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    byEntry: tally(rows, "entry", (v) => (v ? (ENTRY_LABEL[v] ?? v) : "직접 진입")),
+    bySurface: tally(rows, "surface", (v) => (v ? (SURFACE_LABEL[v] ?? v) : "-")),
+    byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
+    byMbti: tally(rows, "mbti", (v) => v ?? "-").slice(0, 10),
+    recent: rows.slice(0, 20),
+  };
+}
