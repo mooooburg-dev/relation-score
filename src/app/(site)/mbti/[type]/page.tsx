@@ -14,6 +14,7 @@ import {
   faqLd,
 } from "@/components/seo";
 import { FamilyCard } from "@/components/family";
+import { GiftCta } from "@/components/gift";
 import {
   MBTI_LIST,
   RELATIONS,
@@ -187,6 +188,9 @@ export default async function TypePage({ params }: { params: Promise<Params> }) 
         </SectionTitle>
         <RankList me={t} items={best} />
       </Card>
+
+      {/* 유입이 실제로 떨어지는 페이지라 선물 게이트를 위쪽에 둔다 */}
+      <GiftCta type={t} />
 
       <Card>
         <SectionTitle>

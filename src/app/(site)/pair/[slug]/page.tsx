@@ -15,6 +15,7 @@ import {
   faqLd,
 } from "@/components/seo";
 import { FamilyCard } from "@/components/family";
+import { GiftCtaPair } from "@/components/gift";
 import {
   RELATIONS,
   SITE_URL,
@@ -188,6 +189,9 @@ export default async function PairPage({ params }: { params: Promise<Params> }) 
           })}
         </div>
       </Card>
+
+      {/* 궁합을 확인한 직후가 선물로 넘어가기 제일 좋은 지점 */}
+      <GiftCtaPair a={a} b={b} />
 
       <AnalyzeCta a={a} b={b} />
 

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "lastmod": "node scripts/update-lastmod.mjs",
-    "gift-links": "node scripts/gen-coupang-links.mjs"
+    "gift-links": "node scripts/gen-coupang-links.mjs",
+    "gift-preview": "node scripts/gen-gift-preview.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
