@@ -635,7 +635,7 @@ function StepResult({
 
       {GIFT_LINKS_READY && otherMbti && (
         <Link
-          href={`/gift/${otherMbti.toLowerCase()}#rel-${encodeURIComponent(relation)}`}
+          href={`/gift/${otherMbti.toLowerCase()}?from=result#rel-${encodeURIComponent(relation)}`}
           className="group block rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/15 to-primary/5 p-5 shadow-sm transition active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
