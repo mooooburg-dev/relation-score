@@ -6,6 +6,7 @@ import {
 } from "@/lib/supabase";
 import { verifyAdmin } from "@/lib/admin/auth";
 import { RELATIONS } from "@/lib/mbti";
+import { botLabel, isBotUa } from "@/lib/bot";
 
 /**
  * 어드민 데이터 접근 계층. service_role 키를 쓰므로 서버에서만 import 할 것.
@@ -241,31 +242,41 @@ export interface ListResult {
 
 export const PER_PAGE = 20;
 
+type ScoreQuery = ReturnType<
+  ReturnType<typeof supabaseAdmin.from>["select"]
+>;
+
+/** 개별 목록과 사용자 묶음 보기가 같은 필터를 쓰도록 한 군데에 모아 둔다 */
+function applyListFilters<Q extends ScoreQuery>(query: Q, params: ListParams): Q {
+  let q = query.eq("is_admin", false) as Q; // 운영자 본인 활동 제외
+
+  if (params.relation) q = q.eq("relation", params.relation) as Q;
+  if (params.mbti) {
+    const m = params.mbti.toUpperCase();
+    // 내 쪽/상대 쪽 어디에 있든 잡는다
+    q = q.or(`inputs->>myMbti.eq.${m},inputs->>otherMbti.eq.${m}`) as Q;
+  }
+  if (typeof params.minScore === "number")
+    q = q.gte("score", params.minScore) as Q;
+  if (typeof params.maxScore === "number")
+    q = q.lte("score", params.maxScore) as Q;
+  if (params.days) {
+    const since = new Date(Date.now() - params.days * 86_400_000).toISOString();
+    q = q.gte("created_at", since) as Q;
+  }
+  return q;
+}
+
 export async function listAnalyses(params: ListParams): Promise<ListResult> {
   await requireAdmin();
 
   const perPage = params.perPage ?? PER_PAGE;
   const page = Math.max(1, params.page ?? 1);
 
-  let query = supabaseAdmin
-    .from(SCORE_TABLE)
-    .select("*", { count: "exact" })
-    .eq("is_admin", false); // 운영자 본인 활동 제외
-
-  if (params.relation) query = query.eq("relation", params.relation);
-  if (params.mbti) {
-    const m = params.mbti.toUpperCase();
-    // 내 쪽/상대 쪽 어디에 있든 잡는다
-    query = query.or(`inputs->>myMbti.eq.${m},inputs->>otherMbti.eq.${m}`);
-  }
-  if (typeof params.minScore === "number")
-    query = query.gte("score", params.minScore);
-  if (typeof params.maxScore === "number")
-    query = query.lte("score", params.maxScore);
-  if (params.days) {
-    const since = new Date(Date.now() - params.days * 86_400_000).toISOString();
-    query = query.gte("created_at", since);
-  }
+  let query = applyListFilters(
+    supabaseAdmin.from(SCORE_TABLE).select("*", { count: "exact" }),
+    params,
+  );
 
   switch (params.sort) {
     case "score_desc":
@@ -294,6 +305,187 @@ export async function listAnalyses(params: ListParams): Promise<ListResult> {
     page,
     perPage,
     totalPages: Math.max(1, Math.ceil(total / perPage)),
+  };
+}
+
+/**
+ * 사용자 묶음 보기.
+ *
+ * 로그인이 없는 서비스라 "같은 사용자"를 정확히 알 방법은 없다. IP + User-Agent 조합을
+ * 대리 키로 쓴다 — 같은 IP라도 기기가 다르면 나누고, 기기가 같으면 한 사람으로 본다.
+ * 통신사 NAT 뒤에서는 남남이 묶일 수 있고 IP가 바뀌면 같은 사람이 갈라지므로,
+ * 정확한 신원이 아니라 "한 번에 여러 번 돌려본 흐름"을 보는 용도다.
+ *
+ * GROUP BY 를 supabase-js 로 직접 못 쓰므로 필터에 걸린 행을 받아 메모리에서 묶는다.
+ * 규모가 커지면 RPC(SQL 함수)로 옮겨야 한다 — 그때까지는 이게 단순하고 충분하다.
+ */
+
+export type GroupSortKey = "count" | "recent";
+
+export interface AnalysisGroup {
+  key: string;
+  ip: string | null;
+  userAgent: string | null;
+  isBot: boolean;
+  count: number;
+  firstAt: string;
+  lastAt: string;
+  avgScore: number;
+  views: number;
+  /** 많이 쓴 순 관계 유형 */
+  relations: { relation: string; count: number }[];
+  /** 자주 등장한 MBTI (나·상대 합산) */
+  mbtis: string[];
+  rows: AnalysisRow[];
+}
+
+export interface GroupListResult {
+  groups: AnalysisGroup[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+  /** 묶는 데 사용한 행 수 */
+  scanned: number;
+  /** 상한에 걸려 일부만 묶었는지 */
+  truncated: boolean;
+}
+
+export const GROUPS_PER_PAGE = 10;
+const GROUP_SCAN_LIMIT = 5_000;
+
+/** User-Agent → 사람이 읽는 기기 이름 */
+export function deviceLabel(ua: string | null): string {
+  if (!ua) return "기기 미상";
+  if (isBotUa(ua)) return botLabel(ua);
+
+  const os = /iPhone/i.test(ua)
+    ? "iPhone"
+    : /iPad/i.test(ua)
+      ? "iPad"
+      : /Android/i.test(ua)
+        ? "Android"
+        : /Macintosh|Mac OS X/i.test(ua)
+          ? "Mac"
+          : /Windows/i.test(ua)
+            ? "Windows"
+            : /Linux/i.test(ua)
+              ? "Linux"
+              : "기타";
+
+  // 국내 유입은 인앱 브라우저 비중이 커서 먼저 가려낸다
+  const browser = /KAKAOTALK/i.test(ua)
+    ? "카카오톡"
+    : /NAVER\(inapp/i.test(ua)
+      ? "네이버앱"
+      : /Instagram/i.test(ua)
+        ? "인스타그램"
+        : /FBAN|FBAV/i.test(ua)
+          ? "페이스북"
+          : /DaumApps/i.test(ua)
+            ? "다음앱"
+            : /SamsungBrowser/i.test(ua)
+              ? "삼성인터넷"
+              : /Whale/i.test(ua)
+                ? "웨일"
+                : /Edg\//i.test(ua)
+                  ? "Edge"
+                  : /FxiOS|Firefox/i.test(ua)
+                    ? "Firefox"
+                    : /CriOS|Chrome/i.test(ua)
+                      ? "Chrome"
+                      : /Safari/i.test(ua)
+                        ? "Safari"
+                        : "기타";
+
+  return `${os} · ${browser}`;
+}
+
+export async function listAnalysisGroups(
+  params: ListParams & { groupSort?: GroupSortKey },
+): Promise<GroupListResult> {
+  await requireAdmin();
+
+  const perPage = params.perPage ?? GROUPS_PER_PAGE;
+  const page = Math.max(1, params.page ?? 1);
+
+  const { data, error } = await applyListFilters(
+    supabaseAdmin.from(SCORE_TABLE).select("*"),
+    params,
+  )
+    .order("created_at", { ascending: false })
+    .limit(GROUP_SCAN_LIMIT);
+
+  if (error) throw new Error(`사용자 묶음 조회 실패: ${error.message}`);
+  const rows = (data ?? []) as AnalysisRow[];
+
+  const byKey = new Map<string, AnalysisRow[]>();
+  for (const row of rows) {
+    // IP·UA 가 없는 행끼리 한 덩어리가 되지 않도록 행 id 를 섞어 각자 떨어뜨린다
+    const key =
+      row.ip || row.user_agent
+        ? `${row.ip ?? "-"}\u0000${row.user_agent ?? "-"}`
+        : `unknown\u0000${row.id}`;
+    const list = byKey.get(key);
+    if (list) list.push(row);
+    else byKey.set(key, [row]);
+  }
+
+  const groups: AnalysisGroup[] = [...byKey.entries()].map(([key, list]) => {
+    // rows 는 created_at 내림차순으로 들어온다
+    const scores = list
+      .map((r) => r.score)
+      .filter((v): v is number => typeof v === "number");
+
+    const relCount = new Map<string, number>();
+    const mbtiCount = new Map<string, number>();
+    for (const r of list) {
+      const rel = r.relation || "(없음)";
+      relCount.set(rel, (relCount.get(rel) ?? 0) + 1);
+      for (const m of [r.inputs?.myMbti, r.inputs?.otherMbti]) {
+        const up = m?.toUpperCase();
+        if (up) mbtiCount.set(up, (mbtiCount.get(up) ?? 0) + 1);
+      }
+    }
+
+    return {
+      key,
+      ip: list[0].ip,
+      userAgent: list[0].user_agent,
+      isBot: isBotUa(list[0].user_agent),
+      count: list.length,
+      firstAt: list[list.length - 1].created_at,
+      lastAt: list[0].created_at,
+      avgScore: scores.length
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : 0,
+      views: list.reduce((sum, r) => sum + (r.view_count ?? 0), 0),
+      relations: [...relCount.entries()]
+        .map(([relation, count]) => ({ relation, count }))
+        .sort((a, b) => b.count - a.count || a.relation.localeCompare(b.relation)),
+      mbtis: [...mbtiCount.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 4)
+        .map(([m]) => m),
+      rows: list,
+    };
+  });
+
+  groups.sort((a, b) =>
+    params.groupSort === "recent"
+      ? b.lastAt.localeCompare(a.lastAt)
+      : b.count - a.count || b.lastAt.localeCompare(a.lastAt),
+  );
+
+  const from = (page - 1) * perPage;
+  return {
+    groups: groups.slice(from, from + perPage),
+    total: groups.length,
+    page,
+    perPage,
+    totalPages: Math.max(1, Math.ceil(groups.length / perPage)),
+    scanned: rows.length,
+    truncated: rows.length >= GROUP_SCAN_LIMIT,
   };
 }
 
