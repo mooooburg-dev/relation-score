@@ -82,6 +82,8 @@ export interface DashboardStats {
   topPairs: { pair: string; count: number; avgScore: number }[];
   models: { model: string; count: number }[];
   truncated: boolean;
+  /** 통계에서 빠진 봇·크롤러 기록 수 (API 차단 이전에 쌓인 것) */
+  botExcluded: number;
 }
 
 const DAILY_DAYS = 14;
@@ -98,10 +100,18 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       count: "exact",
     })
     .eq("is_admin", false) // 운영자 본인 활동 제외
+    .eq("is_bot", false) // 봇·크롤러 제외
     .order("created_at", { ascending: false })
     .limit(STAT_LIMIT);
 
   if (error) throw new Error(`분석 통계 조회 실패: ${error.message}`);
+
+  // 얼마나 빠졌는지는 보여준다 — 소리 없이 줄어든 숫자만큼 혼란스러운 것도 없다
+  const { count: botCount } = await supabaseAdmin
+    .from(SCORE_TABLE)
+    .select("id", { count: "exact", head: true })
+    .eq("is_admin", false)
+    .eq("is_bot", true);
   const rows = (data ?? []) as StatRow[];
   // total은 count(전체) 기준. rows는 STAT_LIMIT에서 잘릴 수 있다
   const total = count ?? rows.length;
@@ -216,12 +226,15 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       (m) => m.model,
     ),
     truncated: rows.length >= STAT_LIMIT,
+    botExcluded: botCount ?? 0,
   };
 }
 
 export type SortKey = "recent" | "score_desc" | "score_asc" | "views";
 
 export interface ListParams {
+  /** 봇·크롤러 기록까지 포함할지 (기본: 제외) */
+  includeBots?: boolean;
   relation?: string;
   mbti?: string;
   minScore?: number;
@@ -249,6 +262,8 @@ type ScoreQuery = ReturnType<
 /** 개별 목록과 사용자 묶음 보기가 같은 필터를 쓰도록 한 군데에 모아 둔다 */
 function applyListFilters<Q extends ScoreQuery>(query: Q, params: ListParams): Q {
   let q = query.eq("is_admin", false) as Q; // 운영자 본인 활동 제외
+  // 봇은 기본으로 뺀다. 과거에 쌓인 크롤러 기록을 확인하고 싶을 때만 켠다
+  if (!params.includeBots) q = q.eq("is_bot", false) as Q;
 
   if (params.relation) q = q.eq("relation", params.relation) as Q;
   if (params.mbti) {
@@ -496,6 +511,7 @@ export async function getRecentAnalyses(limit = 5): Promise<AnalysisRow[]> {
     .from(SCORE_TABLE)
     .select("*")
     .eq("is_admin", false) // 운영자 본인 활동 제외
+    .eq("is_bot", false) // 봇·크롤러 제외
     .order("created_at", { ascending: false })
     .limit(limit);
   if (error) throw new Error(`최근 분석 조회 실패: ${error.message}`);

@@ -84,8 +84,10 @@ export default async function AnalysesPage({
   const groupSort = (GROUP_SORTS.find((s) => s.value === one(sp.gsort))?.value ??
     "count") as GroupSortKey;
   const page = Math.max(1, Number(one(sp.page)) || 1);
+  const includeBots = one(sp.bots) === "1";
 
   const filters = {
+    includeBots,
     relation: relation || undefined,
     mbti: mbti || undefined,
     minScore: min,
@@ -113,6 +115,7 @@ export default async function AnalysesPage({
     if (min !== undefined) q.set("min", String(min));
     if (max !== undefined) q.set("max", String(max));
     if (days) q.set("days", String(days));
+    if (includeBots) q.set("bots", "1");
     if (!g && sort !== "recent") q.set("sort", sort);
     if (g && groupSort !== "count") q.set("gsort", groupSort);
     if (p > 1) q.set("page", String(p));
@@ -230,6 +233,20 @@ export default async function AnalysesPage({
           </select>
         )}
 
+        <label
+          className="flex cursor-pointer items-center gap-1.5 text-xs text-foreground/50"
+          title="API에서 차단하기 전에 쌓인 크롤러 기록까지 본다"
+        >
+          <input
+            type="checkbox"
+            name="bots"
+            value="1"
+            defaultChecked={includeBots}
+            className="accent-primary"
+          />
+          봇 포함
+        </label>
+
         <button
           type="submit"
           className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white hover:opacity-90"
@@ -260,6 +277,9 @@ export default async function AnalysesPage({
             와이파이·통신사를 쓰는 남남이 묶이거나, IP가 바뀌면 같은 사람이 갈라질 수
             있으니 신원이 아니라 &ldquo;한 번에 여러 번 돌려본 흐름&rdquo;으로 읽어야 한다.
             {groupList!.truncated && " 최근 5,000건까지만 묶는다."}
+            {includeBots
+              ? " 지금은 봇·크롤러 기록도 함께 보고 있다."
+              : " 봇·크롤러는 빼고 본다."}
           </p>
           {groupList!.groups.length === 0 ? (
             <Empty>조건에 맞는 분석이 없어</Empty>
