@@ -6,6 +6,7 @@ import {
   type AnalysisResult,
 } from "@/lib/supabase";
 import { isOperatorRequest } from "@/lib/admin/operator";
+import { isBotUa } from "@/lib/bot";
 
 // OpenAI 호환 엔드포인트. OPENAI_BASE_URL을 바꾸면 Vercel AI Gateway 등으로 교체 가능
 const openai = new OpenAI({
@@ -91,6 +92,18 @@ const RESULT_SCHEMA = {
 } as const;
 
 export async function POST(request: Request) {
+  const userAgent = request.headers.get("user-agent");
+
+  // 봇·크롤러는 본문을 읽기도 전에 끊는다. 구글 크롤러(GoogleOther 등)가 이 엔드포인트를
+  // 실제로 호출해 누적 분석의 절반을 만들고 OpenAI 비용까지 태웠다. 크롤링할 가치가
+  // 없는 POST 이므로 막아도 색인에 손해가 없다 (OG·결과 조회 경로는 건드리지 않는다).
+  if (isBotUa(userAgent)) {
+    return Response.json(
+      { error: "이 엔드포인트는 크롤러에게 제공하지 않아" },
+      { status: 403 },
+    );
+  }
+
   let body: AnalyzeBody;
   try {
     body = await request.json();
@@ -219,7 +232,7 @@ ${describePerson("상대방", other)}
         .from(SCORE_TABLE)
         .insert({
           ip,
-          user_agent: request.headers.get("user-agent"),
+          user_agent: userAgent,
           relation: body.relation,
           score: result.score,
           inputs,

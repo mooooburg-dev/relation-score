@@ -219,6 +219,18 @@ export default async function AdminDashboard() {
 
       <p className="text-center text-[11px] text-foreground/35">
         모델: {stats.models.map((m) => `${m.model} ${m.count}건`).join(" · ") || "–"}
+        {stats.botExcluded > 0 && (
+          <>
+            {" · "}
+            <Link
+              href="/admin/analyses?view=user&bots=1"
+              className="hover:text-primary"
+              title="API에서 차단하기 전에 쌓인 크롤러 기록"
+            >
+              봇 {stats.botExcluded.toLocaleString()}건 제외됨 →
+            </Link>
+          </>
+        )}
         {stats.truncated && " · 통계는 최근 20,000건 기준"}
       </p>
     </div>

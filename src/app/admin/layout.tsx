@@ -5,6 +5,7 @@ import { logoutAction } from "@/lib/admin/actions";
 import LoginForm from "./login-form";
 import AdminNav from "./nav";
 import AdminFloating from "./floating";
+import RefreshControls from "./refresh-controls";
 
 export const metadata: Metadata = {
   title: "어드민",
@@ -22,16 +23,20 @@ export default async function AdminLayout({
     return <LoginForm configured={isAdminConfigured()} />;
   }
 
+  // layout 도 매 요청 다시 실행되므로(cookies 의존) router.refresh() 때마다 새 시각이 온다
+  const generatedAt = new Date().toISOString();
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b border-black/5 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-5 py-3">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
           <Link href="/admin" className="text-sm font-bold">
             몇점이야?{" "}
             <span className="font-normal text-foreground/40">admin</span>
           </Link>
           <AdminNav />
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex flex-wrap items-center gap-3">
+            <RefreshControls generatedAt={generatedAt} />
             <Link
               href="/"
               className="text-xs text-foreground/50 hover:text-primary"
