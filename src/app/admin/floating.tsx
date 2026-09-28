@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ArrowUpIcon, RefreshIcon } from "./icons";
+import { useAdminRefresh } from "./use-admin-refresh";
 
 /**
  * 어드민 우측 하단 플로팅 버튼 두 개.
@@ -16,8 +17,8 @@ import { useRouter } from "next/navigation";
 const TOP_THRESHOLD = 300;
 
 export default function AdminFloating() {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  // 헤더 컨트롤과 같은 훅을 쓴다 — 여기서 누른 갱신도 포커스 스로틀에 반영된다
+  const { refresh, isPending } = useAdminRefresh();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function AdminFloating() {
     <>
       <button
         type="button"
-        onClick={() => startTransition(() => router.refresh())}
+        onClick={refresh}
         disabled={isPending}
         aria-label="대시보드 새로고침"
         title="지금 새로고침"
@@ -42,20 +43,7 @@ export default function AdminFloating() {
           scrolled ? "bottom-[5.25rem]" : "bottom-6"
         }`}
       >
-        <svg
-          className={`h-5 w-5 ${isPending ? "animate-spin" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2.5}
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 0 0 5.6 6.6M4 15a8 8 0 0 0 14.4 2.4"
-          />
-        </svg>
+        <RefreshIcon className={`h-5 w-5 ${isPending ? "animate-spin" : ""}`} />
       </button>
 
       {scrolled && (
@@ -66,16 +54,7 @@ export default function AdminFloating() {
           title="맨 위로"
           className={`${base} bottom-6 bg-foreground text-background hover:opacity-90`}
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            viewBox="0 0 24 24"
-            aria-hidden
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-          </svg>
+          <ArrowUpIcon className="h-5 w-5" />
         </button>
       )}
     </>
