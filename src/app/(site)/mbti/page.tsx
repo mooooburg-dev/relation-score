@@ -30,6 +30,7 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/mbti`,
     type: "website",
   },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
 export default function MbtiIndexPage() {

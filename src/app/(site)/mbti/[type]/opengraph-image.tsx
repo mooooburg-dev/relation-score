@@ -6,6 +6,10 @@ export const alt = "MBTI 궁합 순위";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+/**
+ * 네이버 이미지 캐러셀 등은 1200×630 을 가운데 정사각형(약 630px 폭)으로 잘라 쓴다.
+ * 모든 텍스트를 가운데 560px 안에 두어 잘려도 읽히게 한다.
+ */
 export function generateStaticParams() {
   return MBTI_LIST.map((t) => ({ type: t.toLowerCase() }));
 }
@@ -21,8 +25,7 @@ export default async function OgImage({
   const top = t ? getRanking(t).slice(0, 3) : [];
   const title = t ?? "MBTI";
   const nickname = t ? `${ko(t)} · ${content?.nickname ?? ""}` : "궁합 순위";
-  const topText = top.map((r, i) => `${i + 1}위 ${r.other} ${r.score}점`).join("   ");
-  const text = `${title} 궁합 순위 ${nickname} ${topText} 몇점이야? · score.drawyourmind.com`;
+  const text = `${title} 궁합 순위 ${nickname} ${top.map((r) => `${r.other} ${r.score}점`).join("")} 몇점이야? · score.drawyourmind.com`;
   const fontData = await loadKoreanFont(text);
 
   return new ImageResponse(
@@ -48,8 +51,21 @@ export default async function OgImage({
         <div style={{ display: "flex", fontSize: 56, fontWeight: 800, marginTop: 8 }}>
           궁합 순위
         </div>
-        <div style={{ display: "flex", fontSize: 34, marginTop: 36, opacity: 0.95 }}>
-          {topText}
+        <div style={{ display: "flex", gap: 14, marginTop: 32 }}>
+          {top.map((r) => (
+            <div
+              key={r.other}
+              style={{
+                display: "flex",
+                fontSize: 28,
+                padding: "8px 18px",
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.18)",
+              }}
+            >
+              {`${r.other} ${r.score}점`}
+            </div>
+          ))}
         </div>
         <div style={{ display: "flex", fontSize: 28, marginTop: 36, opacity: 0.7 }}>
           몇점이야? · score.drawyourmind.com
