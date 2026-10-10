@@ -1,6 +1,6 @@
 # 몇점이야? (relation-score)
 
-MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트. https://score.drawyourmind.com
+MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠 궁합. https://score.drawyourmind.com
 
 ## 개발
 
@@ -25,12 +25,18 @@ npm run lint
 | `/mbti` | MBTI 궁합표 인덱스 |
 | `/mbti/[type]` | 유형별 궁합 순위 (16장, 정적 생성) |
 | `/pair/[a-b]` | 조합별 궁합 상세 (136장, 정적 생성, 알파벳순 slug가 canonical) |
+| `/tti` | 띠 궁합표 인덱스 (출생연도 계산기, 12×12 점수표, 계산법) |
+| `/tti/[animal]` | 띠별 궁합 순위·성격·출생연도 (12장, 정적 생성) |
+| `/tti/[a]/[b]` | 띠 조합 상세 (78장, 정적 생성, 지지 순서 slug가 canonical — 역순은 308) |
+| `/go/gift/[id]` | 선물 클릭 기록 후 쿠팡 파트너스 링크로 302 (띠 선물은 `f=tti&z=<띠>`) |
+| `/go/out/[site]` | 패밀리 사이트(골드박스투데이 등) 클릭 기록 후 UTM 붙여 302 |
 | `/api/analyze` | OpenAI(gpt-5.4-mini) 분석 + Supabase 저장. `OPENAI_BASE_URL`로 게이트웨이 교체 가능 |
 | `/api/og` | 결과 공유용 동적 OG 이미지 |
 | `/admin` | 운영 대시보드 (통계) — `ADMIN_PASSWORD` 로그인, noindex |
 | `/admin/analyses` | 분석 목록 (필터·정렬·페이지네이션, 행 펼치면 AI 응답 원문) |
-| `/sitemap.xml` | 154개 URL (URL별 `lastmod` 포함) |
-| `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/pair/*`를 앞쪽에 배치 |
+| `/admin/tti` | 띠 궁합 운영 (골드박스 전환·띠 선물 클릭·딥링크 준비·파트너스 API 장부·콘텐츠 점검) |
+| `/sitemap.xml` | 262개 URL (URL별 `lastmod` 포함) |
+| `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/tti/*/*`, `/pair/*`를 앞쪽에 배치 |
 
 레거시 공유 링크 `/?id=uuid`는 `src/proxy.ts`에서 `/r/uuid`로 301 리다이렉트된다.
 
@@ -50,6 +56,32 @@ node scripts/generate-content.mjs all --provider openai   # OpenAI(gpt-5.4)로 �
 - 이미 생성된 항목은 건너뛰므로 중단돼도 이어서 실행 가능
 - 데이터를 재생성했으면 `src/lib/mbti.ts`의 `CONTENT_UPDATED`를 갱신한다
 
+### 띠 궁합
+
+점수는 AI가 아니라 `src/lib/tti-rules.ts`의 전통 규칙으로 계산한다.
+
+```
+기본점: 육합 92 / 삼합 88 / 같은 띠 76 / 그 외 70
+오행  : 상생 +4, 같은 오행 +2, 상극 -4
+감점  : 충 -18, 원진 -14, 형 -8, 해 -6, 자형(같은 띠 진·오·유·해) -12   → 40~96으로 자름
+```
+
+같은 조합이 재생성마다 다른 점수로 나오지 않고, 페이지에 "왜 이 점수인지"를 근거로 보여줄 수 있다.
+본문(`src/data/tti-types.json`, `tti-pairs.json`)은 이 점수와 근거를 프롬프트에 넣어 생성한다.
+관계별 점수는 AI가 쓰되 종합 ±8 안으로 스크립트가 강제한다.
+
+```bash
+npm run tti-content -- types            # 12띠 소개
+npm run tti-content -- pairs            # 78개 조합
+npm run tti-content -- all --force --provider openai
+```
+
+- 규칙 파일을 TS 그대로 import 하므로 `node --experimental-strip-types`로 돈다(npm 스크립트에 들어 있음)
+- **가중치를 바꾸면 점수가 바뀐다.** 이미 생성된 본문은 옛 점수 기준이라 `pairs --force`로 재생성할 것.
+  `/admin/tti`의 "점수 어긋난 본문"이 재생성 대상을 보여준다
+- 재생성했으면 `src/lib/tti-content.ts`의 `TTI_CONTENT_UPDATED`를 갱신한다
+- 두 생성 스크립트는 LLM 호출부를 `scripts/lib/llm.mjs`로 공유한다
+
 ## 갱신일(lastmod) 관리
 
 `sitemap.xml`의 `lastmod`와 `rss.xml`의 `pubDate`는 `src/data/lastmod.json`에서 읽는다.
@@ -64,7 +96,7 @@ npm run build && npm run lastmod   # 빌드 결과 본문을 해시해 실제로
 이전 기록과 비교한다. 본문이 같으면 날짜를 유지하므로 재빌드만으로는 값이 흔들리지 않는다.
 결과 JSON은 커밋해야 배포에 반영되며, 한 배포 뒤에 sitemap에 나타난다.
 
-- `<body>` 전체를 보므로 footer 같은 layout 공통 영역이 바뀌면 154개 URL이 함께 갱신된다
+- `<body>` 전체를 보므로 footer 같은 layout 공통 영역이 바뀌면 전 URL이 함께 갱신된다
 - `<script>`와 AdSense 마크업(`data-ad` 블록, `.adsbygoogle`)은 해시에서 제외한다.
   광고 env 유무로 마크업이 통째로 생겼다 사라져서, 빼지 않으면 광고 slot이 설정된 환경에서
   빌드했다는 이유만으로 152개 URL이 전부 "변경"으로 뒤집힌다
@@ -81,6 +113,9 @@ npm run build && npm run lastmod   # 빌드 결과 본문을 해시해 실제로
 - 분석 목록: 관계·MBTI·점수 구간·기간 필터, 정렬, 20건씩 페이지네이션.
   행을 펼치면 입력값 전체, 세부 점수 4종, AI 응답 원문, 모델·IP·UA, 공유 링크가 보인다
 - 분석 목록의 **사용자별 묶기**: 같은 사람이 연달아 돌린 흐름을 한 줄로 본다
+- 대시보드 **패밀리 사이트 전환**: `/go/out` 기록(`outbound_clicks`) — 목적지·출발 버티컬별
+- 띠 궁합(`/admin/tti`): 띠 페이지발 골드박스 전환, 띠 선물 클릭, 띠 선물 딥링크 준비 상태,
+  쿠팡 파트너스 API 공용 장부 잔여(읽기 전용), 콘텐츠 누락·점수 어긋남 점검
 
 ### 사용자별 묶기
 

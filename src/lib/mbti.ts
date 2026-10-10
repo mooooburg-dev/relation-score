@@ -1,8 +1,8 @@
 import typesJson from "@/data/types.json";
 import pairsJson from "@/data/pairs.json";
+import type { Faq } from "./site";
 
-export const SITE_URL = "https://score.drawyourmind.com";
-export const SITE_NAME = "몇점이야?";
+export { SITE_URL, SITE_NAME, type Faq } from "./site";
 
 /** 정적 콘텐츠(types.json / pairs.json) 갱신일. 데이터 재생성 시 함께 갱신한다. */
 export const CONTENT_UPDATED = new Date("2026-09-14T00:00:00Z");
@@ -47,11 +47,6 @@ export const RELATIONS = [
   { value: "썸", emoji: "🔥" },
 ] as const;
 export type Relation = (typeof RELATIONS)[number]["value"];
-
-export interface Faq {
-  q: string;
-  a: string;
-}
 
 export interface TypeContent {
   type: Mbti;

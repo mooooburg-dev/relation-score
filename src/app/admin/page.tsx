@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   getDashboardStats,
   getGiftClickStats,
+  getOutboundStats,
   getRecentAnalyses,
 } from "@/lib/admin/data";
 import { verifyAdmin } from "@/lib/admin/auth";
@@ -33,10 +34,11 @@ export default async function AdminDashboard() {
   // 여기서 한 번 더 끊어줘야 데이터 계층이 throw 하지 않는다.
   if (!(await verifyAdmin())) return null;
 
-  const [stats, recent, gift] = await Promise.all([
+  const [stats, recent, gift, outbound] = await Promise.all([
     getDashboardStats(),
     getRecentAnalyses(6),
     getGiftClickStats(),
+    getOutboundStats(),
   ]);
 
   return (
@@ -62,6 +64,50 @@ export default async function AdminDashboard() {
       <Panel title="최근 14일 분석 추이" hint="KST · 막대 위 숫자는 건수">
         <ColumnChart data={stats.daily} />
       </Panel>
+
+      <h2 className="mt-2 text-lg font-bold">패밀리 사이트 전환</h2>
+      <p className="-mt-2 text-xs text-foreground/50">
+        골드박스투데이·금리박스·월급박스로 나간 클릭 (/go/out 기록, 운영자·봇 제외).
+        버티컬별 상세는{" "}
+        <Link href="/admin/tti" className="underline hover:text-primary">
+          띠 궁합
+        </Link>{" "}
+        탭에서.
+      </p>
+      {outbound.error ? (
+        <p className="rounded-2xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-amber-200">
+          기록 테이블을 읽지 못했어. supabase/migrations/20261011-outbound-clicks.sql 적용 여부를
+          확인해. <span className="text-xs text-amber-900/60">({outbound.error})</span>
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <Stat label="누적 전환" value={outbound.total.toLocaleString()} />
+            <Stat label="오늘" value={outbound.today.toLocaleString()} sub="KST 기준" />
+            <Stat
+              label="최근 7일"
+              value={outbound.last7.toLocaleString()}
+              sub={delta(outbound.last7, outbound.prev7)}
+            />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Panel title="목적지">
+              {outbound.bySite.length ? (
+                <BarList items={outbound.bySite} />
+              ) : (
+                <Empty>아직 클릭이 없어</Empty>
+              )}
+            </Panel>
+            <Panel title="출발 버티컬" hint="어느 화면에서 넘어갔나">
+              {outbound.byVertical.length ? (
+                <BarList items={outbound.byVertical} />
+              ) : (
+                <Empty>아직 클릭이 없어</Empty>
+              )}
+            </Panel>
+          </div>
+        </>
+      )}
 
       <h2 className="mt-2 text-lg font-bold">선물 클릭</h2>
       <p className="-mt-2 text-xs text-foreground/50">
@@ -126,7 +172,9 @@ export default async function AdminDashboard() {
                       ? "궁합"
                       : c.entry === "result"
                         ? "결과"
-                        : "직접"}
+                        : c.entry === "tti"
+                          ? "띠"
+                          : "직접"}
                 </span>
               </li>
             ))}

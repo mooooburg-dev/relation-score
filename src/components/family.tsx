@@ -4,7 +4,16 @@ import {
   familyHref,
   pickFamily,
   type FamilyPick,
+  type FamilyVertical,
 } from "@/lib/family";
+
+/** 기존 campaign 값으로 버티컬을 추정한다 (호출부를 전부 고치지 않으려고) */
+function verticalOf(campaign: string): FamilyVertical {
+  if (campaign.startsWith("tti")) return "tti";
+  if (campaign.startsWith("gift")) return "gift";
+  if (campaign === "result" || campaign === "shared") return campaign;
+  return "mbti";
+}
 
 /**
  * 문맥형 카드: 화면당 한 장만 노출한다.
@@ -24,13 +33,14 @@ export function FamilyCard({
   campaign: string;
   className?: string;
 }) {
-  const pick: FamilyPick = pickFamily({ relation, age, seed });
-  const href = familyHref(pick.site, `family_${campaign}`, relation || seed);
+  const vertical = verticalOf(campaign);
+  const pick: FamilyPick = pickFamily({ relation, age, seed, vertical });
+  const href = familyHref(pick.site, `family_${campaign}`, relation || seed, vertical);
   return (
     <a
       href={href}
       target="_blank"
-      rel="noopener"
+      rel="nofollow noopener"
       className={`group flex items-center gap-3 rounded-3xl border-2 border-dashed border-primary/25 bg-primary/5 p-4 transition hover:border-primary/60 active:scale-[0.99] ${className}`}
     >
       <span className="text-3xl leading-none" aria-hidden>
@@ -61,9 +71,9 @@ export function FamilyLinks() {
         {FAMILY_SITES.map((s) => (
           <li key={s.id}>
             <a
-              href={familyHref(s, "family_footer")}
+              href={familyHref(s, "family_footer", undefined, "footer")}
               target="_blank"
-              rel="noopener"
+              rel="nofollow noopener"
               title={s.tagline}
               className="hover:text-primary"
             >

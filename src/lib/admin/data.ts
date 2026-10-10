@@ -547,6 +547,7 @@ const ENTRY_LABEL: Record<string, string> = {
   type: "유형 페이지",
   pair: "궁합 페이지",
   result: "결과 화면",
+  tti: "띠 궁합 페이지",
 };
 const SURFACE_LABEL: Record<string, string> = {
   list: "본문 목록",
@@ -599,4 +600,245 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
     byMbti: tally(rows, "mbti", (v) => v ?? "-").slice(0, 10),
     recent: rows.slice(0, 20),
   };
+}
+
+// ---- 패밀리 사이트 전환 (골드박스투데이 등) ----
+
+export interface OutboundRow {
+  id: number;
+  created_at: string;
+  site: string;
+  vertical: string | null;
+  campaign: string | null;
+  content: string | null;
+  source_path: string | null;
+}
+
+export interface OutboundStats {
+  /** outbound_clicks 테이블을 못 읽으면 이유. 정상이면 null */
+  error: string | null;
+  total: number;
+  today: number;
+  last7: number;
+  prev7: number;
+  daily: { date: string; count: number }[];
+  bySite: { key: string; label: string; count: number }[];
+  byVertical: { key: string; label: string; count: number }[];
+  byPage: { key: string; label: string; count: number }[];
+  /** utm_campaign = 클릭 자리 (family_tti-pair-cta 는 본문 중간, family_tti-pair 는 하단 카드) */
+  byCampaign: { key: string; label: string; count: number }[];
+  recent: OutboundRow[];
+}
+
+const SITE_LABEL: Record<string, string> = {
+  goldbox: "🎁 골드박스투데이",
+  ratebox: "🏦 금리박스",
+  paybox: "💸 월급박스",
+};
+const VERTICAL_LABEL: Record<string, string> = {
+  mbti: "MBTI 궁합 페이지",
+  tti: "띠 궁합 페이지",
+  gift: "선물 페이지",
+  result: "분석 결과",
+  shared: "공유 결과",
+  home: "홈",
+  footer: "푸터",
+};
+
+/**
+ * 패밀리 사이트로 나간 클릭 집계 (/go/out 기록).
+ * site/vertical 로 좁힐 수 있다 — 띠 궁합 어드민은 vertical=tti 만 본다.
+ *
+ * 마이그레이션(20261011-outbound-clicks.sql) 적용 전이면 테이블이 없어 에러가 난다.
+ * 어드민 전체가 깨지지 않도록 throw 하지 않고 error 로 돌려준다.
+ */
+export async function getOutboundStats(
+  filter: { site?: string; vertical?: string } = {},
+): Promise<OutboundStats> {
+  await requireAdmin();
+
+  let q = supabaseAdmin
+    .from("outbound_clicks")
+    .select("id, created_at, site, vertical, campaign, content, source_path")
+    .eq("is_admin", false)
+    .eq("is_bot", false);
+  if (filter.site) q = q.eq("site", filter.site);
+  if (filter.vertical) q = q.eq("vertical", filter.vertical);
+
+  const { data, error } = await q.order("created_at", { ascending: false }).limit(5000);
+
+  const daily = new Map<string, number>();
+  for (let i = DAILY_DAYS - 1; i >= 0; i--) daily.set(kstDateBefore(i), 0);
+
+  if (error) {
+    return {
+      error: error.message,
+      total: 0,
+      today: 0,
+      last7: 0,
+      prev7: 0,
+      daily: [...daily.entries()].map(([date, count]) => ({ date, count })),
+      bySite: [],
+      byVertical: [],
+      byPage: [],
+      byCampaign: [],
+      recent: [],
+    };
+  }
+
+  const rows = (data ?? []) as OutboundRow[];
+  const today = kstDate(new Date());
+  const d7 = kstDateBefore(6);
+  const d14 = kstDateBefore(13);
+  let todayCount = 0;
+  let last7 = 0;
+  let prev7 = 0;
+  for (const r of rows) {
+    const day = kstDate(r.created_at);
+    if (daily.has(day)) daily.set(day, (daily.get(day) ?? 0) + 1);
+    if (day === today) todayCount++;
+    if (day >= d7) last7++;
+    else if (day >= d14) prev7++;
+  }
+
+  return {
+    error: null,
+    total: rows.length,
+    today: todayCount,
+    last7,
+    prev7,
+    daily: [...daily.entries()].map(([date, count]) => ({ date, count })),
+    bySite: tally(rows, "site", (v) => (v ? (SITE_LABEL[v] ?? v) : "-")),
+    byVertical: tally(rows, "vertical", (v) => (v ? (VERTICAL_LABEL[v] ?? v) : "(구분 없음)")),
+    byPage: tally(rows, "source_path", (v) => v ?? "(알 수 없음)").slice(0, 10),
+    byCampaign: tally(rows, "campaign", (v) => v ?? "-").slice(0, 10),
+    recent: rows.slice(0, 20),
+  };
+}
+
+// ---- 띠 선물 클릭 ----
+
+export interface TtiGiftClickStats {
+  error: string | null;
+  total: number;
+  last7: number;
+  byTti: { key: string; label: string; count: number }[];
+  byGift: { key: string; label: string; count: number }[];
+}
+
+/**
+ * /tti/* 의 선물 버튼 클릭 (gift_clicks.entry = 'tti').
+ * tti 컬럼은 20261011-gift-clicks-tti.sql 로 추가된다. 적용 전이면 error 로 알린다.
+ */
+export async function getTtiGiftClickStats(
+  ttiLabel: (t: string) => string,
+): Promise<TtiGiftClickStats> {
+  await requireAdmin();
+
+  const { data, error } = await supabaseAdmin
+    .from("gift_clicks")
+    .select("created_at, gift_id, tti")
+    .eq("entry", "tti")
+    .eq("is_admin", false)
+    .eq("is_bot", false)
+    .order("created_at", { ascending: false })
+    .limit(2000);
+
+  if (error) {
+    return { error: error.message, total: 0, last7: 0, byTti: [], byGift: [] };
+  }
+  const rows = (data ?? []) as { created_at: string; gift_id: string; tti: string | null }[];
+  const weekAgo = kstDateBefore(6);
+  return {
+    error: null,
+    total: rows.length,
+    last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    byTti: tally(rows, "tti", (v) => (v ? ttiLabel(v) : "-")),
+    byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
+  };
+}
+
+// ---- 쿠팡 파트너스 API 공용 장부 ----
+
+export interface LedgerBucket {
+  key: string;
+  scope: string;
+  bucket: string;
+  windowSeconds: number;
+  used: number;
+  max: number;
+  note: string | null;
+}
+
+export interface LedgerStatus {
+  error: string | null;
+  buckets: LedgerBucket[];
+}
+
+/**
+ * 딥링크 배치(scripts/gen-coupang-links.mjs)가 거치는 계정 공용 장부를 읽는다.
+ *
+ * 파트너스 API 한도는 계정 단위라 골드박스·랭킹박스·프라이스갭과 함께 쓴다.
+ * 배치를 돌리기 전에 "지금 계정이 얼마나 달아올라 있는지" 어드민에서 보려는 것 —
+ * 스크립트의 reportHeadroom 과 같은 계산(닫힌 윈도는 0으로 본다)이다.
+ * 읽기 전용이다. 여기서는 절대 cp_try_consume_quota 를 부르지 않는다.
+ */
+export async function getCoupangLedger(): Promise<LedgerStatus> {
+  await requireAdmin();
+
+  const wanted = [
+    ["account", "all"],
+    ["account", "deeplink"],
+    ["score", "coupang-deeplink"],
+  ];
+
+  const [{ data: pol, error: pe }, { data: rows, error: qe }] = await Promise.all([
+    supabaseAdmin
+      .from("cp_api_policy")
+      .select("scope,bucket,window_seconds,max_count,note"),
+    supabaseAdmin
+      .from("cp_api_quota")
+      .select("bucket,window_start,count")
+      .gte("window_start", new Date(Date.now() - 86_400_000).toISOString()),
+  ]);
+
+  if (pe || qe || !pol || !rows) {
+    return { error: (pe ?? qe)?.message ?? "장부를 읽지 못했어", buckets: [] };
+  }
+
+  const now = Date.now();
+  const current = new Map<string, { window_start: string; count: number }>();
+  for (const r of rows as { bucket: string; window_start: string; count: number }[]) {
+    const w = Number(r.bucket.split(":").pop());
+    if (!Number.isFinite(w)) continue;
+    if (new Date(r.window_start).getTime() + w * 1000 <= now) continue; // 닫힌 윈도
+    const cur = current.get(r.bucket);
+    if (!cur || new Date(r.window_start) > new Date(cur.window_start)) current.set(r.bucket, r);
+  }
+
+  type PolicyRow = {
+    scope: string;
+    bucket: string;
+    window_seconds: number;
+    max_count: number;
+    note: string | null;
+  };
+  const buckets: LedgerBucket[] = [];
+  for (const [scope, bucket] of wanted) {
+    for (const rule of (pol as PolicyRow[])
+      .filter((p) => p.scope === scope && p.bucket === bucket)
+      .sort((a, b) => a.window_seconds - b.window_seconds)) {
+      const key = `${scope}:${bucket}:${rule.window_seconds}`;
+      buckets.push({
+        key,
+        scope,
+        bucket,
+        windowSeconds: rule.window_seconds,
+        used: current.get(key)?.count ?? 0,
+        max: rule.max_count,
+        note: rule.note,
+      });
+    }
+  }
+  return { error: null, buckets };
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FAMILY_SITES, familyHref } from "@/lib/family";
+import { FAMILY_SITES, familyHref, type FamilyVertical } from "@/lib/family";
 import {
   giftPath,
   giftRelationAnchor,
@@ -160,15 +160,29 @@ export function GiftCta({
  * 페이지 맨 아래 패밀리 카드보다 여기가 맞다. 사이트를 goldbox 로 고정한다
  * (관계별로 돌리는 pickFamily 와 달리, 이 맥락에선 특가 사이트가 항상 정답).
  */
-export function GoldboxCta({ className = "" }: { className?: string }) {
+export function GoldboxCta({
+  className = "",
+  campaign = "family_gift",
+  content = "gift_detail",
+  vertical = "gift",
+  title = "살 거 정했으면, 오늘 특가인지는 보고 사자 🎁",
+  description = "골드박스 오늘의 특가와 역대 최저가를 한눈에",
+}: {
+  className?: string;
+  campaign?: string;
+  content?: string;
+  vertical?: FamilyVertical;
+  title?: string;
+  description?: string;
+}) {
   const site = FAMILY_SITES.find((s) => s.id === "goldbox");
   if (!site) return null;
 
   return (
     <a
-      href={familyHref(site, "family_gift", "gift_detail")}
+      href={familyHref(site, campaign, content, vertical)}
       target="_blank"
-      rel="noopener"
+      rel="nofollow noopener"
       className={`group flex items-center gap-3 rounded-3xl border-2 border-dashed border-primary/25 bg-primary/5 p-4 transition hover:border-primary/60 active:scale-[0.99] ${className}`}
     >
       <span className="text-3xl leading-none" aria-hidden>
@@ -178,12 +192,8 @@ export function GoldboxCta({ className = "" }: { className?: string }) {
         <span className="text-[10px] font-semibold text-foreground/40">
           만든 사람의 다른 서비스 · {site.name}
         </span>
-        <span className="text-sm font-extrabold leading-snug">
-          살 거 정했으면, 오늘 특가인지는 보고 사자 🎁
-        </span>
-        <span className="text-xs leading-relaxed text-foreground/60">
-          골드박스 오늘의 특가와 역대 최저가를 한눈에
-        </span>
+        <span className="text-sm font-extrabold leading-snug">{title}</span>
+        <span className="text-xs leading-relaxed text-foreground/60">{description}</span>
         <span className="mt-0.5 text-xs font-bold text-primary group-hover:underline">
           오늘의 특가 보기 →
         </span>
