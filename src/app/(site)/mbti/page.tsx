@@ -137,6 +137,13 @@ export default function MbtiIndexPage() {
           </p>
         </div>
       </Card>
+
+      <Link
+        href="/tti"
+        className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
+      >
+        🐭 띠 궁합표도 보기 →
+      </Link>
     </main>
   );
 }

@@ -692,6 +692,198 @@
         "food"
       ],
       "band": "low"
+    },
+    "tti-gold-rat": {
+      "label": "쥐띠 순금 기념품",
+      "query": "쥐띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-ox": {
+      "label": "소띠 순금 기념품",
+      "query": "소띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-tiger": {
+      "label": "호랑이띠 순금 기념품",
+      "query": "호랑이띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-rabbit": {
+      "label": "토끼띠 순금 기념품",
+      "query": "토끼띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-dragon": {
+      "label": "용띠 순금 기념품",
+      "query": "용띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-snake": {
+      "label": "뱀띠 순금 기념품",
+      "query": "뱀띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-horse": {
+      "label": "말띠 순금 기념품",
+      "query": "말띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-goat": {
+      "label": "양띠 순금 기념품",
+      "query": "양띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-monkey": {
+      "label": "원숭이띠 순금 기념품",
+      "query": "원숭이띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-rooster": {
+      "label": "닭띠 순금 기념품",
+      "query": "닭띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-dog": {
+      "label": "개띠 순금 기념품",
+      "query": "개띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-gold-pig": {
+      "label": "돼지띠 순금 기념품",
+      "query": "돼지띠 순금",
+      "tags": [
+        "wearable"
+      ],
+      "band": "high"
+    },
+    "tti-goods-rat": {
+      "label": "쥐 캐릭터 키링·소품",
+      "query": "쥐 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-ox": {
+      "label": "소 캐릭터 키링·소품",
+      "query": "소 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-tiger": {
+      "label": "호랑이 캐릭터 키링·소품",
+      "query": "호랑이 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-rabbit": {
+      "label": "토끼 캐릭터 키링·소품",
+      "query": "토끼 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-dragon": {
+      "label": "용 캐릭터 키링·소품",
+      "query": "용 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-snake": {
+      "label": "뱀 캐릭터 키링·소품",
+      "query": "뱀 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-horse": {
+      "label": "말 캐릭터 키링·소품",
+      "query": "말 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-goat": {
+      "label": "양 캐릭터 키링·소품",
+      "query": "양 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-monkey": {
+      "label": "원숭이 캐릭터 키링·소품",
+      "query": "원숭이 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-rooster": {
+      "label": "닭 캐릭터 키링·소품",
+      "query": "닭 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-dog": {
+      "label": "개 캐릭터 키링·소품",
+      "query": "개 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "tti-goods-pig": {
+      "label": "돼지 캐릭터 키링·소품",
+      "query": "돼지 인형 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
     }
   },
   "types": {

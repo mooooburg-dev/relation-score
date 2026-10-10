@@ -2,6 +2,7 @@ import { after, type NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import linksJson from "@/data/gift-links.json";
 import { MBTI_LIST } from "@/lib/mbti";
+import { isTti } from "@/lib/tti";
 import { isOperatorRequest } from "@/lib/admin/operator";
 import { isBotUa } from "@/lib/bot";
 
@@ -24,7 +25,7 @@ const links = linksJson as Record<string, string>;
 
 /** 자유 입력값을 그대로 넣지 않는다 — 길이·화이트리스트로 자른다 */
 const SURFACES = new Set(["list", "relation"]);
-const ENTRIES = new Set(["type", "pair", "result"]);
+const ENTRIES = new Set(["type", "pair", "result", "tti"]);
 const RELATIONS = new Set([
   "연인", "썸", "친구", "직장동료", "가족", "소개팅",
 ]);
@@ -47,6 +48,7 @@ export async function GET(
   const surface = q.get("s");
   const relation = q.get("r");
   const entry = q.get("f");
+  const tti = q.get("z");
   const isAdmin = isOperatorRequest(req);
   const userAgent = req.headers.get("user-agent");
   // UA 가 아예 없는 요청도 봇으로 본다 — 사람 브라우저는 반드시 보낸다
@@ -64,6 +66,9 @@ export async function GET(
         is_bot: isBot,
         // 어떤 봇이 오는지 보려고 남긴다. IP 는 저장하지 않는다.
         user_agent: userAgent ? userAgent.slice(0, 200) : null,
+        // 띠 선물일 때만 키를 넣는다. 20261011-gift-clicks-tti.sql 적용 전에 tti 키가
+        // 들어가면 insert 전체가 실패해 MBTI 선물 클릭 기록까지 잃는다.
+        ...(tti && isTti(tti) ? { tti } : {}),
       });
     } catch {
       // 기록 실패가 이동을 막지 않는다

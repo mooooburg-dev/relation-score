@@ -131,6 +131,23 @@ export function giftsFor(other: Mbti, relation: Relation | string): GiftSet | nu
   };
 }
 
+/**
+ * 카탈로그 항목 하나를 이유와 함께 꺼낸다. MBTI 타입 매핑을 거치지 않는 버티컬(띠 궁합)용.
+ * 딥링크가 아직 없으면 url 이 null 이라 UI 가 버튼을 숨긴다.
+ */
+export function catalogPick(id: string, why: string): GiftPick | null {
+  const item = catalog[id];
+  if (!item) return null;
+  return {
+    id,
+    label: item.label,
+    why,
+    band: item.band,
+    priceLabel: PRICE_LABEL[item.band],
+    url: linkFor(id),
+  };
+}
+
 /** 딥링크 생성 스크립트가 읽는 전체 목록 */
 export function catalogEntries(): { id: string; query: string }[] {
   return Object.entries(catalog).map(([id, v]) => ({ id, query: v.query }));

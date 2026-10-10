@@ -124,7 +124,16 @@ export function ScoreBar({
 }
 
 /** 큰 점수 표시 */
-export function BigScore({ score, caption }: { score: number; caption?: string }) {
+export function BigScore({
+  score,
+  caption,
+  emoji,
+}: {
+  score: number;
+  caption?: string;
+  /** 버티컬마다 점수 구간이 달라 이모지도 따로 받는다 (기본: MBTI 기준) */
+  emoji?: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="flex items-end gap-1">
@@ -134,7 +143,7 @@ export function BigScore({ score, caption }: { score: number; caption?: string }
         <span className="mb-1 text-sm font-semibold text-foreground/50">/ 100</span>
       </div>
       <span className="text-sm font-bold">
-        {scoreEmoji(score)} {caption ?? scoreLabel(score)}
+        {emoji ?? scoreEmoji(score)} {caption ?? scoreLabel(score)}
       </span>
     </div>
   );

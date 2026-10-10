@@ -9,13 +9,15 @@ import {
   pairPath,
   typePath,
 } from "@/lib/mbti";
+import { TTI_INDEX_PATH, ttiInfo, ttiName, ttiPairPath, ttiScoreLabel, ttiTypePath } from "@/lib/tti";
+import { getAllTtiPairs, getAllTtiTypes } from "@/lib/tti-content";
 
 // 정적 데이터로만 만드는 피드라 빌드 시 한 번 생성한다.
 // (Route Handler 는 Next 16 기준 기본 비캐시)
 export const dynamic = "force-static";
 
 const FEED_DESCRIPTION =
-  "MBTI 16가지 유형별 궁합 순위와 136가지 조합의 관계별 궁합 점수. 연인·친구·직장동료·가족·소개팅·썸 기준으로 정리한 궁합 콘텐츠.";
+  "MBTI 16가지 유형별 궁합 순위와 136가지 조합, 12띠 78가지 조합의 관계별 궁합 점수. 연인·부부·친구·직장동료·가족 기준으로 정리한 궁합 콘텐츠.";
 
 interface FeedItem {
   title: string;
@@ -40,8 +42,23 @@ function summarize(s: string, max = 300): string {
 /**
  * 수집 우선순위 순서. 네이버 RSS 수집기는 앞쪽 항목부터 읽어가므로
  * 아직 색인이 얇은 조합(pair) 페이지를 먼저 싣고 유형·인덱스를 뒤에 둔다.
+ * 새로 연 띠 궁합 조합이 색인이 가장 얇아 맨 앞에 둔다.
  */
 function feedItems(): FeedItem[] {
+  const ttiPairs: FeedItem[] = getAllTtiPairs()
+    .sort((x, y) => y.score - x.score)
+    .map((p) => ({
+      title: `${ttiName(p.a)} ${ttiName(p.b)} 궁합 ${p.score}점 - ${ttiScoreLabel(p.score)}`,
+      path: ttiPairPath(p.a, p.b),
+      description: summarize(`${p.headline} ${p.summary}`),
+    }));
+
+  const ttiTypes: FeedItem[] = getAllTtiTypes().map((t) => ({
+    title: `${ttiName(t.id)} 궁합 순위 - ${ttiName(t.id)}와 잘 맞는 띠, ${ttiName(t.id)} 성격 (${ttiInfo(t.id).branch}·${ttiInfo(t.id).hanja})`,
+    path: ttiTypePath(t.id),
+    description: summarize(`${t.tagline}. ${t.intro}`),
+  }));
+
   const pairs: FeedItem[] = getAllPairs()
     .sort((x, y) => y.overall - x.overall)
     .map((p) => ({
@@ -58,6 +75,12 @@ function feedItems(): FeedItem[] {
 
   const index: FeedItem[] = [
     {
+      title: "띠 궁합표 - 12띠 궁합 점수, 잘 맞는 띠와 안 맞는 띠",
+      path: TTI_INDEX_PATH,
+      description:
+        "쥐띠부터 돼지띠까지 12띠 78가지 조합의 궁합 점수. 육합·삼합·충·원진으로 계산한 근거와 관계별 궁합.",
+    },
+    {
       title: "MBTI 궁합표 - 16가지 유형별 궁합 순위",
       path: "/mbti",
       description: summarize(FEED_DESCRIPTION),
@@ -70,7 +93,7 @@ function feedItems(): FeedItem[] {
     },
   ];
 
-  return [...pairs, ...types, ...index];
+  return [...ttiPairs, ...pairs, ...ttiTypes, ...types, ...index];
 }
 
 export async function GET() {
@@ -100,7 +123,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${esc(SITE_NAME)} - MBTI 궁합 점수</title>
+    <title>${esc(SITE_NAME)} - MBTI·띠 궁합 점수</title>
     <link>${SITE_URL}</link>
     <description>${esc(FEED_DESCRIPTION)}</description>
     <language>ko</language>

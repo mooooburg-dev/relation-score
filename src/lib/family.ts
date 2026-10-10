@@ -145,6 +145,29 @@ const GENERIC: Copy[] = [
   },
 ];
 
+// 띠 궁합 페이지용 카피. 버티컬 목적이 골드박스투데이 전환이라 전부 goldbox 로 보낸다.
+// (나이대가 넓은 검색 유입이라 "선물"보다 "특가·최저가"가 공통 분모다)
+const TTI: Copy[] = [
+  {
+    siteId: "goldbox",
+    title: "띠 궁합 봤으면, 선물은 특가로 🎁",
+    description: "골드박스 오늘의 특가와 역대 최저가 한눈에",
+    cta: "오늘의 특가 보기",
+  },
+  {
+    siteId: "goldbox",
+    title: "궁합 좋은 날엔 장바구니도 가볍게 🛒",
+    description: "오늘 골드박스에 뜬 역대 최저가만 골라 보기",
+    cta: "역대 최저가 보기",
+  },
+  {
+    siteId: "goldbox",
+    title: "부모님 선물, 오늘 특가인지 보고 사자 🎁",
+    description: "골드박스 오늘의 특가를 가격 이력과 함께",
+    cta: "오늘의 특가 보기",
+  },
+];
+
 function isRelation(v: string): v is Relation {
   return v in BY_RELATION;
 }
@@ -168,16 +191,20 @@ function hash(s: string): number {
  * 문맥에 맞는 패밀리 사이트 하나를 고른다.
  * - relation 이 있으면 관계별 카피(나이 조건 충족 시 나이별 카피)
  * - 없으면 seed 해시로 GENERIC 중 하나
+ * - 띠 궁합(vertical=tti)은 관계와 무관하게 골드박스 카피 중 하나
  */
 export function pickFamily({
   relation,
   age,
   seed = "",
+  vertical,
 }: {
   relation?: string;
   age?: string | number;
   seed?: string;
+  vertical?: FamilyVertical;
 }): FamilyPick {
+  if (vertical === "tti") return toPick(TTI[hash(seed) % TTI.length]);
   if (relation && isRelation(relation)) {
     const n = typeof age === "number" ? age : parseInt(String(age ?? ""), 10);
     const byAge = BY_AGE[relation];
@@ -189,8 +216,8 @@ export function pickFamily({
   return toPick(GENERIC[hash(seed) % GENERIC.length]);
 }
 
-/** UTM 파라미터를 붙인 외부 링크 */
-export function familyHref(
+/** UTM 파라미터를 붙인 외부 링크 (/go/out 이 최종 목적지로 쓴다) */
+export function familyUtmUrl(
   site: FamilySite,
   campaign: string,
   content?: string,
@@ -201,4 +228,24 @@ export function familyHref(
   u.searchParams.set("utm_campaign", campaign);
   if (content) u.searchParams.set("utm_content", content);
   return u.toString();
+}
+
+/** /go/out 기록 구분용 버티컬 */
+export type FamilyVertical = "mbti" | "tti" | "gift" | "result" | "shared" | "home" | "footer";
+
+/**
+ * 패밀리 사이트 링크. 외부 URL 로 바로 보내지 않고 /go/out/[site] 를 거친다
+ * — 거기서 클릭을 기록(outbound_clicks)하고 UTM 을 붙여 302 한다.
+ * robots.txt 가 /go 를 막고 있어 크롤러가 따라가지 않는다.
+ */
+export function familyHref(
+  site: FamilySite,
+  campaign: string,
+  content?: string,
+  vertical?: FamilyVertical,
+): string {
+  const q = new URLSearchParams({ c: campaign });
+  if (content) q.set("ct", content);
+  if (vertical) q.set("v", vertical);
+  return `/go/out/${site.id}?${q.toString()}`;
 }
