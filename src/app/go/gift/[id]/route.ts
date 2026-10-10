@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import linksJson from "@/data/gift-links.json";
 import { MBTI_LIST } from "@/lib/mbti";
 import { isOperatorRequest } from "@/lib/admin/operator";
+import { isBotUa } from "@/lib/bot";
 
 /**
  * 선물 링크 클릭 기록 후 쿠팡 파트너스 링크로 302.
@@ -13,6 +14,10 @@ import { isOperatorRequest } from "@/lib/admin/operator";
  *
  * 기록은 after() 로 응답 뒤에 돌린다 — 사용자를 DB 쓰기만큼 기다리게 하지 않는다.
  * 기록에 실패해도 이동은 반드시 된다(매출 경로가 로깅보다 우선).
+ *
+ * 봇은 쿠팡으로 넘기지 않는다. robots.txt 가 /go 를 막고 있어도 무시하고 훑는 봇이
+ * 있었고(2026-10-10 하루 697건), 그대로 넘기면 파트너스에 무효 클릭이 쌓인다.
+ * 봇 클릭도 is_bot 으로 남겨 차단이 동작하는지 어드민에서 확인할 수 있게 한다.
  */
 
 const links = linksJson as Record<string, string>;
@@ -43,6 +48,9 @@ export async function GET(
   const relation = q.get("r");
   const entry = q.get("f");
   const isAdmin = isOperatorRequest(req);
+  const userAgent = req.headers.get("user-agent");
+  // UA 가 아예 없는 요청도 봇으로 본다 — 사람 브라우저는 반드시 보낸다
+  const isBot = !userAgent || isBotUa(userAgent);
 
   after(async () => {
     try {
@@ -53,11 +61,18 @@ export async function GET(
         relation: relation && RELATIONS.has(relation) ? relation : null,
         entry: entry && ENTRIES.has(entry) ? entry : null,
         is_admin: isAdmin,
+        is_bot: isBot,
+        // 어떤 봇이 오는지 보려고 남긴다. IP 는 저장하지 않는다.
+        user_agent: userAgent ? userAgent.slice(0, 200) : null,
       });
     } catch {
       // 기록 실패가 이동을 막지 않는다
     }
   });
+
+  if (isBot) {
+    return Response.redirect(new URL("/gift", req.url), 302);
+  }
 
   return Response.redirect(target, 302);
 }

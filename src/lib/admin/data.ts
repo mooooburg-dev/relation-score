@@ -581,6 +581,7 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
     .from("gift_clicks")
     .select("id, created_at, gift_id, mbti, surface, relation, entry")
     .eq("is_admin", false) // 운영자 본인 클릭 제외
+    .eq("is_bot", false) // 봇 클릭 제외
     .order("created_at", { ascending: false })
     .limit(2000);
 
