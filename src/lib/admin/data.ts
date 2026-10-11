@@ -642,6 +642,8 @@ const VERTICAL_LABEL: Record<string, string> = {
   tti: "띠 궁합 페이지",
   fortune: "신년운세 페이지",
   zodiac: "별자리 궁합 페이지",
+  name: "이름 궁합",
+  birthday: "생일 궁합",
   gift: "선물 페이지",
   result: "분석 결과",
   shared: "공유 결과",
@@ -892,5 +894,58 @@ export async function getZodiacGiftClickStats(
     last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
     bySign: tally(rows, "zodiac", (v) => (v ? signLabel(v) : "-")),
     byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
+  };
+}
+
+// ---- 입력형 도구 (이름·생일 궁합) 공유 결과 조회 ----
+
+export interface ToolViewStats {
+  error: string | null;
+  total: number;
+  last7: number;
+  byTool: { key: string; label: string; count: number }[];
+  daily: { date: string; count: number }[];
+}
+
+const TOOL_LABEL: Record<string, string> = { name: "💘 이름 궁합", birthday: "🎂 생일 궁합" };
+
+/**
+ * 공유 링크가 열린 횟수 (tool_views). 계산 자체는 브라우저에서 끝나 서버 기록이 없어서,
+ * 공유 결과 조회가 이 도구들의 바이럴 지표다. 테이블은 20261011-tool-views.sql.
+ */
+export async function getToolViewStats(): Promise<ToolViewStats> {
+  await requireAdmin();
+  const daily = new Map<string, number>();
+  for (let i = DAILY_DAYS - 1; i >= 0; i--) daily.set(kstDateBefore(i), 0);
+
+  const { data, error } = await supabaseAdmin
+    .from("tool_views")
+    .select("created_at, tool")
+    .eq("is_admin", false)
+    .eq("is_bot", false)
+    .order("created_at", { ascending: false })
+    .limit(5000);
+
+  if (error) {
+    return {
+      error: error.message,
+      total: 0,
+      last7: 0,
+      byTool: [],
+      daily: [...daily.entries()].map(([date, count]) => ({ date, count })),
+    };
+  }
+  const rows = (data ?? []) as { created_at: string; tool: string }[];
+  const weekAgo = kstDateBefore(6);
+  for (const r of rows) {
+    const d = kstDate(r.created_at);
+    if (daily.has(d)) daily.set(d, (daily.get(d) ?? 0) + 1);
+  }
+  return {
+    error: null,
+    total: rows.length,
+    last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    byTool: tally(rows, "tool", (v) => (v ? (TOOL_LABEL[v] ?? v) : "-")),
+    daily: [...daily.entries()].map(([date, count]) => ({ date, count })),
   };
 }

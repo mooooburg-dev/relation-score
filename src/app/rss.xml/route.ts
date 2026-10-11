@@ -115,6 +115,16 @@ function feedItems(): FeedItem[] {
 
   const index: FeedItem[] = [
     {
+      title: "이름 궁합 테스트 - 획수로 보는 이름 궁합 점수 계산기",
+      path: "/name",
+      description: "두 사람 이름을 번갈아 쓰고 획수를 더해 이름 궁합 퍼센트를 계산. 두 방향 점수와 계산 과정까지.",
+    },
+    {
+      title: "생일 궁합 - 생년월일로 보는 띠 궁합 + 별자리 궁합 점수",
+      path: "/birthday",
+      description: "생년월일 두 개로 띠 궁합과 별자리 궁합을 함께 계산해 종합 점수로 보여주는 생일 궁합.",
+    },
+    {
       title: "별자리 궁합표 - 12별자리 궁합 점수, 잘 맞는 별자리와 안 맞는 별자리",
       path: ZODIAC_INDEX_PATH,
       description:

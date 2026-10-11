@@ -138,6 +138,14 @@ export default function SiteLayout({
             <Link href={fortuneIndexPath(LATEST_FORTUNE_YEAR)} className="hover:text-primary">
               {LATEST_FORTUNE_YEAR} 띠별 운세
             </Link>
+            {" · "}
+            <Link href="/name" className="hover:text-primary">
+              이름 궁합
+            </Link>
+            {" · "}
+            <Link href="/birthday" className="hover:text-primary">
+              생일 궁합
+            </Link>
           </p>
           <ul className="flex flex-wrap justify-center gap-x-2 gap-y-1">
             {TTI_IDS.map((t) => (
@@ -169,7 +177,7 @@ export default function SiteLayout({
         <p>
           <strong>몇점이야?</strong>는 두 사람의 MBTI·나이·혈액형으로 연인,
           친구, 썸, 소개팅 등 관계별 궁합 점수를 AI가 분석해주는 무료
-          테스트입니다. 12띠·12별자리 궁합 점수와 띠별 신년운세도 함께 볼 수 있습니다.
+          테스트입니다. 12띠·12별자리 궁합 점수, 이름·생일 궁합, 띠별 신년운세도 함께 볼 수 있습니다.
         </p>
         <p className="mt-2">© 2026 몇점이야?</p>
       </footer>

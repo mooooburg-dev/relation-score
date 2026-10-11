@@ -8,6 +8,7 @@ const MENU = [
   { href: "/admin/analyses", label: "분석 목록", exact: false },
   { href: "/admin/tti", label: "띠·운세", exact: false },
   { href: "/admin/zodiac", label: "별자리", exact: false },
+  { href: "/admin/tools", label: "이름·생일", exact: false },
 ];
 
 export default function AdminNav() {
