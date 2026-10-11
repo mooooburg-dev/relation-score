@@ -83,6 +83,24 @@ export default function Page() {
       {/* 검색 유입/크롤링용 콘텐츠 링크 (앱 아래) */}
       <section className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-8">
         <ArticleAd />
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            href="/name"
+            className="rounded-3xl bg-white p-4 text-center shadow-sm transition hover:text-primary"
+          >
+            <span className="block text-2xl">💘</span>
+            <span className="text-sm font-extrabold">이름 궁합</span>
+            <span className="block text-[11px] text-foreground/50">획수로 보는 퍼센트</span>
+          </Link>
+          <Link
+            href="/birthday"
+            className="rounded-3xl bg-white p-4 text-center shadow-sm transition hover:text-primary"
+          >
+            <span className="block text-2xl">🎂</span>
+            <span className="text-sm font-extrabold">생일 궁합</span>
+            <span className="block text-[11px] text-foreground/50">띠 + 별자리 한 번에</span>
+          </Link>
+        </div>
         <div className="rounded-3xl bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-extrabold">MBTI별 궁합 순위</h2>

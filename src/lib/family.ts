@@ -204,7 +204,13 @@ export function pickFamily({
   seed?: string;
   vertical?: FamilyVertical;
 }): FamilyPick {
-  if (vertical === "tti" || vertical === "fortune" || vertical === "zodiac")
+  if (
+    vertical === "tti" ||
+    vertical === "fortune" ||
+    vertical === "zodiac" ||
+    vertical === "name" ||
+    vertical === "birthday"
+  )
     return toPick(TTI[hash(seed) % TTI.length]);
   if (relation && isRelation(relation)) {
     const n = typeof age === "number" ? age : parseInt(String(age ?? ""), 10);
@@ -237,6 +243,8 @@ export type FamilyVertical =
   | "tti"
   | "fortune"
   | "zodiac"
+  | "name"
+  | "birthday"
   | "gift"
   | "result"
   | "shared"

@@ -35,6 +35,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    // 입력형 도구 — 공유 결과(/name/r, /birthday/r)는 noindex 라 넣지 않는다
+    {
+      url: `${SITE_URL}/name`,
+      lastModified: lastmodFor("/name"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/birthday`,
+      lastModified: lastmodFor("/birthday"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
     {
       url: `${SITE_URL}/gift`,
       lastModified: lastmodFor("/gift"),

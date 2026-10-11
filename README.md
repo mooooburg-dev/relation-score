@@ -1,6 +1,6 @@
 # 몇점이야? (relation-score)
 
-MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠·12별자리 궁합, 띠별 신년운세. https://score.drawyourmind.com
+MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠·12별자리 궁합, 이름·생일 궁합, 띠별 신년운세. https://score.drawyourmind.com
 
 ## 개발
 
@@ -28,6 +28,10 @@ npm run lint
 | `/tti` | 띠 궁합표 인덱스 (출생연도 계산기, 12×12 점수표, 계산법) |
 | `/tti/[animal]` | 띠별 궁합 순위·성격·출생연도 (12장, 정적 생성) |
 | `/tti/[a]/[b]` | 띠 조합 상세 (78장, 정적 생성, 지지 순서 slug가 canonical — 역순은 308) |
+| `/name` | 이름 궁합(획수 궁합) 계산기 — 계산은 브라우저에서, 이름은 서버로 보내지 않음 |
+| `/name/r/[code]` | 이름 궁합 공유 결과 (noindex, 동적 OG, 조회는 `tool_views`) |
+| `/birthday` | 생일 궁합 계산기 — 띠 궁합(연도) + 별자리 궁합(월일) 평균 |
+| `/birthday/r/[code]` | 생일 궁합 공유 결과 (noindex, 동적 OG — 생년월일은 그리지 않음) |
 | `/zodiac` | 별자리 궁합표 인덱스 (생일 계산기, 12×12 점수표, 원소별 별자리, 계산법) |
 | `/zodiac/[sign]` | 별자리별 궁합 순위·성격 (12장) |
 | `/zodiac/[a]/[b]` | 별자리 조합 상세 (78장, 황도 순서 slug가 canonical — 역순은 308) |
@@ -41,6 +45,7 @@ npm run lint
 | `/admin` | 운영 대시보드 (통계) — `ADMIN_PASSWORD` 로그인, noindex |
 | `/admin/analyses` | 분석 목록 (필터·정렬·페이지네이션, 행 펼치면 AI 응답 원문) |
 | `/admin/tti` | 띠 궁합·신년운세 운영 (골드박스 전환·띠 선물 클릭·딥링크 준비·파트너스 API 장부·콘텐츠 점검) |
+| `/admin/tools` | 이름·생일 궁합 운영 (공유 결과 조회수·골드박스 전환) |
 | `/admin/zodiac` | 별자리 궁합 운영 (골드박스 전환·별자리 선물 클릭·딥링크 준비·콘텐츠 점검) |
 | `/sitemap.xml` | 262개 URL (URL별 `lastmod` 포함) |
 | `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/tti/*/*`, `/pair/*`를 앞쪽에 배치 |
@@ -100,6 +105,17 @@ npm run tti-content -- all --force --provider openai
 
 본문은 `src/data/zodiac-types.json`, `zodiac-pairs.json`(관계: 연인·썸·부부·친구·직장동료, 종합 ±8).
 생일 → 별자리 경계일은 해마다 하루 정도 달라질 수 있어 계산기에 안내 문구를 둔다.
+
+### 이름·생일 궁합
+
+입력형 도구라 본문 데이터가 없다. 계산은 순수 함수(`src/lib/name-match.ts`, `birthday-match.ts`)로
+브라우저에서 끝나고, 입력한 이름·생년월일은 서버로 보내지 않는다.
+
+- 이름 궁합: 두 이름을 번갈아 쓰고 자모 획수 → 이웃 합의 일의 자리를 두 자리가 남을 때까지. 순서가 바뀌면
+  결과도 바뀌어 "내가 → 상대", "상대 → 내가" 를 따로 보여준다. 획수표는 가장 흔한 값을 썼다
+- 생일 궁합: 새 규칙 없이 `scoreTti`(연도) + `scoreZodiac`(월일) 평균. 결과 카드가 띠·별자리 상세로 이어진다
+- 공유 링크는 입력값을 base64url 로 감싼 `/name/r/[code]`, `/birthday/r/[code]` (암호화 아님 — GA 경로에
+  이름·생일이 그대로 찍히지 않게 하려는 것). noindex 이고, 열릴 때 `tool_views` 에 도구 이름만 남긴다
 
 ### 띠별 신년운세
 

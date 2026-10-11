@@ -12,11 +12,15 @@
  * 이 목록을 고치면 supabase/migrations 의 소급 분류 정규식(POSIX 문법, \b 대신 \y)도
  * 같이 봐야 한다.
  *
+ * kakaotalk-scrap 은 카톡 링크 미리보기 수집기다. 이름·생일 궁합 공유 결과(/name/r, /birthday/r)는
+ * 카톡으로 퍼지는데, 미리보기를 만들 때마다 한 번씩 열어서 조회수(tool_views)에 섞인다.
+ * (사람의 카톡 인앱 브라우저는 UA 에 KAKAOTALK 이 들어가므로 구분된다)
+ *
  * 주의: Daum 은 크롤러(Daumoa)와 사용자 인앱 브라우저(DaumApps)가 이름이 비슷하다.
  * 크롤러 쪽만 정확히 적는다.
  */
 const BOT_UA =
-  /bot\b|bot\/|crawler|spider|slurp|headless|bingpreview|GoogleOther|Google-InspectionTool|Mediapartners-Google|AdsBot|Yeti|Daumoa|facebookexternalhit|Bytespider|PetalBot|YandexBot|Applebot|GPTBot|ClaudeBot|Claude-Web|CCBot|PerplexityBot|Amazonbot|SemrushBot|AhrefsBot/i;
+  /bot\b|bot\/|crawler|spider|slurp|headless|bingpreview|GoogleOther|Google-InspectionTool|Mediapartners-Google|AdsBot|Yeti|Daumoa|facebookexternalhit|Bytespider|PetalBot|YandexBot|Applebot|GPTBot|ClaudeBot|Claude-Web|CCBot|PerplexityBot|Amazonbot|SemrushBot|AhrefsBot|kakaotalk-scrap/i;
 
 export function isBotUa(ua: string | null | undefined): boolean {
   return ua ? BOT_UA.test(ua) : false;
