@@ -43,10 +43,22 @@ export function TtiGrid({ current }: { current?: Tti }) {
 }
 
 /** "왜 이 점수인지" — 규칙 근거 카드 */
-export function TtiFactors({ factors, score }: { factors: TtiFactor[]; score: number }) {
+export function TtiFactors({
+  factors,
+  score,
+  title,
+  lead,
+}: {
+  factors: Pick<TtiFactor, "kind" | "name" | "delta" | "desc">[];
+  score: number;
+  title?: string;
+  /** 카드 위쪽 설명 (신년운세: "그 해의 띠와 내 띠의 관계로 봐") */
+  lead?: string;
+}) {
   return (
     <Card>
-      <SectionTitle>왜 {score}점일까?</SectionTitle>
+      <SectionTitle>{title ?? `왜 ${score}점일까?`}</SectionTitle>
+      {lead && <p className="-mt-1 mb-3 text-xs leading-relaxed text-foreground/50">{lead}</p>}
       <ul className="flex flex-col gap-3">
         {factors.map((f) => (
           <li key={f.kind + f.name} className="flex gap-3">
@@ -136,9 +148,17 @@ export function TtiRankingList({
  * 띠 선물 버튼. /go/gift 가 클릭을 기록(entry=tti, tti=띠)하고 파트너스 링크로 302 한다.
  * subId 는 사이트 공통 scoregift — 버티컬별로 채널을 쪼개지 않는다(docs/coupang-compliance.md).
  */
-function TtiGiftButton({ item, tti }: { item: GiftPick; tti: Tti }) {
+function TtiGiftButton({
+  item,
+  tti,
+  entry,
+}: {
+  item: GiftPick;
+  tti: Tti;
+  entry: "tti" | "fortune";
+}) {
   if (!item.url) return null;
-  const q = new URLSearchParams({ z: tti, s: "list", f: "tti" });
+  const q = new URLSearchParams({ z: tti, s: "list", f: entry });
   return (
     <a
       href={`/go/gift/${item.id}?${q.toString()}`}
@@ -155,7 +175,16 @@ function TtiGiftButton({ item, tti }: { item: GiftPick; tti: Tti }) {
  * 띠 선물 카드. 딥링크가 하나도 없으면 렌더하지 않는다
  * (미등록 미디어 노출 방지 — 링크 없는 항목은 GiftButton 처럼 숨긴다).
  */
-export function TtiGiftCard({ ttis, lead }: { ttis: Tti[]; lead?: string }) {
+export function TtiGiftCard({
+  ttis,
+  lead,
+  entry = "tti",
+}: {
+  ttis: Tti[];
+  lead?: string;
+  /** 클릭 기록(gift_clicks.entry)용 출처 — 띠 궁합 / 신년운세 */
+  entry?: "tti" | "fortune";
+}) {
   if (!GIFT_LINKS_READY) return null;
   const sets = [...new Set(ttis)]
     .map((t) => ({ t, items: ttiGiftsFor(t).filter((i) => i.url) }))
@@ -192,7 +221,7 @@ export function TtiGiftCard({ ttis, lead }: { ttis: Tti[]; lead?: string }) {
                 <span className="text-sm font-bold">{item.label}</span>
                 <span className="text-[11px] text-foreground/50">{item.priceLabel}</span>
               </span>
-              <TtiGiftButton item={item} tti={t} />
+              <TtiGiftButton item={item} tti={t} entry={entry} />
             </li>
           )),
         )}

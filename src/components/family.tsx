@@ -10,6 +10,7 @@ import {
 /** 기존 campaign 값으로 버티컬을 추정한다 (호출부를 전부 고치지 않으려고) */
 function verticalOf(campaign: string): FamilyVertical {
   if (campaign.startsWith("tti")) return "tti";
+  if (campaign.startsWith("fortune")) return "fortune";
   if (campaign.startsWith("gift")) return "gift";
   if (campaign === "result" || campaign === "shared") return campaign;
   return "mbti";

@@ -18,7 +18,7 @@ import { isBotUa } from "@/lib/bot";
  */
 
 const SITES = new Map(FAMILY_SITES.map((s) => [s.id, s]));
-const VERTICALS = new Set(["mbti", "tti", "gift", "result", "shared", "home", "footer"]);
+const VERTICALS = new Set(["mbti", "tti", "fortune", "gift", "result", "shared", "home", "footer"]);
 
 /** 자유 입력값은 길이와 문자 집합으로 자른다 */
 function clean(v: string | null, max = 60): string | null {

@@ -18,6 +18,8 @@ import {
 } from "@/lib/tti";
 import { getTtiPair, getTtiType } from "@/lib/tti-content";
 import { TTI_GIFT_IDS } from "@/lib/tti-gifts";
+import { FORTUNE_YEARS, fortunePath, fortuneScore } from "@/lib/fortune";
+import { getFortune } from "@/lib/fortune-content";
 import { BarList, ColumnChart, Empty, Panel, Stat, formatDateTime } from "../ui";
 
 /**
@@ -54,11 +56,23 @@ function ttiLabel(t: string): string {
 export default async function AdminTtiPage() {
   if (!(await verifyAdmin())) return null;
 
-  const [outbound, gifts, ledger] = await Promise.all([
+  const [outbound, fortuneOutbound, gifts, ledger] = await Promise.all([
     getOutboundStats({ vertical: "tti" }),
+    getOutboundStats({ vertical: "fortune" }),
     getTtiGiftClickStats(ttiLabel),
     getCoupangLedger(),
   ]);
+
+  // ---- 신년운세 콘텐츠 ----
+  const fortuneStatus = FORTUNE_YEARS.map((year) => {
+    const missing = TTI_IDS.filter((t) => !getFortune(year, t));
+    // 분야별 점수가 총운 ±8 을 벗어났거나 96 을 넘은 본문
+    const drift = TTI_IDS.map((t) => getFortune(year, t)).filter(
+      (f) => f && f.fields.some((x) => Math.abs(x.score - f.score) > 8 || x.score > 96),
+    );
+    const scores = TTI_IDS.map((t) => fortuneScore(year, t).score);
+    return { year, missing, drift, min: Math.min(...scores), max: Math.max(...scores) };
+  });
 
   // ---- 콘텐츠 현황 (빌드에 들어간 정적 데이터 기준) ----
   const pairs = allTtiPairs();
@@ -93,7 +107,7 @@ export default async function AdminTtiPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">띠 궁합</h1>
+      <h1 className="text-xl font-bold">띠 궁합 · 신년운세</h1>
 
       <h2 className="mt-2 text-lg font-bold">골드박스투데이 전환</h2>
       <p className="-mt-2 text-xs text-foreground/50">
@@ -127,17 +141,51 @@ export default async function AdminTtiPage() {
         </>
       )}
 
+      <h2 className="mt-2 text-lg font-bold">신년운세 → 골드박스 전환</h2>
+      <p className="-mt-2 text-xs text-foreground/50">
+        /fortune/* 에서 나간 클릭 (UTM family_fortune*). 시즌(11~1월)에 몰린다.
+      </p>
+      {fortuneOutbound.error ? (
+        <MigrationNotice file="20261011-outbound-clicks.sql" error={fortuneOutbound.error} />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+            <Stat label="누적" value={fortuneOutbound.total.toLocaleString()} />
+            <Stat label="최근 7일" value={fortuneOutbound.last7.toLocaleString()} />
+          </div>
+          <Panel title="클릭 자리" hint="-cta = 본문 중간">
+            {fortuneOutbound.byCampaign.length ? (
+              <BarList items={fortuneOutbound.byCampaign} />
+            ) : (
+              <Empty>아직 클릭이 없어</Empty>
+            )}
+          </Panel>
+          <Panel title="클릭이 난 페이지" hint="상위 10">
+            {fortuneOutbound.byPage.length ? (
+              <BarList items={fortuneOutbound.byPage} />
+            ) : (
+              <Empty>아직 클릭이 없어</Empty>
+            )}
+          </Panel>
+        </div>
+      )}
+
       <h2 className="mt-2 text-lg font-bold">띠 선물 클릭</h2>
       <p className="-mt-2 text-xs text-foreground/50">
-        쿠팡으로 넘어간 띠 선물 클릭 (gift_clicks.entry = tti). subId 는 사이트 공통 scoregift.
+        쿠팡으로 넘어간 띠 선물 클릭 (gift_clicks.entry = tti | fortune). subId 는 사이트 공통 scoregift.
       </p>
       {gifts.error ? (
         <MigrationNotice file="20261011-gift-clicks-tti.sql" error={gifts.error} />
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-            <Stat label="누적" value={gifts.total.toLocaleString()} />
-            <Stat label="최근 7일" value={gifts.last7.toLocaleString()} />
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <Stat label="누적" value={gifts.total.toLocaleString()} />
+              <Stat label="최근 7일" value={gifts.last7.toLocaleString()} />
+            </div>
+            <Panel title="출처">
+              {gifts.byEntry.length ? <BarList items={gifts.byEntry} /> : <Empty>아직 클릭이 없어</Empty>}
+            </Panel>
           </div>
           <Panel title="대상 띠">
             {gifts.byTti.length ? <BarList items={gifts.byTti} /> : <Empty>아직 클릭이 없어</Empty>}
@@ -209,7 +257,40 @@ export default async function AdminTtiPage() {
         </Panel>
       </div>
 
-      <h2 className="mt-2 text-lg font-bold">콘텐츠</h2>
+      <h2 className="mt-2 text-lg font-bold">신년운세 콘텐츠</h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {fortuneStatus.map((f) => (
+          <Stat
+            key={f.year}
+            label={`${f.year} 띠별 운세`}
+            value={`${TTI_IDS.length - f.missing.length}/${TTI_IDS.length}`}
+            sub={`총운 ${f.min}~${f.max}점 · 점수 어긋남 ${f.drift.length}`}
+          />
+        ))}
+      </div>
+      {fortuneStatus.some((f) => f.missing.length || f.drift.length) && (
+        <Panel title="신년운세 재작성 필요">
+          <ul className="flex flex-col gap-1 text-sm">
+            {fortuneStatus.flatMap((f) => [
+              ...f.missing.map((t) => (
+                <li key={`${f.year}-${t}-m`}>
+                  {f.year} {ttiName(t)} 본문 없음 (페이지가 생성되지 않음)
+                </li>
+              )),
+              ...f.drift.map((x) => (
+                <li key={`${f.year}-${x!.tti}-d`}>
+                  <Link href={fortunePath(f.year, x!.tti)} className="underline">
+                    {f.year} {ttiName(x!.tti)}
+                  </Link>{" "}
+                  분야 점수 어긋남 (총운 {x!.score}, 분야 {x!.fields.map((y) => y.score).join("/")})
+                </li>
+              )),
+            ])}
+          </ul>
+        </Panel>
+      )}
+
+      <h2 className="mt-2 text-lg font-bold">띠 궁합 콘텐츠</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="띠 소개" value={`${TTI_IDS.length - missingTypes.length}/${TTI_IDS.length}`} />
         <Stat label="조합 본문" value={`${pairs.length - missingPairs.length}/${pairs.length}`} />

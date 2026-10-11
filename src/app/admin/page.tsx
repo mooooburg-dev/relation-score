@@ -174,7 +174,9 @@ export default async function AdminDashboard() {
                         ? "결과"
                         : c.entry === "tti"
                           ? "띠"
-                          : "직접"}
+                          : c.entry === "fortune"
+                            ? "운세"
+                            : "직접"}
                 </span>
               </li>
             ))}

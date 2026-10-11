@@ -25,7 +25,7 @@ const links = linksJson as Record<string, string>;
 
 /** 자유 입력값을 그대로 넣지 않는다 — 길이·화이트리스트로 자른다 */
 const SURFACES = new Set(["list", "relation"]);
-const ENTRIES = new Set(["type", "pair", "result", "tti"]);
+const ENTRIES = new Set(["type", "pair", "result", "tti", "fortune"]);
 const RELATIONS = new Set([
   "연인", "썸", "친구", "직장동료", "가족", "소개팅",
 ]);

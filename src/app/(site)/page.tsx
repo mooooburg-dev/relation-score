@@ -2,7 +2,8 @@ import Link from "next/link";
 import ScoreApp from "@/app/ScoreApp";
 import { ArticleAd, JsonLd, TypeGrid } from "@/components/seo";
 import { getTopPairs, pairPath, scoreEmoji } from "@/lib/mbti";
-import { TTI_INDEX_PATH } from "@/lib/tti";
+import { TTI_INDEX_PATH, ttiInfo } from "@/lib/tti";
+import { LATEST_FORTUNE_YEAR, fortuneIndexPath, yearLabel } from "@/lib/fortune";
 import { TtiGrid } from "@/components/tti";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -120,6 +121,13 @@ export default function Page() {
             </Link>
           </div>
           <TtiGrid />
+          <Link
+            href={fortuneIndexPath(LATEST_FORTUNE_YEAR)}
+            className="mt-3 block rounded-xl bg-primary/10 py-2.5 text-center text-sm font-bold text-primary"
+          >
+            {ttiInfo(yearLabel(LATEST_FORTUNE_YEAR).tti).emoji} {LATEST_FORTUNE_YEAR} 띠별 신년운세
+            보기 →
+          </Link>
         </div>
       </section>
     </>

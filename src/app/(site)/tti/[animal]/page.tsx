@@ -35,6 +35,8 @@ import {
   type Tti,
 } from "@/lib/tti";
 import { TTI_CONTENT_UPDATED, getTtiRanking, getTtiType } from "@/lib/tti-content";
+import { LATEST_FORTUNE_YEAR, fortunePath } from "@/lib/fortune";
+import { getFortune } from "@/lib/fortune-content";
 
 // 대문자 등 비정규 slug 는 런타임에 정규화 리다이렉트 / 404
 export const dynamicParams = true;
@@ -180,6 +182,15 @@ export default async function TtiTypePage({ params }: { params: Promise<Params> 
         <SectionTitle>{name}와 잘 맞는 띠 순위</SectionTitle>
         <TtiRankingList me={t} />
       </Card>
+
+      {getFortune(LATEST_FORTUNE_YEAR, t) && (
+        <Link
+          href={fortunePath(LATEST_FORTUNE_YEAR, t)}
+          className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
+        >
+          {info.emoji} {LATEST_FORTUNE_YEAR}년 {name} 운세 보기 →
+        </Link>
+      )}
 
       <TtiGiftCard ttis={[t]} lead={content.giftAngle} />
 

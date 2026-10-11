@@ -191,7 +191,7 @@ function hash(s: string): number {
  * 문맥에 맞는 패밀리 사이트 하나를 고른다.
  * - relation 이 있으면 관계별 카피(나이 조건 충족 시 나이별 카피)
  * - 없으면 seed 해시로 GENERIC 중 하나
- * - 띠 궁합(vertical=tti)은 관계와 무관하게 골드박스 카피 중 하나
+ * - 띠 궁합·신년운세(vertical=tti|fortune)는 관계와 무관하게 골드박스 카피 중 하나
  */
 export function pickFamily({
   relation,
@@ -204,7 +204,7 @@ export function pickFamily({
   seed?: string;
   vertical?: FamilyVertical;
 }): FamilyPick {
-  if (vertical === "tti") return toPick(TTI[hash(seed) % TTI.length]);
+  if (vertical === "tti" || vertical === "fortune") return toPick(TTI[hash(seed) % TTI.length]);
   if (relation && isRelation(relation)) {
     const n = typeof age === "number" ? age : parseInt(String(age ?? ""), 10);
     const byAge = BY_AGE[relation];
@@ -231,7 +231,15 @@ export function familyUtmUrl(
 }
 
 /** /go/out 기록 구분용 버티컬 */
-export type FamilyVertical = "mbti" | "tti" | "gift" | "result" | "shared" | "home" | "footer";
+export type FamilyVertical =
+  | "mbti"
+  | "tti"
+  | "fortune"
+  | "gift"
+  | "result"
+  | "shared"
+  | "home"
+  | "footer";
 
 /**
  * 패밀리 사이트 링크. 외부 URL 로 바로 보내지 않고 /go/out/[site] 를 거친다
