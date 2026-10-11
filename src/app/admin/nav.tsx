@@ -7,6 +7,7 @@ const MENU = [
   { href: "/admin", label: "대시보드", exact: true },
   { href: "/admin/analyses", label: "분석 목록", exact: false },
   { href: "/admin/tti", label: "띠·운세", exact: false },
+  { href: "/admin/zodiac", label: "별자리", exact: false },
 ];
 
 export default function AdminNav() {

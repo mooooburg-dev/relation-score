@@ -13,13 +13,15 @@ import { TTI_INDEX_PATH, ttiInfo, ttiName, ttiPairPath, ttiScoreLabel, ttiTypePa
 import { getAllTtiPairs, getAllTtiTypes } from "@/lib/tti-content";
 import { FORTUNE_YEARS, fortuneIndexPath, fortuneLabel, fortunePath, yearLabel } from "@/lib/fortune";
 import { getFortune, getFortuneTtis } from "@/lib/fortune-content";
+import { ZODIAC_INDEX_PATH, zodiacName, zodiacPairPath, zodiacScoreLabel, zodiacTypePath } from "@/lib/zodiac";
+import { getAllZodiacPairs, getAllZodiacTypes } from "@/lib/zodiac-content";
 
 // 정적 데이터로만 만드는 피드라 빌드 시 한 번 생성한다.
 // (Route Handler 는 Next 16 기준 기본 비캐시)
 export const dynamic = "force-static";
 
 const FEED_DESCRIPTION =
-  "MBTI 16가지 유형별 궁합 순위와 136가지 조합, 12띠 78가지 조합의 관계별 궁합 점수. 연인·부부·친구·직장동료·가족 기준으로 정리한 궁합 콘텐츠.";
+  "MBTI 16가지 유형별 궁합 순위와 136가지 조합, 12띠·12별자리 78가지 조합의 관계별 궁합 점수와 띠별 신년운세.";
 
 interface FeedItem {
   title: string;
@@ -69,6 +71,20 @@ function feedItems(): FeedItem[] {
     ];
   });
 
+  // 새로 연 별자리 조합 — 시즌 운세 다음, 띠 조합 앞
+  const zodiacPairs: FeedItem[] = getAllZodiacPairs()
+    .sort((x, y) => y.score - x.score)
+    .map((p) => ({
+      title: `${zodiacName(p.a)} ${zodiacName(p.b)} 궁합 ${p.score}점 - ${zodiacScoreLabel(p.score)}`,
+      path: zodiacPairPath(p.a, p.b),
+      description: summarize(`${p.headline} ${p.summary}`),
+    }));
+  const zodiacTypes: FeedItem[] = getAllZodiacTypes().map((t) => ({
+    title: `${zodiacName(t.id)} 궁합 순위 - ${zodiacName(t.id)}와 잘 맞는 별자리, ${zodiacName(t.id)} 성격`,
+    path: zodiacTypePath(t.id),
+    description: summarize(`${t.tagline}. ${t.intro}`),
+  }));
+
   const ttiPairs: FeedItem[] = getAllTtiPairs()
     .sort((x, y) => y.score - x.score)
     .map((p) => ({
@@ -99,6 +115,12 @@ function feedItems(): FeedItem[] {
 
   const index: FeedItem[] = [
     {
+      title: "별자리 궁합표 - 12별자리 궁합 점수, 잘 맞는 별자리와 안 맞는 별자리",
+      path: ZODIAC_INDEX_PATH,
+      description:
+        "양자리부터 물고기자리까지 12별자리 78가지 조합의 궁합 점수. 점성술 각도로 계산한 근거와 관계별 궁합.",
+    },
+    {
       title: "띠 궁합표 - 12띠 궁합 점수, 잘 맞는 띠와 안 맞는 띠",
       path: TTI_INDEX_PATH,
       description:
@@ -117,7 +139,16 @@ function feedItems(): FeedItem[] {
     },
   ];
 
-  return [...fortunes, ...ttiPairs, ...pairs, ...ttiTypes, ...types, ...index];
+  return [
+    ...fortunes,
+    ...zodiacPairs,
+    ...ttiPairs,
+    ...pairs,
+    ...zodiacTypes,
+    ...ttiTypes,
+    ...types,
+    ...index,
+  ];
 }
 
 export async function GET() {
@@ -147,7 +178,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${esc(SITE_NAME)} - MBTI·띠 궁합 점수와 신년운세</title>
+    <title>${esc(SITE_NAME)} - MBTI·띠·별자리 궁합 점수와 신년운세</title>
     <link>${SITE_URL}</link>
     <description>${esc(FEED_DESCRIPTION)}</description>
     <language>ko</language>

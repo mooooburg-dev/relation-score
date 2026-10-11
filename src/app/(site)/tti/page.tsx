@@ -225,12 +225,20 @@ export default function TtiIndexPage() {
         <FaqList faq={FAQ} />
       </Card>
 
-      <Link
-        href="/mbti"
-        className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
-      >
-        MBTI 궁합표도 보기 →
-      </Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          href="/mbti"
+          className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
+        >
+          MBTI 궁합표 →
+        </Link>
+        <Link
+          href="/zodiac"
+          className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
+        >
+          별자리 궁합표 →
+        </Link>
+      </div>
 
       <TtiDisclaimer />
     </main>

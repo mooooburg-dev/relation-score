@@ -150,7 +150,7 @@ const GENERIC: Copy[] = [
 const TTI: Copy[] = [
   {
     siteId: "goldbox",
-    title: "띠 궁합 봤으면, 선물은 특가로 🎁",
+    title: "궁합 봤으면, 선물은 특가로 🎁",
     description: "골드박스 오늘의 특가와 역대 최저가 한눈에",
     cta: "오늘의 특가 보기",
   },
@@ -191,7 +191,7 @@ function hash(s: string): number {
  * 문맥에 맞는 패밀리 사이트 하나를 고른다.
  * - relation 이 있으면 관계별 카피(나이 조건 충족 시 나이별 카피)
  * - 없으면 seed 해시로 GENERIC 중 하나
- * - 띠 궁합·신년운세(vertical=tti|fortune)는 관계와 무관하게 골드박스 카피 중 하나
+ * - 띠 궁합·신년운세·별자리(vertical=tti|fortune|zodiac)는 관계와 무관하게 골드박스 카피 중 하나
  */
 export function pickFamily({
   relation,
@@ -204,7 +204,8 @@ export function pickFamily({
   seed?: string;
   vertical?: FamilyVertical;
 }): FamilyPick {
-  if (vertical === "tti" || vertical === "fortune") return toPick(TTI[hash(seed) % TTI.length]);
+  if (vertical === "tti" || vertical === "fortune" || vertical === "zodiac")
+    return toPick(TTI[hash(seed) % TTI.length]);
   if (relation && isRelation(relation)) {
     const n = typeof age === "number" ? age : parseInt(String(age ?? ""), 10);
     const byAge = BY_AGE[relation];
@@ -235,6 +236,7 @@ export type FamilyVertical =
   | "mbti"
   | "tti"
   | "fortune"
+  | "zodiac"
   | "gift"
   | "result"
   | "shared"

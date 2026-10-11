@@ -884,6 +884,210 @@
         "hobby"
       ],
       "band": "low"
+    },
+    "zodiac-necklace-aries": {
+      "label": "양자리 별자리 목걸이",
+      "query": "양자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-taurus": {
+      "label": "황소자리 별자리 목걸이",
+      "query": "황소자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-gemini": {
+      "label": "쌍둥이자리 별자리 목걸이",
+      "query": "쌍둥이자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-cancer": {
+      "label": "게자리 별자리 목걸이",
+      "query": "게자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-leo": {
+      "label": "사자자리 별자리 목걸이",
+      "query": "사자자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-virgo": {
+      "label": "처녀자리 별자리 목걸이",
+      "query": "처녀자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-libra": {
+      "label": "천칭자리 별자리 목걸이",
+      "query": "천칭자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-scorpio": {
+      "label": "전갈자리 별자리 목걸이",
+      "query": "전갈자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-sagittarius": {
+      "label": "사수자리 별자리 목걸이",
+      "query": "사수자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-capricorn": {
+      "label": "염소자리 별자리 목걸이",
+      "query": "염소자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-aquarius": {
+      "label": "물병자리 별자리 목걸이",
+      "query": "물병자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-necklace-pisces": {
+      "label": "물고기자리 별자리 목걸이",
+      "query": "물고기자리 목걸이",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "zodiac-keyring-aries": {
+      "label": "양자리 별자리 키링",
+      "query": "양자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-taurus": {
+      "label": "황소자리 별자리 키링",
+      "query": "황소자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-gemini": {
+      "label": "쌍둥이자리 별자리 키링",
+      "query": "쌍둥이자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-cancer": {
+      "label": "게자리 별자리 키링",
+      "query": "게자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-leo": {
+      "label": "사자자리 별자리 키링",
+      "query": "사자자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-virgo": {
+      "label": "처녀자리 별자리 키링",
+      "query": "처녀자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-libra": {
+      "label": "천칭자리 별자리 키링",
+      "query": "천칭자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-scorpio": {
+      "label": "전갈자리 별자리 키링",
+      "query": "전갈자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-sagittarius": {
+      "label": "사수자리 별자리 키링",
+      "query": "사수자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-capricorn": {
+      "label": "염소자리 별자리 키링",
+      "query": "염소자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-aquarius": {
+      "label": "물병자리 별자리 키링",
+      "query": "물병자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "zodiac-keyring-pisces": {
+      "label": "물고기자리 별자리 키링",
+      "query": "물고기자리 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
     }
   },
   "types": {

@@ -94,6 +94,13 @@
   정책 행은 그대로 둔다. 배치 전에 `/admin/tti` 의 "파트너스 API 공용 장부" 또는
   `npm run gift-links -- --dry` 로 계정 전체 여유를 먼저 본다
 
+### 9-1. 별자리 궁합 선물 (2026-10-11 추가)
+
+`/zodiac/*` 에 별자리 목걸이·키링(12 × 2 = 24종, `zodiac-necklace-*` / `zodiac-keyring-*`)을 붙였다.
+띠와 똑같이 채널은 새로 만들지 않고 `scoregift` 로 딥링크를 만들었다(장부 경유 2콜).
+클릭은 `/go/gift/[id]?f=zodiac&zs=<별자리>` → `gift_clicks.entry='zodiac'`, `gift_clicks.zodiac`
+(`20261011-gift-clicks-zodiac.sql`). 카탈로그는 일반 명사만 쓴다. 신년운세 페이지의 띠 선물은 `f=fortune` 으로 구분한다.
+
 ### 10. 골드박스투데이 전환 기록
 
 패밀리 링크(골드박스투데이·금리박스·월급박스)는 이제 `/go/out/[site]` 를 거친다.

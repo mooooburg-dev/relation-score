@@ -8,12 +8,10 @@ import {
   ttiScoreEmoji,
   ttiTypePath,
   type Tti,
-  type TtiFactor,
 } from "@/lib/tti";
 import { getTtiRanking } from "@/lib/tti-content";
 import { ttiGiftsFor } from "@/lib/tti-gifts";
-import { GIFT_LINKS_READY, type GiftPick } from "@/lib/gifts";
-import { AffiliateNotice } from "@/components/gift";
+import { SymbolGiftCard } from "@/components/symbol-gift";
 import { Card, SectionTitle } from "@/components/seo";
 
 /** 12띠 링크 그리드 */
@@ -48,12 +46,16 @@ export function TtiFactors({
   score,
   title,
   lead,
+  footnote,
 }: {
-  factors: Pick<TtiFactor, "kind" | "name" | "delta" | "desc">[];
+  /** 띠·별자리 공용 — kind 는 key 로만 쓴다 */
+  factors: { kind: string; name: string; delta: number; desc: string }[];
   score: number;
   title?: string;
   /** 카드 위쪽 설명 (신년운세: "그 해의 띠와 내 띠의 관계로 봐") */
   lead?: string;
+  /** 카드 아래 계산 방법 안내 (기본: 띠 궁합) */
+  footnote?: React.ReactNode;
 }) {
   return (
     <Card>
@@ -81,8 +83,12 @@ export function TtiFactors({
         ))}
       </ul>
       <p className="mt-4 text-xs leading-relaxed text-foreground/40">
-        기본 70점에서 육합·삼합이면 크게 오르고, 충·원진·형·해가 있으면 깎이는 방식으로
-        계산했어. <Link href={`${TTI_INDEX_PATH}#how`} className="underline">계산 방법 보기</Link>
+        {footnote ?? (
+          <>
+            기본 70점에서 육합·삼합이면 크게 오르고, 충·원진·형·해가 있으면 깎이는 방식으로
+            계산했어. <Link href={`${TTI_INDEX_PATH}#how`} className="underline">계산 방법 보기</Link>
+          </>
+        )}
       </p>
     </Card>
   );
@@ -144,37 +150,7 @@ export function TtiRankingList({
   );
 }
 
-/**
- * 띠 선물 버튼. /go/gift 가 클릭을 기록(entry=tti, tti=띠)하고 파트너스 링크로 302 한다.
- * subId 는 사이트 공통 scoregift — 버티컬별로 채널을 쪼개지 않는다(docs/coupang-compliance.md).
- */
-function TtiGiftButton({
-  item,
-  tti,
-  entry,
-}: {
-  item: GiftPick;
-  tti: Tti;
-  entry: "tti" | "fortune";
-}) {
-  if (!item.url) return null;
-  const q = new URLSearchParams({ z: tti, s: "list", f: entry });
-  return (
-    <a
-      href={`/go/gift/${item.id}?${q.toString()}`}
-      target="_blank"
-      rel="sponsored nofollow noopener noreferrer"
-      className="shrink-0 rounded-lg bg-primary/10 px-2.5 py-1.5 text-xs font-bold text-primary"
-    >
-      보러가기
-    </a>
-  );
-}
-
-/**
- * 띠 선물 카드. 딥링크가 하나도 없으면 렌더하지 않는다
- * (미등록 미디어 노출 방지 — 링크 없는 항목은 GiftButton 처럼 숨긴다).
- */
+/** 띠 선물 카드. 클릭은 entry(띠 궁합/신년운세)와 띠로 구분해 기록한다 */
 export function TtiGiftCard({
   ttis,
   lead,
@@ -185,48 +161,17 @@ export function TtiGiftCard({
   /** 클릭 기록(gift_clicks.entry)용 출처 — 띠 궁합 / 신년운세 */
   entry?: "tti" | "fortune";
 }) {
-  if (!GIFT_LINKS_READY) return null;
-  const sets = [...new Set(ttis)]
-    .map((t) => ({ t, items: ttiGiftsFor(t).filter((i) => i.url) }))
-    .filter((s) => s.items.length);
-  if (!sets.length) return null;
-
   return (
-    <section className="rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/15 to-primary/5 p-5 shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="text-3xl leading-none" aria-hidden>
-          🎁
-        </span>
-        <div className="flex flex-col">
-          <h2 className="text-base font-extrabold leading-snug">
-            {sets.length > 1 ? "둘 중 누구에게 선물해?" : `${ttiName(sets[0].t)}에게 선물한다면`}
-          </h2>
-          <p className="text-xs leading-relaxed text-foreground/60">
-            {lead ?? "돌·생일·환갑처럼 띠가 의미 있는 날에 특히 반응이 좋아"}
-          </p>
-        </div>
-      </div>
-      <AffiliateNotice />
-      <ul className="mt-3 flex flex-col gap-2">
-        {sets.flatMap(({ t, items }) =>
-          items.map((item) => (
-            <li
-              key={item.id}
-              className="flex items-center gap-3 rounded-2xl bg-white/70 px-3 py-2.5"
-            >
-              <span className="text-xl leading-none" aria-hidden>
-                {ttiInfo(t).emoji}
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm font-bold">{item.label}</span>
-                <span className="text-[11px] text-foreground/50">{item.priceLabel}</span>
-              </span>
-              <TtiGiftButton item={item} tti={t} entry={entry} />
-            </li>
-          )),
-        )}
-      </ul>
-    </section>
+    <SymbolGiftCard
+      lead={lead ?? "돌·생일·환갑처럼 띠가 의미 있는 날에 특히 반응이 좋아"}
+      sets={[...new Set(ttis)].map((t) => ({
+        key: t,
+        emoji: ttiInfo(t).emoji,
+        name: ttiName(t),
+        items: ttiGiftsFor(t),
+        query: { z: t, f: entry },
+      }))}
+    />
   );
 }
 
