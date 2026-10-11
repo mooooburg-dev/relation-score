@@ -176,7 +176,9 @@ export default async function AdminDashboard() {
                           ? "띠"
                           : c.entry === "fortune"
                             ? "운세"
-                            : "직접"}
+                            : c.entry === "zodiac"
+                              ? "별자리"
+                              : "직접"}
                 </span>
               </li>
             ))}

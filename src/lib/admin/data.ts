@@ -549,6 +549,7 @@ const ENTRY_LABEL: Record<string, string> = {
   result: "결과 화면",
   tti: "띠 궁합 페이지",
   fortune: "신년운세 페이지",
+  zodiac: "별자리 궁합 페이지",
 };
 const SURFACE_LABEL: Record<string, string> = {
   list: "본문 목록",
@@ -640,6 +641,7 @@ const VERTICAL_LABEL: Record<string, string> = {
   mbti: "MBTI 궁합 페이지",
   tti: "띠 궁합 페이지",
   fortune: "신년운세 페이지",
+  zodiac: "별자리 궁합 페이지",
   gift: "선물 페이지",
   result: "분석 결과",
   shared: "공유 결과",
@@ -851,4 +853,44 @@ export async function getCoupangLedger(): Promise<LedgerStatus> {
     }
   }
   return { error: null, buckets };
+}
+
+// ---- 별자리 선물 클릭 ----
+
+export interface ZodiacGiftClickStats {
+  error: string | null;
+  total: number;
+  last7: number;
+  bySign: { key: string; label: string; count: number }[];
+  byGift: { key: string; label: string; count: number }[];
+}
+
+/**
+ * /zodiac/* 의 선물 버튼 클릭 (gift_clicks.entry = 'zodiac').
+ * zodiac 컬럼은 20261011-gift-clicks-zodiac.sql 로 추가된다. 적용 전이면 error 로 알린다.
+ */
+export async function getZodiacGiftClickStats(
+  signLabel: (z: string) => string,
+): Promise<ZodiacGiftClickStats> {
+  await requireAdmin();
+
+  const { data, error } = await supabaseAdmin
+    .from("gift_clicks")
+    .select("created_at, gift_id, zodiac")
+    .eq("entry", "zodiac")
+    .eq("is_admin", false)
+    .eq("is_bot", false)
+    .order("created_at", { ascending: false })
+    .limit(2000);
+
+  if (error) return { error: error.message, total: 0, last7: 0, bySign: [], byGift: [] };
+  const rows = (data ?? []) as { created_at: string; gift_id: string; zodiac: string | null }[];
+  const weekAgo = kstDateBefore(6);
+  return {
+    error: null,
+    total: rows.length,
+    last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    bySign: tally(rows, "zodiac", (v) => (v ? signLabel(v) : "-")),
+    byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
+  };
 }

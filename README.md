@@ -1,6 +1,6 @@
 # 몇점이야? (relation-score)
 
-MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠 궁합·띠별 신년운세. https://score.drawyourmind.com
+MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠·12별자리 궁합, 띠별 신년운세. https://score.drawyourmind.com
 
 ## 개발
 
@@ -28,6 +28,9 @@ npm run lint
 | `/tti` | 띠 궁합표 인덱스 (출생연도 계산기, 12×12 점수표, 계산법) |
 | `/tti/[animal]` | 띠별 궁합 순위·성격·출생연도 (12장, 정적 생성) |
 | `/tti/[a]/[b]` | 띠 조합 상세 (78장, 정적 생성, 지지 순서 slug가 canonical — 역순은 308) |
+| `/zodiac` | 별자리 궁합표 인덱스 (생일 계산기, 12×12 점수표, 원소별 별자리, 계산법) |
+| `/zodiac/[sign]` | 별자리별 궁합 순위·성격 (12장) |
+| `/zodiac/[a]/[b]` | 별자리 조합 상세 (78장, 황도 순서 slug가 canonical — 역순은 308) |
 | `/fortune` | 최신 연도 운세로 307 (해마다 바뀌므로 영구 리다이렉트 아님) |
 | `/fortune/[year]` | 띠별 신년운세 순위·삼재 띠·출생연도 계산기 (본문 있는 해만, 그 외 404) |
 | `/fortune/[year]/[animal]` | 띠별 신년운세 (총운·분야별·월별·출생연도별, 12장/해) |
@@ -38,6 +41,7 @@ npm run lint
 | `/admin` | 운영 대시보드 (통계) — `ADMIN_PASSWORD` 로그인, noindex |
 | `/admin/analyses` | 분석 목록 (필터·정렬·페이지네이션, 행 펼치면 AI 응답 원문) |
 | `/admin/tti` | 띠 궁합·신년운세 운영 (골드박스 전환·띠 선물 클릭·딥링크 준비·파트너스 API 장부·콘텐츠 점검) |
+| `/admin/zodiac` | 별자리 궁합 운영 (골드박스 전환·별자리 선물 클릭·딥링크 준비·콘텐츠 점검) |
 | `/sitemap.xml` | 262개 URL (URL별 `lastmod` 포함) |
 | `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/tti/*/*`, `/pair/*`를 앞쪽에 배치 |
 
@@ -84,6 +88,18 @@ npm run tti-content -- all --force --provider openai
   `/admin/tti`의 "점수 어긋난 본문"이 재생성 대상을 보여준다
 - 재생성했으면 `src/lib/tti-content.ts`의 `TTI_CONTENT_UPDATED`를 갱신한다
 - 두 생성 스크립트는 LLM 호출부를 `scripts/lib/llm.mjs`로 공유한다
+
+### 별자리 궁합
+
+점수는 `src/lib/zodiac-rules.ts`의 점성술 각도로 계산한다. 황도 12궁이 30°씩이라 두 별자리 사이 칸 수가 곧 각도다.
+
+```
+트라인(120°) 92 / 섹스타일(60°) 84 / 같은 별자리 78 / 오포지션(180°) 70 / 30° 62 / 150° 56 / 스퀘어(90°) 50
+가산: 같은 지배성 +4, 금성×화성 짝 +3, 태양(사자)×달(게) +3  → 최대 96
+```
+
+본문은 `src/data/zodiac-types.json`, `zodiac-pairs.json`(관계: 연인·썸·부부·친구·직장동료, 종합 ±8).
+생일 → 별자리 경계일은 해마다 하루 정도 달라질 수 있어 계산기에 안내 문구를 둔다.
 
 ### 띠별 신년운세
 

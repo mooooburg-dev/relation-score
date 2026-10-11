@@ -12,6 +12,8 @@ import { TTI_INDEX_PATH, ttiPairPath, ttiTypePath } from "@/lib/tti";
 import { getAllTtiPairs, getAllTtiTypes } from "@/lib/tti-content";
 import { FORTUNE_YEARS, fortuneIndexPath, fortunePath } from "@/lib/fortune";
 import { getFortuneTtis } from "@/lib/fortune-content";
+import { ZODIAC_INDEX_PATH, zodiacPairPath, zodiacTypePath } from "@/lib/zodiac";
+import { getAllZodiacPairs, getAllZodiacTypes } from "@/lib/zodiac-content";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const home: MetadataRoute.Sitemap = [
@@ -89,5 +91,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
       })),
     ];
   });
-  return [...home, ...fortunes, ...types, ...gifts, ...pairs, ...ttiTypes, ...ttiPairs];
+  const zodiacs: MetadataRoute.Sitemap = getAllZodiacTypes().length
+    ? [
+        {
+          url: `${SITE_URL}${ZODIAC_INDEX_PATH}`,
+          lastModified: lastmodFor(ZODIAC_INDEX_PATH),
+          changeFrequency: "weekly",
+          priority: 0.9,
+        },
+        ...getAllZodiacTypes().map((t) => ({
+          url: `${SITE_URL}${zodiacTypePath(t.id)}`,
+          lastModified: lastmodFor(zodiacTypePath(t.id)),
+          changeFrequency: "monthly" as const,
+          priority: 0.8,
+        })),
+        ...getAllZodiacPairs().map((p) => ({
+          url: `${SITE_URL}${zodiacPairPath(p.a, p.b)}`,
+          lastModified: lastmodFor(zodiacPairPath(p.a, p.b)),
+          changeFrequency: "monthly" as const,
+          priority: 0.7,
+        })),
+      ]
+    : [];
+  return [
+    ...home,
+    ...fortunes,
+    ...types,
+    ...gifts,
+    ...pairs,
+    ...ttiTypes,
+    ...ttiPairs,
+    ...zodiacs,
+  ];
 }

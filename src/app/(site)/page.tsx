@@ -5,6 +5,8 @@ import { getTopPairs, pairPath, scoreEmoji } from "@/lib/mbti";
 import { TTI_INDEX_PATH, ttiInfo } from "@/lib/tti";
 import { LATEST_FORTUNE_YEAR, fortuneIndexPath, yearLabel } from "@/lib/fortune";
 import { TtiGrid } from "@/components/tti";
+import { ZodiacGrid } from "@/components/zodiac";
+import { ZODIAC_INDEX_PATH } from "@/lib/zodiac";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 // 구조화 데이터 (SEO/AEO) — 답변 엔진이 서비스와 FAQ를 이해하도록.
@@ -128,6 +130,18 @@ export default function Page() {
             {ttiInfo(yearLabel(LATEST_FORTUNE_YEAR).tti).emoji} {LATEST_FORTUNE_YEAR} 띠별 신년운세
             보기 →
           </Link>
+        </div>
+        <div className="rounded-3xl bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-extrabold">별자리 궁합도 볼까?</h2>
+            <Link
+              href={ZODIAC_INDEX_PATH}
+              className="text-xs font-bold text-primary underline underline-offset-2"
+            >
+              별자리 궁합표 →
+            </Link>
+          </div>
+          <ZodiacGrid />
         </div>
       </section>
     </>
