@@ -548,6 +548,7 @@ const ENTRY_LABEL: Record<string, string> = {
   pair: "궁합 페이지",
   result: "결과 화면",
   tti: "띠 궁합 페이지",
+  fortune: "신년운세 페이지",
 };
 const SURFACE_LABEL: Record<string, string> = {
   list: "본문 목록",
@@ -638,6 +639,7 @@ const SITE_LABEL: Record<string, string> = {
 const VERTICAL_LABEL: Record<string, string> = {
   mbti: "MBTI 궁합 페이지",
   tti: "띠 궁합 페이지",
+  fortune: "신년운세 페이지",
   gift: "선물 페이지",
   result: "분석 결과",
   shared: "공유 결과",
@@ -722,12 +724,14 @@ export interface TtiGiftClickStats {
   error: string | null;
   total: number;
   last7: number;
+  /** 띠 궁합 / 신년운세 중 어디서 눌렀나 */
+  byEntry: { key: string; label: string; count: number }[];
   byTti: { key: string; label: string; count: number }[];
   byGift: { key: string; label: string; count: number }[];
 }
 
 /**
- * /tti/* 의 선물 버튼 클릭 (gift_clicks.entry = 'tti').
+ * 띠 선물 버튼 클릭 — /tti/* (entry='tti') 와 /fortune/* (entry='fortune').
  * tti 컬럼은 20261011-gift-clicks-tti.sql 로 추가된다. 적용 전이면 error 로 알린다.
  */
 export async function getTtiGiftClickStats(
@@ -737,22 +741,28 @@ export async function getTtiGiftClickStats(
 
   const { data, error } = await supabaseAdmin
     .from("gift_clicks")
-    .select("created_at, gift_id, tti")
-    .eq("entry", "tti")
+    .select("created_at, gift_id, tti, entry")
+    .in("entry", ["tti", "fortune"])
     .eq("is_admin", false)
     .eq("is_bot", false)
     .order("created_at", { ascending: false })
     .limit(2000);
 
   if (error) {
-    return { error: error.message, total: 0, last7: 0, byTti: [], byGift: [] };
+    return { error: error.message, total: 0, last7: 0, byEntry: [], byTti: [], byGift: [] };
   }
-  const rows = (data ?? []) as { created_at: string; gift_id: string; tti: string | null }[];
+  const rows = (data ?? []) as {
+    created_at: string;
+    gift_id: string;
+    tti: string | null;
+    entry: string | null;
+  }[];
   const weekAgo = kstDateBefore(6);
   return {
     error: null,
     total: rows.length,
     last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    byEntry: tally(rows, "entry", (v) => (v ? (ENTRY_LABEL[v] ?? v) : "-")),
     byTti: tally(rows, "tti", (v) => (v ? ttiLabel(v) : "-")),
     byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
   };

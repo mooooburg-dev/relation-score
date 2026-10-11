@@ -1,6 +1,6 @@
 # 몇점이야? (relation-score)
 
-MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠 궁합. https://score.drawyourmind.com
+MBTI·나이·혈액형 기반 관계별 궁합 점수 테스트와 12띠 궁합·띠별 신년운세. https://score.drawyourmind.com
 
 ## 개발
 
@@ -28,13 +28,16 @@ npm run lint
 | `/tti` | 띠 궁합표 인덱스 (출생연도 계산기, 12×12 점수표, 계산법) |
 | `/tti/[animal]` | 띠별 궁합 순위·성격·출생연도 (12장, 정적 생성) |
 | `/tti/[a]/[b]` | 띠 조합 상세 (78장, 정적 생성, 지지 순서 slug가 canonical — 역순은 308) |
+| `/fortune` | 최신 연도 운세로 307 (해마다 바뀌므로 영구 리다이렉트 아님) |
+| `/fortune/[year]` | 띠별 신년운세 순위·삼재 띠·출생연도 계산기 (본문 있는 해만, 그 외 404) |
+| `/fortune/[year]/[animal]` | 띠별 신년운세 (총운·분야별·월별·출생연도별, 12장/해) |
 | `/go/gift/[id]` | 선물 클릭 기록 후 쿠팡 파트너스 링크로 302 (띠 선물은 `f=tti&z=<띠>`) |
 | `/go/out/[site]` | 패밀리 사이트(골드박스투데이 등) 클릭 기록 후 UTM 붙여 302 |
 | `/api/analyze` | OpenAI(gpt-5.4-mini) 분석 + Supabase 저장. `OPENAI_BASE_URL`로 게이트웨이 교체 가능 |
 | `/api/og` | 결과 공유용 동적 OG 이미지 |
 | `/admin` | 운영 대시보드 (통계) — `ADMIN_PASSWORD` 로그인, noindex |
 | `/admin/analyses` | 분석 목록 (필터·정렬·페이지네이션, 행 펼치면 AI 응답 원문) |
-| `/admin/tti` | 띠 궁합 운영 (골드박스 전환·띠 선물 클릭·딥링크 준비·파트너스 API 장부·콘텐츠 점검) |
+| `/admin/tti` | 띠 궁합·신년운세 운영 (골드박스 전환·띠 선물 클릭·딥링크 준비·파트너스 API 장부·콘텐츠 점검) |
 | `/sitemap.xml` | 262개 URL (URL별 `lastmod` 포함) |
 | `/rss.xml` | 네이버 서치어드바이저 RSS 제출용 피드. 색인이 얇은 `/tti/*/*`, `/pair/*`를 앞쪽에 배치 |
 
@@ -81,6 +84,20 @@ npm run tti-content -- all --force --provider openai
   `/admin/tti`의 "점수 어긋난 본문"이 재생성 대상을 보여준다
 - 재생성했으면 `src/lib/tti-content.ts`의 `TTI_CONTENT_UPDATED`를 갱신한다
 - 두 생성 스크립트는 LLM 호출부를 `scripts/lib/llm.mjs`로 공유한다
+
+### 띠별 신년운세
+
+총운은 "내 띠 × 그 해의 띠(태세)"를 띠 궁합과 같은 규칙(`scoreTti`)으로 계산한다
+(`src/lib/fortune.ts`). 2027 정미년이면 양(未)과의 관계다. 월운은 그 달의 지지(1월=인월 … 12월=축월)와
+같은 방식으로 보고, 삼재(들·눌·날)와 행운의 색(내 띠 오행을 살리는 오행)도 규칙으로 정한다.
+
+본문(`src/data/fortune-<year>.json`)에는 분야별 점수(총운 ±8)와 문장만 있다. 새 해를 열려면
+
+1. `FORTUNE_YEARS`·`LATEST_FORTUNE_YEAR`(fortune.ts)와 `FORTUNE_PUBLISHED`·`DATA`(fortune-content.ts)에 해 추가
+2. `src/data/fortune-<year>.json` 작성 (띠 12개 × 분야 4·월 12·출생연도 1948~2020)
+3. `/admin/tti`의 "신년운세 콘텐츠"에서 누락·점수 어긋남 확인
+
+시즌(11~1월) 검색이라 색인 시간을 고려해 10월 중에 연다. 건강·질병·사고·투자 권유·부적 같은 표현은 쓰지 않는다.
 
 ## 갱신일(lastmod) 관리
 
