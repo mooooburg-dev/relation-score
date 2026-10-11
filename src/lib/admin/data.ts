@@ -950,3 +950,38 @@ export async function getToolViewStats(): Promise<ToolViewStats> {
     daily: [...daily.entries()].map(([date, count]) => ({ date, count })),
   };
 }
+
+// ---- 웹 푸시 (재방문) ----
+
+export interface PushStats {
+  error: string | null;
+  subscribers: number;
+  newLast7: number;
+  byTti: { key: string; label: string; count: number }[];
+  log: { run_date: string; total: number; sent: number; failed: number; removed: number }[];
+}
+
+/** 알림 구독자(운영자 제외)와 최근 발송 기록. 테이블은 20261012-push.sql */
+export async function getPushStats(ttiLabel: (t: string) => string): Promise<PushStats> {
+  await requireAdmin();
+  const [{ data: subs, error: se }, { data: log, error: le }] = await Promise.all([
+    supabaseAdmin.from("push_subscriptions").select("created_at, tti").eq("is_admin", false).limit(20000),
+    supabaseAdmin
+      .from("push_log")
+      .select("run_date, total, sent, failed, removed")
+      .order("run_date", { ascending: false })
+      .limit(14),
+  ]);
+  if (se || le) {
+    return { error: (se ?? le)!.message, subscribers: 0, newLast7: 0, byTti: [], log: [] };
+  }
+  const rows = (subs ?? []) as { created_at: string; tti: string | null }[];
+  const weekAgo = kstDateBefore(6);
+  return {
+    error: null,
+    subscribers: rows.length,
+    newLast7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    byTti: tally(rows, "tti", (v) => (v ? ttiLabel(v) : "(띠 없음)")),
+    log: (log ?? []) as PushStats["log"],
+  };
+}

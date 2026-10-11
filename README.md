@@ -47,6 +47,7 @@ npm run lint
 | `/admin` | 운영 대시보드 (통계) — `ADMIN_PASSWORD` 로그인, noindex |
 | `/admin/analyses` | 분석 목록 (필터·정렬·페이지네이션, 행 펼치면 AI 응답 원문) |
 | `/admin/tti` | 띠 궁합·신년운세 운영 (골드박스 전환·띠 선물 클릭·딥링크 준비·파트너스 API 장부·콘텐츠 점검) |
+| `/admin/retention` | 재방문 (알림 구독자·발송 기록·오늘의 운세 전환·GA 이벤트 안내) |
 | `/admin/tools` | 이름·생일 궁합 운영 (공유 결과 조회수·골드박스 전환) |
 | `/admin/zodiac` | 별자리 궁합 운영 (골드박스 전환·별자리 선물 클릭·딥링크 준비·콘텐츠 점검) |
 | `/sitemap.xml` | 262개 URL (URL별 `lastmod` 포함) |
@@ -120,6 +121,20 @@ npm run tti-content -- all --force --provider openai
 - 나를 기억하기(`src/lib/visitor.ts`, localStorage 전용·서버 미전송): 내 생일(→ 띠·별자리), 출석(연속 확인 일수),
   최근 본 궁합(이름·생일·MBTI 결과 링크 10개). 홈·운세 상세에는 한 줄 카드, `/today` 에는 전체 카드
 - 측정: GA4 커스텀 이벤트 `daily_checkin`(streak, returning) · `profile_save` · `history_open`
+
+### 웹 푸시 알림 · 홈 화면 설치 (리텐션 2단계)
+
+- `/today` 내 운세 카드에 "매일 아침 8시 알림 받기"(`src/components/push-opt-in.tsx`). 아이폰 사파리는 홈 화면 추가 후에만
+  웹 푸시가 되므로 추가 방법을 안내하고, 안드로이드 크롬은 `beforeinstallprompt` 가 오면 홈 화면 추가 버튼을 보여준다
+- 구독(`/api/push/subscribe`)은 엔드포인트·키·띠·별자리만 저장한다(생일·IP·UA 없음). 엔드포인트는 브라우저 푸시 서비스
+  호스트(FCM·Mozilla·Apple·Windows)만 받는다 — 크론이 임의 주소로 POST 하지 않게(SSRF)
+- 발송: `vercel.json` 크론 `0 23 * * *`(UTC) = 08:00 KST → `/api/cron/push-daily`(`CRON_SECRET` Bearer 필수).
+  띠별 개인화 문구, TTL 6시간, 404/410 은 즉시 정리, 일시 실패 7회 연속이면 정리. 요약은 `push_log`
+- 서비스 워커 `public/sw.js` 는 푸시 전용(오프라인 캐시 없음), `next.config.ts` 에서 캐시 금지 헤더
+- manifest `start_url` 은 `/today?utm_source=pwa…` — 홈 화면 앱 재방문을 GA 에서 구분
+- 환경변수: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET` (Vercel production 등록 완료).
+  없으면 알림 버튼이 숨고 크론은 발송하지 않는다
+- 어드민 `/admin/retention`: 구독자·띠 분포·발송 기록, GA 에서 볼 이벤트 목록
 
 ### 이름·생일 궁합
 
