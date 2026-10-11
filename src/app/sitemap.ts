@@ -1,4 +1,7 @@
 import type { MetadataRoute } from "next";
+import { TODAY_PATH, kstToday, todayTtiPath, todayZodiacPath } from "@/lib/daily";
+import { TTI_IDS } from "@/lib/tti";
+import { ZODIAC_IDS } from "@/lib/zodiac";
 import { lastmodFor } from "@/lib/lastmod";
 import {
   MBTI_LIST,
@@ -15,7 +18,29 @@ import { getFortuneTtis } from "@/lib/fortune-content";
 import { ZODIAC_INDEX_PATH, zodiacPairPath, zodiacTypePath } from "@/lib/zodiac";
 import { getAllZodiacPairs, getAllZodiacTypes } from "@/lib/zodiac-content";
 
+// 오늘의 운세 lastModified 가 매일 바뀌어야 해서 sitemap 도 1시간마다 다시 만든다
+export const revalidate = 3600;
+
 export default function sitemap(): MetadataRoute.Sitemap {
+  // 오늘의 운세는 매일 자정(KST)에 바뀐다 — 오늘 날짜를 lastModified 로 쓴다
+  const t = kstToday();
+  const todayMod = new Date(`${t.y}-${String(t.m).padStart(2, "0")}-${String(t.d).padStart(2, "0")}T00:00:00+09:00`);
+  const daily: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}${TODAY_PATH}`, lastModified: todayMod, changeFrequency: "daily", priority: 0.9 },
+    ...TTI_IDS.map((x) => ({
+      url: `${SITE_URL}${todayTtiPath(x)}`,
+      lastModified: todayMod,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    })),
+    ...ZODIAC_IDS.map((x) => ({
+      url: `${SITE_URL}${todayZodiacPath(x)}`,
+      lastModified: todayMod,
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    })),
+  ];
+
   const home: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -128,6 +153,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     : [];
   return [
     ...home,
+    ...daily,
     ...fortunes,
     ...types,
     ...gifts,

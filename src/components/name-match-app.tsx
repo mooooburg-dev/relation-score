@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { NAME_MAX, isValidName, nameSharePath } from "@/lib/name-match";
+import { NAME_MAX, isValidName, nameMatch, nameSharePath } from "@/lib/name-match";
+import { addHistory } from "@/lib/visitor";
 import { NameResult } from "@/components/name-result";
 import ShareButton from "@/components/share-button";
 
@@ -23,6 +24,11 @@ export default function NameMatchApp() {
     }
     setError("");
     setShown([a, b]);
+    addHistory({
+      kind: "name",
+      label: `${a} ♥ ${b} ${nameMatch(a, b).score}%`,
+      path: nameSharePath(a, b),
+    });
   }
 
   return (

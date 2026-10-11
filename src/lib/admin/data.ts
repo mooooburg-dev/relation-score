@@ -644,6 +644,7 @@ const VERTICAL_LABEL: Record<string, string> = {
   zodiac: "별자리 궁합 페이지",
   name: "이름 궁합",
   birthday: "생일 궁합",
+  today: "오늘의 운세",
   gift: "선물 페이지",
   result: "분석 결과",
   shared: "공유 결과",

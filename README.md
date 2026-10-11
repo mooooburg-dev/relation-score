@@ -28,6 +28,8 @@ npm run lint
 | `/tti` | 띠 궁합표 인덱스 (출생연도 계산기, 12×12 점수표, 계산법) |
 | `/tti/[animal]` | 띠별 궁합 순위·성격·출생연도 (12장, 정적 생성) |
 | `/tti/[a]/[b]` | 띠 조합 상세 (78장, 정적 생성, 지지 순서 slug가 canonical — 역순은 308) |
+| `/today` | 오늘의 운세 허브 — 12띠·12별자리 오늘 순위, 내 운세 카드(생일 저장), 출석, 최근 본 궁합 (ISR 10분) |
+| `/today/tti/[animal]` · `/today/zodiac/[sign]` | 띠별·별자리별 오늘의 운세 (24장, ISR 10분) |
 | `/name` | 이름 궁합(획수 궁합) 계산기 — 계산은 브라우저에서, 이름은 서버로 보내지 않음 |
 | `/name/r/[code]` | 이름 궁합 공유 결과 (noindex, 동적 OG, 조회는 `tool_views`) |
 | `/birthday` | 생일 궁합 계산기 — 띠 궁합(연도) + 별자리 궁합(월일) 평균 |
@@ -105,6 +107,19 @@ npm run tti-content -- all --force --provider openai
 
 본문은 `src/data/zodiac-types.json`, `zodiac-pairs.json`(관계: 연인·썸·부부·친구·직장동료, 종합 ±8).
 생일 → 별자리 경계일은 해마다 하루 정도 달라질 수 있어 계산기에 안내 문구를 둔다.
+
+### 오늘의 운세 · 재방문 장치
+
+단골을 만들기 위한 장치다. 매일 바뀌는 볼거리 + 다시 왔을 때 나를 알아보는 화면.
+
+- 점수(`src/lib/daily.ts`): 띠는 그날 일진(60갑자)의 지지와 띠 궁합 규칙 + 일간 오행 가감, 별자리는 그날 달이
+  지나는 별자리(Meeus 저정밀식, KST 정오)와 별자리 궁합 규칙. 분야별은 총운 ±8 을 날짜·대상 해시로 고정
+- 문장(`src/data/daily-pool.json`): 6분야 × 5구간 × 10문장. 날짜·대상 해시로 고른다 (같은 날 같은 결과)
+- 페이지는 ISR(`revalidate = 600`). 자정 직후 최대 10분은 전날 내용일 수 있다. sitemap 은 1시간마다 다시 만들고
+  `/today/*` 의 lastModified 를 KST 오늘로 쓴다 (`update-lastmod.mjs` 는 `/today` 를 건너뛴다)
+- 나를 기억하기(`src/lib/visitor.ts`, localStorage 전용·서버 미전송): 내 생일(→ 띠·별자리), 출석(연속 확인 일수),
+  최근 본 궁합(이름·생일·MBTI 결과 링크 10개). 홈·운세 상세에는 한 줄 카드, `/today` 에는 전체 카드
+- 측정: GA4 커스텀 이벤트 `daily_checkin`(streak, returning) · `profile_save` · `history_open`
 
 ### 이름·생일 궁합
 
