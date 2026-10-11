@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  birthdayMatch,
   birthdaySharePath,
   isValidBirthdate,
   type Birthdate,
 } from "@/lib/birthday-match";
+import { addHistory, getProfile, saveProfile } from "@/lib/visitor";
 import { BirthdayResult } from "@/components/birthday-result";
 import ShareButton from "@/components/share-button";
 
@@ -31,6 +33,14 @@ export default function BirthdayMatchApp({ maxYear }: { maxYear: number }) {
   const [b, setB] = useState<Input>({ y: "", m: "", d: "" });
   const [shown, setShown] = useState<[Birthdate, Birthdate] | null>(null);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  // 저장해 둔 내 생일이 있으면 "나" 칸을 미리 채운다 (localStorage — 마운트 후에만 읽는다)
+  useEffect(() => {
+    const p = getProfile();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 저장소 값으로 한 번 채우는 초기화
+    if (p) setA({ y: String(p.y), m: String(p.m), d: String(p.d) });
+  }, []);
 
   const years: number[] = [];
   for (let y = maxYear; y >= 1940; y--) years.push(y);
@@ -46,6 +56,12 @@ export default function BirthdayMatchApp({ maxYear }: { maxYear: number }) {
     }
     setError("");
     setShown([da, db]);
+    setSaved(false);
+    addHistory({
+      kind: "birthday",
+      label: `생일 궁합 ${birthdayMatch(da, db).score}점 (${da.y}.${da.m}.${da.d} × ${db.y}.${db.m}.${db.d})`,
+      path: birthdaySharePath(da, db),
+    });
   }
 
   return (
@@ -66,6 +82,16 @@ export default function BirthdayMatchApp({ maxYear }: { maxYear: number }) {
         <div className="flex flex-col gap-3 rounded-3xl border-2 border-primary/20 bg-white p-4">
           <BirthdayResult a={shown[0]} b={shown[1]} />
           <ShareButton path={birthdaySharePath(shown[0], shown[1])} title="우리 생일 궁합" />
+          <button
+            type="button"
+            onClick={() => {
+              saveProfile({ y: shown[0].y, m: shown[0].m, d: shown[0].d });
+              setSaved(true);
+            }}
+            className="rounded-2xl border-2 border-primary py-3 text-sm font-bold text-primary"
+          >
+            {saved ? "저장했어! 오늘의 운세에서 매일 볼 수 있어 ✅" : "내 생일 저장하고 매일 오늘의 운세 보기 ☀️"}
+          </button>
         </div>
       )}
     </div>

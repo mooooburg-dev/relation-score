@@ -20,6 +20,7 @@ import {
   ZodiacRankingList,
 } from "@/components/zodiac";
 import ZodiacFinder from "@/components/zodiac-finder";
+import { todayZodiacPath } from "@/lib/daily";
 import { SITE_URL } from "@/lib/site";
 import { lastmodFor } from "@/lib/lastmod";
 import {
@@ -173,6 +174,13 @@ export default async function ZodiacTypePage({ params }: { params: Promise<Param
         <SectionTitle>{name}와 잘 맞는 별자리 순위</SectionTitle>
         <ZodiacRankingList me={z} />
       </Card>
+
+      <Link
+        href={todayZodiacPath(z)}
+        className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
+      >
+        ☀️ {name} 오늘의 운세 보기 →
+      </Link>
 
       <ZodiacGiftCard signs={[z]} lead={content.giftAngle} />
 

@@ -139,6 +139,10 @@ export default function SiteLayout({
               {LATEST_FORTUNE_YEAR} 띠별 운세
             </Link>
             {" · "}
+            <Link href="/today" className="hover:text-primary">
+              오늘의 운세
+            </Link>
+            {" · "}
             <Link href="/name" className="hover:text-primary">
               이름 궁합
             </Link>

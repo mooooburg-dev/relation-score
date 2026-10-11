@@ -17,6 +17,7 @@ import { GoldboxCta } from "@/components/gift";
 import { FamilyCard } from "@/components/family";
 import { TtiFactors, TtiGiftCard } from "@/components/tti";
 import { FortuneDisclaimer, FortuneGrid } from "@/components/fortune";
+import { todayTtiPath } from "@/lib/daily";
 import { SITE_URL } from "@/lib/site";
 import { lastmodFor } from "@/lib/lastmod";
 import {
@@ -312,6 +313,13 @@ export default async function FortunePage({ params }: { params: Promise<Params> 
         <SectionTitle>자주 묻는 질문</SectionTitle>
         <FaqList faq={f.faq} />
       </Card>
+
+      <Link
+        href={todayTtiPath(t)}
+        className="block rounded-2xl border-2 border-primary py-3.5 text-center text-sm font-bold text-primary transition active:scale-[0.98]"
+      >
+        ☀️ {name} 오늘의 운세 보기 →
+      </Link>
 
       <Link
         href={ttiTypePath(t)}

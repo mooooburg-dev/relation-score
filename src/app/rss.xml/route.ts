@@ -115,6 +115,11 @@ function feedItems(): FeedItem[] {
 
   const index: FeedItem[] = [
     {
+      title: "오늘의 운세 - 띠별·별자리별 오늘의 운세 순위",
+      path: "/today",
+      description: "12띠와 12별자리 오늘의 운세 점수 순위와 분야별 운세를 매일 업데이트.",
+    },
+    {
       title: "이름 궁합 테스트 - 획수로 보는 이름 궁합 점수 계산기",
       path: "/name",
       description: "두 사람 이름을 번갈아 쓰고 획수를 더해 이름 궁합 퍼센트를 계산. 두 방향 점수와 계산 과정까지.",

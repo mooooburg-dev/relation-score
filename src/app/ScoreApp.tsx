@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AdUnit from "./AdUnit";
 import { FamilyCard } from "@/components/family";
+// 최근 본 궁합 기록 (localStorage 전용 — 재방문 시 /today 와 홈에서 다시 열 수 있게)
+import { addHistory } from "@/lib/visitor";
 // 딥링크가 아직 없으면 선물 CTA를 숨긴다. gifts.ts 가 아니라 이 모듈을 쓰는 건
 // 클라이언트 번들에 types/pairs.json 까지 끌려들어오지 않게 하려는 것.
 import { GIFT_LINKS_READY } from "@/lib/gift-ready";
@@ -159,6 +161,13 @@ function HomeContent({ initialId }: { initialId?: string }) {
       const { id, ...rest } = data as Result & { id?: string };
       setResult(rest);
       setResultId(id ?? null);
+      if (id) {
+        addHistory({
+          kind: "mbti",
+          label: `${m.mbti} × ${o.mbti}${rel ? ` · ${rel}` : ""} ${rest.score}점`,
+          path: `/r/${id}`,
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "알 수 없는 오류");
     } finally {
