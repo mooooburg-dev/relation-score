@@ -15,6 +15,7 @@ import {
   zodiacDaily,
 } from "@/lib/daily";
 import { TTI_LIST } from "@/lib/tti-rules";
+import PushOptIn from "@/components/push-opt-in";
 import { ZODIAC_LIST } from "@/lib/zodiac-rules";
 import {
   VISITOR_EVENT,
@@ -150,6 +151,7 @@ export default function MyToday({ variant = "full" }: { variant?: "full" | "comp
           </span>
         </Link>
       </div>
+      <PushOptIn tti={tti} zodiac={zodiac} />
       <p className="mt-3 text-center text-[11px] text-foreground/45">
         {profile.y}.{profile.m}.{profile.d}생 기준 ·{" "}
         <button type="button" onClick={() => setEditing(true)} className="underline">
