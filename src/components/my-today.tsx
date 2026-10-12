@@ -12,6 +12,9 @@ import {
   todayZodiacPath,
   TODAY_PATH,
   ttiDaily,
+  weekScores,
+  weekdayOf,
+  ymdKey,
   zodiacDaily,
 } from "@/lib/daily";
 import { TTI_LIST } from "@/lib/tti-rules";
@@ -91,6 +94,10 @@ export default function MyToday({ variant = "full" }: { variant?: "full" | "comp
   const zodiac = profileZodiac(profile);
   const t = ttiDaily(tti, today);
   const z = zodiacDaily(zodiac, today);
+  // 이번 주 내 베스트 데이 — 띠·별자리 점수 평균이 가장 높은 날
+  const week = weekScores((d) => Math.round((ttiDaily(tti, d).score + zodiacDaily(zodiac, d).score) / 2), today);
+  const best = week.reduce((a, b) => (b.score > a.score ? b : a), week[0]);
+  const bestIsToday = ymdKey(best.date) === ymdKey(today);
   const ttiInfo = TTI_LIST.find((x) => x.id === tti)!;
   const zInfo = ZODIAC_LIST.find((x) => x.id === zodiac)!;
 
@@ -151,6 +158,13 @@ export default function MyToday({ variant = "full" }: { variant?: "full" | "comp
           </span>
         </Link>
       </div>
+      <p className="mt-3 rounded-xl bg-white/70 py-2 text-center text-xs font-semibold text-foreground/70">
+        📅 이번 주 내 베스트 데이:{" "}
+        <b className="text-primary">
+          {bestIsToday ? "바로 오늘!" : `${best.date.m}/${best.date.d}(${weekdayOf(best.date)})`}
+        </b>{" "}
+        평균 {best.score}점
+      </p>
       <PushOptIn tti={tti} zodiac={zodiac} />
       <p className="mt-3 text-center text-[11px] text-foreground/45">
         {profile.y}.{profile.m}.{profile.d}생 기준 ·{" "}

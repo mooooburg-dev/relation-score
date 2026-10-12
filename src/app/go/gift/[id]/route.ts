@@ -4,6 +4,7 @@ import linksJson from "@/data/gift-links.json";
 import { MBTI_LIST } from "@/lib/mbti";
 import { isTti } from "@/lib/tti";
 import { isZodiac } from "@/lib/zodiac";
+import { getEvent } from "@/lib/events";
 import { isOperatorRequest } from "@/lib/admin/operator";
 import { isBotUa } from "@/lib/bot";
 
@@ -26,7 +27,7 @@ const links = linksJson as Record<string, string>;
 
 /** 자유 입력값을 그대로 넣지 않는다 — 길이·화이트리스트로 자른다 */
 const SURFACES = new Set(["list", "relation"]);
-const ENTRIES = new Set(["type", "pair", "result", "tti", "fortune", "zodiac"]);
+const ENTRIES = new Set(["type", "pair", "result", "tti", "fortune", "zodiac", "event"]);
 const RELATIONS = new Set([
   "연인", "썸", "친구", "직장동료", "가족", "소개팅",
 ]);
@@ -51,6 +52,7 @@ export async function GET(
   const entry = q.get("f");
   const tti = q.get("z");
   const zodiac = q.get("zs");
+  const event = q.get("ev");
   const isAdmin = isOperatorRequest(req);
   const userAgent = req.headers.get("user-agent");
   // UA 가 아예 없는 요청도 봇으로 본다 — 사람 브라우저는 반드시 보낸다
@@ -73,6 +75,8 @@ export async function GET(
         ...(tti && isTti(tti) ? { tti } : {}),
         // 별자리 선물 — 20261011-gift-clicks-zodiac.sql (같은 이유로 있을 때만 넣는다)
         ...(zodiac && isZodiac(zodiac) ? { zodiac } : {}),
+        // 시즌 이벤트 선물 — 20261012-gift-clicks-event.sql
+        ...(event && getEvent(event) ? { event } : {}),
       });
     } catch {
       // 기록 실패가 이동을 막지 않는다

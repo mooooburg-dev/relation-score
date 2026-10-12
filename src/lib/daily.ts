@@ -208,3 +208,41 @@ export function dailyEmoji(score: number): string {
 export const TODAY_PATH = "/today";
 export const todayTtiPath = (t: Tti) => `/today/tti/${t}`;
 export const todayZodiacPath = (z: Zodiac) => `/today/zodiac/${z}`;
+
+// ---- 주간·월간 흐름 ----
+
+/** 그 날짜가 속한 주의 월요일 */
+export function weekStart(t: Ymd): Ymd {
+  const dow = new Date(Date.UTC(t.y, t.m - 1, t.d)).getUTCDay(); // 0=일
+  return addDays(t, dow === 0 ? -6 : 1 - dow);
+}
+
+export interface DayPoint {
+  date: Ymd;
+  score: number;
+}
+
+/** 이번 주(월~일) 7일 점수 */
+export function weekScores(scoreOf: (d: Ymd) => number, today: Ymd): DayPoint[] {
+  const start = weekStart(today);
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(start, i);
+    return { date, score: scoreOf(date) };
+  });
+}
+
+/** 이번 달에서 점수가 높은 날 (오늘 이후만, 동점이면 빠른 날) */
+export function bestDaysOfMonth(scoreOf: (d: Ymd) => number, today: Ymd, limit = 3): DayPoint[] {
+  const last = new Date(Date.UTC(today.y, today.m, 0)).getUTCDate();
+  const out: DayPoint[] = [];
+  for (let d = today.d; d <= last; d++) {
+    const date = { y: today.y, m: today.m, d };
+    out.push({ date, score: scoreOf(date) });
+  }
+  return out.sort((a, b) => b.score - a.score || a.date.d - b.date.d).slice(0, limit);
+}
+
+export const WEEKDAY_SHORT = WEEKDAY;
+export function weekdayOf(t: Ymd): string {
+  return WEEKDAY[new Date(Date.UTC(t.y, t.m - 1, t.d)).getUTCDay()];
+}

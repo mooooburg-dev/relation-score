@@ -15,6 +15,7 @@ function verticalOf(campaign: string): FamilyVertical {
   if (campaign.startsWith("name")) return "name";
   if (campaign.startsWith("birthday")) return "birthday";
   if (campaign.startsWith("today")) return "today";
+  if (campaign.startsWith("event")) return "event";
   if (campaign.startsWith("gift")) return "gift";
   if (campaign === "result" || campaign === "shared") return campaign;
   return "mbti";

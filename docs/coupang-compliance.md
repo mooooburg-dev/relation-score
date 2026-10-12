@@ -101,6 +101,12 @@
 클릭은 `/go/gift/[id]?f=zodiac&zs=<별자리>` → `gift_clicks.entry='zodiac'`, `gift_clicks.zodiac`
 (`20261011-gift-clicks-zodiac.sql`). 카탈로그는 일반 명사만 쓴다. 신년운세 페이지의 띠 선물은 `f=fortune` 으로 구분한다.
 
+### 9-2. 시즌 이벤트 선물 (2026-10-12 추가)
+
+`/event/*` 에 이벤트 선물 12종(`event-*`)을 붙였다. 같은 채널(`scoregift`), 장부 경유 1콜.
+**브랜드명 금지 원칙대로 "빼빼로"(상표) 대신 "막대과자"를 쓴다** — 이벤트 이름(빼빼로데이)은 기념일 명칭이라
+페이지 제목에는 쓰지만 카탈로그 `label`·`query` 에는 넣지 않는다. 클릭은 `f=event&ev=<slug>` → `gift_clicks.event`.
+
 ### 10. 골드박스투데이 전환 기록
 
 패밀리 링크(골드박스투데이·금리박스·월급박스)는 이제 `/go/out/[site]` 를 거친다.

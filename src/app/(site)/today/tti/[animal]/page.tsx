@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArticleAd, Breadcrumb, Card, JsonLd, SectionTitle, breadcrumbLd } from "@/components/seo";
 import { GoldboxCta } from "@/components/gift";
 import { DailyView } from "@/components/daily-view";
+import { WeekFlow } from "@/components/week-flow";
 import MyToday from "@/components/my-today";
 import { SITE_URL } from "@/lib/site";
 import { TTI_IDS, isTti, ttiInfo, ttiName, ttiTypePath, type Tti } from "@/lib/tti";
@@ -12,7 +13,9 @@ import {
   addDays,
   dateLabel,
   dayPillar,
+  bestDaysOfMonth,
   kstToday,
+  weekScores,
   todayTtiPath,
   ttiDaily,
 } from "@/lib/daily";
@@ -103,6 +106,12 @@ export default async function TtiTodayPage({ params }: { params: Promise<Params>
         tomorrow={ttiDaily(t, addDays(today, 1)).score}
         basisTitle={`${name}와 오늘(${p.ganji})의 관계`}
         basisNote="오늘 일진의 지지와 내 띠의 관계(띠 궁합 규칙)에, 일간의 오행이 내 띠를 살리는지 누르는지를 더했어."
+      />
+
+      <WeekFlow
+        week={weekScores((d) => ttiDaily(t, d).score, today)}
+        monthBest={bestDaysOfMonth((d) => ttiDaily(t, d).score, today)}
+        today={today}
       />
 
       <ArticleAd />

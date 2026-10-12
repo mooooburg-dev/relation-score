@@ -4,6 +4,7 @@ import { ArticleAd, Breadcrumb, Card, FaqList, JsonLd, SectionTitle, breadcrumbL
 import { GoldboxCta } from "@/components/gift";
 import MyToday from "@/components/my-today";
 import RecentHistory from "@/components/recent-history";
+import EventBanner from "@/components/event-banner";
 import { SITE_URL, type Faq } from "@/lib/site";
 import { TTI_IDS, ttiInfo, ttiName } from "@/lib/tti";
 import { ZODIAC_IDS, zodiacInfo, zodiacName } from "@/lib/zodiac";
@@ -89,6 +90,7 @@ export default function TodayPage() {
         </p>
       </header>
 
+      <EventBanner />
       <MyToday variant="full" />
 
       <Card>

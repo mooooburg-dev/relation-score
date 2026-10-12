@@ -84,6 +84,8 @@ for (const file of (await htmlFiles(APP_DIR)).sort()) {
   if (path.startsWith("/_")) continue; // _not-found, _global-error
   // 오늘의 운세는 매일 바뀌어 빌드 날짜 해시가 의미가 없다 — sitemap 이 KST 오늘 날짜를 직접 쓴다
   if (path === "/today" || path.startsWith("/today/")) continue;
+  // 시즌 이벤트는 D-day 가 매일 바뀐다 — sitemap 이 EVENT_CONTENT_UPDATED 를 쓴다
+  if (path.startsWith("/event/")) continue;
 
   const hash = createHash("sha1")
     .update(normalize(readFileSync(file, "utf-8")))

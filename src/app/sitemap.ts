@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { TODAY_PATH, kstToday, todayTtiPath, todayZodiacPath } from "@/lib/daily";
 import { TTI_IDS } from "@/lib/tti";
 import { ZODIAC_IDS } from "@/lib/zodiac";
+import { EVENTS, EVENT_CONTENT_UPDATED, eventPath } from "@/lib/events";
 import { lastmodFor } from "@/lib/lastmod";
 import {
   MBTI_LIST,
@@ -151,9 +152,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
         })),
       ]
     : [];
+  const events: MetadataRoute.Sitemap = EVENTS.map((e) => ({
+    url: `${SITE_URL}${eventPath(e.slug)}`,
+    lastModified: EVENT_CONTENT_UPDATED,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
   return [
     ...home,
     ...daily,
+    ...events,
     ...fortunes,
     ...types,
     ...gifts,

@@ -4,6 +4,7 @@ import { kstToday, todayTtiPath, todayZodiacPath, ttiDaily, ymdKey, zodiacDaily,
 import { dailyText } from "@/lib/daily-content";
 import { isTti, ttiInfo, ttiName } from "@/lib/tti";
 import { isZodiac, zodiacName } from "@/lib/zodiac";
+import { eventToday } from "@/lib/events";
 
 /**
  * 웹 푸시 발송 (서버 전용).
@@ -50,6 +51,13 @@ interface SubRow {
 
 /** 오늘 이 구독자에게 보낼 알림 내용. 띠가 있으면 띠 운세로, 별자리만 있으면 별자리 운세로 */
 export function dailyPayload(tti: string | null, zodiac: string | null) {
+  const p = basePayload(tti, zodiac);
+  // 시즌 이벤트 당일이면 제목 앞에 붙인다 ("🍫 빼빼로데이! 🐭 쥐띠 오늘 …")
+  const ev = eventToday();
+  return ev ? { ...p, title: `${ev.emoji} ${ev.name}! ${p.title}` } : p;
+}
+
+function basePayload(tti: string | null, zodiac: string | null) {
   const today = kstToday();
   const utm = "utm_source=push&utm_medium=web-push&utm_campaign=daily";
   if (tti && isTti(tti)) {

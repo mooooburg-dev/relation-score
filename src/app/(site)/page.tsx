@@ -8,6 +8,7 @@ import { TtiGrid } from "@/components/tti";
 import { ZodiacGrid } from "@/components/zodiac";
 import MyToday from "@/components/my-today";
 import RecentHistory from "@/components/recent-history";
+import EventBanner from "@/components/event-banner";
 import { ZODIAC_INDEX_PATH } from "@/lib/zodiac";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -85,6 +86,7 @@ export default function Page() {
       {/* 검색 유입/크롤링용 콘텐츠 링크 (앱 아래) */}
       <section className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-5 pb-8">
         {/* 재방문용: 생일 저장한 사람에겐 오늘 점수, 아니면 저장 유도 한 줄 */}
+        <EventBanner />
         <MyToday variant="compact" />
         <RecentHistory limit={3} />
         <ArticleAd />
