@@ -143,6 +143,14 @@ export default function SiteLayout({
               오늘의 운세
             </Link>
             {" · "}
+            <Link href="/event/pepero-day" className="hover:text-primary">
+              빼빼로데이
+            </Link>
+            {" · "}
+            <Link href="/event/christmas" className="hover:text-primary">
+              크리스마스
+            </Link>
+            {" · "}
             <Link href="/name" className="hover:text-primary">
               이름 궁합
             </Link>

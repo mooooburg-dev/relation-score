@@ -4,10 +4,21 @@ import { notFound } from "next/navigation";
 import { ArticleAd, Breadcrumb, Card, JsonLd, SectionTitle, breadcrumbLd } from "@/components/seo";
 import { GoldboxCta } from "@/components/gift";
 import { DailyView } from "@/components/daily-view";
+import { WeekFlow } from "@/components/week-flow";
 import MyToday from "@/components/my-today";
 import { SITE_URL } from "@/lib/site";
 import { ZODIAC_IDS, isZodiac, zodiacInfo, zodiacName, zodiacTypePath, type Zodiac } from "@/lib/zodiac";
-import { TODAY_PATH, addDays, dateLabel, kstToday, moonSign, todayZodiacPath, zodiacDaily } from "@/lib/daily";
+import {
+  TODAY_PATH,
+  addDays,
+  bestDaysOfMonth,
+  dateLabel,
+  kstToday,
+  moonSign,
+  todayZodiacPath,
+  weekScores,
+  zodiacDaily,
+} from "@/lib/daily";
 import { dailyText } from "@/lib/daily-content";
 
 // 날짜가 바뀌면 내용이 바뀐다 — 10분마다 다시 만든다(ISR)
@@ -101,6 +112,12 @@ export default async function ZodiacTodayPage({ params }: { params: Promise<Para
         tomorrow={zodiacDaily(z, addDays(today, 1)).score}
         basisTitle={`${name}와 오늘 달(${moon})의 관계`}
         basisNote="달은 약 2.5일마다 별자리를 옮겨. 오늘 달이 있는 별자리와 내 별자리의 각도(별자리 궁합 규칙)로 계산했어."
+      />
+
+      <WeekFlow
+        week={weekScores((d) => zodiacDaily(z, d).score, today)}
+        monthBest={bestDaysOfMonth((d) => zodiacDaily(z, d).score, today)}
+        today={today}
       />
 
       <ArticleAd />

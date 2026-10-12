@@ -178,7 +178,9 @@ export default async function AdminDashboard() {
                             ? "운세"
                             : c.entry === "zodiac"
                               ? "별자리"
-                              : "직접"}
+                              : c.entry === "event"
+                                ? "이벤트"
+                                : "직접"}
                 </span>
               </li>
             ))}

@@ -1088,6 +1088,105 @@
         "hobby"
       ],
       "band": "low"
+    },
+    "event-stick-snack": {
+      "label": "막대과자 선물세트",
+      "query": "막대과자 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    },
+    "event-handmade-choco": {
+      "label": "수제 초콜릿 선물세트",
+      "query": "수제 초콜릿 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    },
+    "event-couple-keyring": {
+      "label": "커플 키링",
+      "query": "커플 키링",
+      "tags": [
+        "hobby"
+      ],
+      "band": "low"
+    },
+    "event-flower": {
+      "label": "꽃다발",
+      "query": "꽃다발 선물",
+      "tags": [
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "event-xmas-giftset": {
+      "label": "크리스마스 선물세트",
+      "query": "크리스마스 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    },
+    "event-xmas-light": {
+      "label": "크리스마스 무드등",
+      "query": "크리스마스 무드등",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "event-couple-pajama": {
+      "label": "커플 잠옷 세트",
+      "query": "커플 잠옷 세트",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
+    },
+    "event-mini-tree": {
+      "label": "미니 크리스마스 트리",
+      "query": "미니 크리스마스 트리",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
+    },
+    "event-couple-ring": {
+      "label": "커플링",
+      "query": "커플링",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "high"
+    },
+    "event-handcream-set": {
+      "label": "핸드크림 선물세트",
+      "query": "핸드크림 선물세트",
+      "tags": [
+        "practical"
+      ],
+      "band": "low"
+    },
+    "event-candy-set": {
+      "label": "사탕 선물세트",
+      "query": "사탕 선물세트",
+      "tags": [
+        "food"
+      ],
+      "band": "low"
+    },
+    "event-necklace": {
+      "label": "목걸이 선물",
+      "query": "여자 목걸이 선물",
+      "tags": [
+        "wearable",
+        "personal"
+      ],
+      "band": "mid"
     }
   },
   "types": {

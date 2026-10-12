@@ -550,6 +550,7 @@ const ENTRY_LABEL: Record<string, string> = {
   tti: "띠 궁합 페이지",
   fortune: "신년운세 페이지",
   zodiac: "별자리 궁합 페이지",
+  event: "시즌 이벤트",
 };
 const SURFACE_LABEL: Record<string, string> = {
   list: "본문 목록",
@@ -645,6 +646,7 @@ const VERTICAL_LABEL: Record<string, string> = {
   name: "이름 궁합",
   birthday: "생일 궁합",
   today: "오늘의 운세",
+  event: "시즌 이벤트",
   gift: "선물 페이지",
   result: "분석 결과",
   shared: "공유 결과",

@@ -15,6 +15,7 @@ import { FORTUNE_YEARS, fortuneIndexPath, fortuneLabel, fortunePath, yearLabel }
 import { getFortune, getFortuneTtis } from "@/lib/fortune-content";
 import { ZODIAC_INDEX_PATH, zodiacName, zodiacPairPath, zodiacScoreLabel, zodiacTypePath } from "@/lib/zodiac";
 import { getAllZodiacPairs, getAllZodiacTypes } from "@/lib/zodiac-content";
+import { EVENTS, daysUntil, eventPath, nextOccurrence } from "@/lib/events";
 
 // 정적 데이터로만 만드는 피드라 빌드 시 한 번 생성한다.
 // (Route Handler 는 Next 16 기준 기본 비캐시)
@@ -70,6 +71,15 @@ function feedItems(): FeedItem[] {
       }),
     ];
   });
+
+  // 다가오는 시즌 이벤트가 가장 앞 (가까운 순)
+  const events: FeedItem[] = [...EVENTS]
+    .sort((a, b) => daysUntil(a) - daysUntil(b))
+    .map((e) => ({
+      title: `${nextOccurrence(e).y} ${e.name} - 연애운 좋은 띠·별자리 순위와 선물 추천`,
+      path: eventPath(e.slug),
+      description: summarize(e.intro),
+    }));
 
   // 새로 연 별자리 조합 — 시즌 운세 다음, 띠 조합 앞
   const zodiacPairs: FeedItem[] = getAllZodiacPairs()
@@ -155,6 +165,7 @@ function feedItems(): FeedItem[] {
   ];
 
   return [
+    ...events,
     ...fortunes,
     ...zodiacPairs,
     ...ttiPairs,

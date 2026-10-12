@@ -11,9 +11,10 @@ import { BarList, Empty, Panel, Stat } from "../ui";
  */
 export default async function AdminRetentionPage() {
   if (!(await verifyAdmin())) return null;
-  const [push, todayOut] = await Promise.all([
+  const [push, todayOut, eventOut] = await Promise.all([
     getPushStats((t) => (isTti(t) ? ttiName(t) : t)),
     getOutboundStats({ vertical: "today" }),
+    getOutboundStats({ vertical: "event" }),
   ]);
 
   return (
@@ -87,6 +88,17 @@ export default async function AdminRetentionPage() {
         )}
       </Panel>
 
+      <h2 className="mt-2 text-lg font-bold">🎉 시즌 이벤트 → 골드박스 전환</h2>
+      <Panel title="이벤트별" hint={eventOut.error ? "" : `누적 ${eventOut.total} · 7일 ${eventOut.last7}`}>
+        {eventOut.error ? (
+          <p className="text-sm text-foreground/60">{eventOut.error}</p>
+        ) : eventOut.byPage.length ? (
+          <BarList items={eventOut.byPage} />
+        ) : (
+          <Empty>아직 클릭이 없어</Empty>
+        )}
+      </Panel>
+
       <Panel title="GA4 에서 볼 것" hint="브라우저에만 저장되는 지표">
         <ul className="flex flex-col gap-1.5 text-sm text-foreground/70">
           <li>
@@ -97,6 +109,9 @@ export default async function AdminRetentionPage() {
           </li>
           <li>
             <b>push_subscribe</b> / <b>push_unsubscribe</b> — 알림 켜기·끄기 · <b>pwa_install_prompt</b> — 홈 화면 추가
+          </li>
+          <li>
+            <b>event_banner_click</b> — 시즌 이벤트 배너(매개변수 event)
           </li>
           <li>
             utm_source=<b>push</b> — 알림으로 들어온 방문 · utm_source=<b>pwa</b> — 홈 화면 앱으로 들어온 방문

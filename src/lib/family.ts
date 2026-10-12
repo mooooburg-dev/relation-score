@@ -210,7 +210,8 @@ export function pickFamily({
     vertical === "zodiac" ||
     vertical === "name" ||
     vertical === "birthday" ||
-    vertical === "today"
+    vertical === "today" ||
+    vertical === "event"
   )
     return toPick(TTI[hash(seed) % TTI.length]);
   if (relation && isRelation(relation)) {
@@ -247,6 +248,7 @@ export type FamilyVertical =
   | "name"
   | "birthday"
   | "today"
+  | "event"
   | "gift"
   | "result"
   | "shared"
