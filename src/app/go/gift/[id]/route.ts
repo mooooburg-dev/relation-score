@@ -32,6 +32,7 @@ const RELATIONS = new Set([
   "연인", "썸", "친구", "직장동료", "가족", "소개팅",
 ]);
 const TYPES = new Set<string>(MBTI_LIST);
+const FETCH_SITES = new Set(["same-origin", "same-site", "cross-site", "none"]);
 
 export async function GET(
   req: NextRequest,
@@ -57,6 +58,8 @@ export async function GET(
   const userAgent = req.headers.get("user-agent");
   // UA 가 아예 없는 요청도 봇으로 본다 — 사람 브라우저는 반드시 보낸다
   const isBot = !userAgent || isBotUa(userAgent);
+  // 사람이 우리 페이지에서 누르면 same-origin. 판단 근거로만 남긴다(20261018-fake-iphone-bot.sql)
+  const fetchSite = req.headers.get("sec-fetch-site");
 
   after(async () => {
     try {
@@ -70,6 +73,7 @@ export async function GET(
         is_bot: isBot,
         // 어떤 봇이 오는지 보려고 남긴다. IP 는 저장하지 않는다.
         user_agent: userAgent ? userAgent.slice(0, 200) : null,
+        fetch_site: fetchSite && FETCH_SITES.has(fetchSite) ? fetchSite : null,
         // 띠 선물일 때만 키를 넣는다. 20261011-gift-clicks-tti.sql 적용 전에 tti 키가
         // 들어가면 insert 전체가 실패해 MBTI 선물 클릭 기록까지 잃는다.
         ...(tti && isTti(tti) ? { tti } : {}),

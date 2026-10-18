@@ -534,6 +534,10 @@ export interface GiftClickStats {
   total: number;
   today: number;
   last7: number;
+  /** 최근 30일 (KST, 오늘 제외) — 쿠팡 파트너스 "지난 30일" 리포트와 같은 구간 */
+  last30: number;
+  /** 최근 30일 동안 봇으로 판정돼 쿠팡으로 보내지 않은 클릭 */
+  botBlocked30: number;
   /** 어느 게이트를 타고 들어와 눌렀나 (직접 진입 포함) */
   byEntry: { key: string; label: string; count: number }[];
   /** 선물 페이지의 어느 자리에서 눌렀나 */
@@ -592,11 +596,26 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
   const rows = (data ?? []) as GiftClickRow[];
   const today = kstDate(new Date());
   const weekAgo = kstDateBefore(6);
+  // 쿠팡 리포트의 "지난 30일"은 어제까지 30일이다 (오늘은 아직 집계 전)
+  const from30 = kstDateBefore(30);
+  const in30 = (iso: string) => {
+    const d = kstDate(iso);
+    return d >= from30 && d < today;
+  };
+
+  const { count: botCount } = await supabaseAdmin
+    .from("gift_clicks")
+    .select("id", { count: "exact", head: true })
+    .eq("is_bot", true)
+    .gte("created_at", new Date(`${from30}T00:00:00+09:00`).toISOString())
+    .lt("created_at", new Date(`${today}T00:00:00+09:00`).toISOString());
 
   return {
     total: rows.length,
     today: rows.filter((r) => kstDate(r.created_at) === today).length,
     last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    last30: rows.filter((r) => in30(r.created_at)).length,
+    botBlocked30: botCount ?? 0,
     byEntry: tally(rows, "entry", (v) => (v ? (ENTRY_LABEL[v] ?? v) : "직접 진입")),
     bySurface: tally(rows, "surface", (v) => (v ? (SURFACE_LABEL[v] ?? v) : "-")),
     byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
