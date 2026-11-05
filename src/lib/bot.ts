@@ -51,3 +51,41 @@ export function botLabel(ua: string): string {
                       : "봇";
   return `🤖 ${name}`;
 }
+
+/**
+ * 봇 UA 목록에는 안 걸리지만 사람으로 보기 어려운 UA.
+ *
+ * 왜: 2026-10-25·11-03 선물 클릭에 정상 브라우저처럼 생긴 UA 가 몰렸다 —
+ * 30분 안에 Mac Chrome 123~146 이 번갈아 찍히고(실사용 Chrome 은 155~156),
+ * 자동화 도구 기본값인 `iPhone OS 13_2_3` 이 매번 다른 선물을 눌렀다.
+ * 확실하지 않아서 막지 않고 gift_clicks.suspect 에 표시만 한다. 1주일 쌓인 것을
+ * 쿠팡 파트너스 리포트와 맞춰 본 뒤 차단 여부를 정한다.
+ *
+ * - old-browser: Chrome 은 자동 업데이트라 실사용자는 최신 근처에 몰려 있다.
+ *   4주마다 한 버전(Chrome 131 = 2024-11-12 기준)으로 그날의 최신을 추정하고
+ *   8버전(약 7개월) 넘게 뒤처지면 표시한다. 버전을 숫자로 박으면 몇 달 뒤 전부 걸린다.
+ *   삼성 인터넷은 Chromium 을 늦게 따라가서, 안드로이드 인앱 웹뷰(`; wv)`)는
+ *   기기마다 업데이트가 늦을 수 있어서 제외한다.
+ * - emulator-ua: 개발자 도구·puppeteer 기본 아이폰 UA.
+ *
+ * ⚠️ 같은 규칙을 supabase/migrations/20261105-gift-clicks-suspect.sql 의 소급 표시가
+ *    SQL 로 옮겨 쓴다. 한쪽을 고치면 다른 쪽도 고친다.
+ */
+const CHROME_ANCHOR = { version: 131, date: Date.UTC(2024, 10, 12) };
+const CHROME_RELEASE_DAYS = 28;
+const CHROME_STALE_GAP = 8;
+
+export function suspectUaReasons(ua: string, now = new Date()): string[] {
+  const reasons: string[] = [];
+  const chrome = /Chrome\/(\d+)/.exec(ua);
+  if (chrome && !/SamsungBrowser|; wv\)/i.test(ua)) {
+    const latest =
+      CHROME_ANCHOR.version +
+      Math.floor(
+        (now.getTime() - CHROME_ANCHOR.date) / (CHROME_RELEASE_DAYS * 86_400_000),
+      );
+    if (Number(chrome[1]) < latest - CHROME_STALE_GAP) reasons.push("old-browser");
+  }
+  if (/iPhone OS 13_2_3 like Mac OS X/.test(ua)) reasons.push("emulator-ua");
+  return reasons;
+}

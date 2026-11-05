@@ -6,7 +6,7 @@ import { isTti } from "@/lib/tti";
 import { isZodiac } from "@/lib/zodiac";
 import { getEvent } from "@/lib/events";
 import { isOperatorRequest } from "@/lib/admin/operator";
-import { isBotUa } from "@/lib/bot";
+import { isBotUa, suspectUaReasons } from "@/lib/bot";
 
 /**
  * 선물 링크 클릭 기록 후 쿠팡 파트너스 링크로 302.
@@ -32,6 +32,8 @@ const RELATIONS = new Set([
   "연인", "썸", "친구", "직장동료", "가족", "소개팅",
 ]);
 const TYPES = new Set<string>(MBTI_LIST);
+/** 1분 안에 이만큼 앞선 클릭이 있으면 burst — 새 탭으로 선물 몇 개 열어 보는 정도는 넘는다 */
+const BURST_PRIOR_CLICKS = 4;
 
 export async function GET(
   req: NextRequest,
@@ -57,9 +59,22 @@ export async function GET(
   const userAgent = req.headers.get("user-agent");
   // UA 가 아예 없는 요청도 봇으로 본다 — 사람 브라우저는 반드시 보낸다
   const isBot = !userAgent || isBotUa(userAgent);
+  // 봇 목록엔 없지만 의심스러운 클릭 — 막지 않고 표시만 한다 (lib/bot.ts 참고)
+  const suspect = !isBot && userAgent ? suspectUaReasons(userAgent) : [];
 
   after(async () => {
     try {
+      // burst: 같은 UA 가 1분 안에 이미 4번 눌렀으면 표시. IP 가 없어 UA 로만 묶으므로
+      // 같은 기종의 다른 사람이 섞일 수 있다 — 그래서 차단이 아니라 표시다.
+      if (!isBot && userAgent) {
+        const { count } = await supabaseAdmin
+          .from("gift_clicks")
+          .select("id", { count: "exact", head: true })
+          .eq("user_agent", userAgent.slice(0, 200))
+          .gte("created_at", new Date(Date.now() - 60_000).toISOString());
+        if ((count ?? 0) >= BURST_PRIOR_CLICKS) suspect.push("burst");
+      }
+
       await supabaseAdmin.from("gift_clicks").insert({
         gift_id: id,
         mbti: mbti && TYPES.has(mbti) ? mbti : null,
@@ -70,6 +85,7 @@ export async function GET(
         is_bot: isBot,
         // 어떤 봇이 오는지 보려고 남긴다. IP 는 저장하지 않는다.
         user_agent: userAgent ? userAgent.slice(0, 200) : null,
+        suspect: suspect.length ? suspect.join(",") : null,
         // 띠 선물일 때만 키를 넣는다. 20261011-gift-clicks-tti.sql 적용 전에 tti 키가
         // 들어가면 insert 전체가 실패해 MBTI 선물 클릭 기록까지 잃는다.
         ...(tti && isTti(tti) ? { tti } : {}),
