@@ -115,10 +115,15 @@ export default async function AdminDashboard() {
         파트너스 리포트로는 화면 구분이 안 돼서, 여기서만 갈라 볼 수 있어.
       </p>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="누적 클릭" value={gift.total.toLocaleString()} />
         <Stat label="오늘" value={gift.today.toLocaleString()} sub="KST 기준" />
         <Stat label="최근 7일" value={gift.last7.toLocaleString()} />
+        <Stat
+          label="7일 중 의심"
+          value={gift.suspectLast7.toLocaleString()}
+          sub="묵은 브라우저·에뮬레이터·연타 (집계엔 포함)"
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -161,7 +166,17 @@ export default async function AdminDashboard() {
                   {formatDateTime(c.created_at)}
                 </span>
                 <span className="w-14 shrink-0 font-bold">{c.mbti ?? "-"}</span>
-                <span className="min-w-0 flex-1 truncate">{c.gift_id}</span>
+                <span className="min-w-0 flex-1 truncate">
+                  {c.gift_id}
+                  {c.suspect && (
+                    <span
+                      className="ml-1.5 rounded bg-amber-100 px-1 py-0.5 text-[10px] font-semibold text-amber-700"
+                      title={c.suspect}
+                    >
+                      의심
+                    </span>
+                  )}
+                </span>
                 <span className="shrink-0 text-xs text-foreground/50">
                   {c.relation ?? (c.surface === "list" ? "본문" : "관계")}
                 </span>

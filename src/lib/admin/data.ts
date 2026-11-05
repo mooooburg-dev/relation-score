@@ -528,12 +528,16 @@ export interface GiftClickRow {
   surface: string;
   relation: string | null;
   entry: string | null;
+  /** 봇 목록엔 없지만 의심스러운 클릭의 이유 (old-browser,emulator-ua,burst). 정상이면 null */
+  suspect: string | null;
 }
 
 export interface GiftClickStats {
   total: number;
   today: number;
   last7: number;
+  /** 최근 7일 중 의심 표시된 클릭 — 집계에서 빼지 않고 따로 보여 준다 */
+  suspectLast7: number;
   /** 어느 게이트를 타고 들어와 눌렀나 (직접 진입 포함) */
   byEntry: { key: string; label: string; count: number }[];
   /** 선물 페이지의 어느 자리에서 눌렀나 */
@@ -583,7 +587,7 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
 
   const { data } = await supabaseAdmin
     .from("gift_clicks")
-    .select("id, created_at, gift_id, mbti, surface, relation, entry")
+    .select("id, created_at, gift_id, mbti, surface, relation, entry, suspect")
     .eq("is_admin", false) // 운영자 본인 클릭 제외
     .eq("is_bot", false) // 봇 클릭 제외
     .order("created_at", { ascending: false })
@@ -597,6 +601,8 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
     total: rows.length,
     today: rows.filter((r) => kstDate(r.created_at) === today).length,
     last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
+    suspectLast7: rows.filter((r) => r.suspect && kstDate(r.created_at) >= weekAgo)
+      .length,
     byEntry: tally(rows, "entry", (v) => (v ? (ENTRY_LABEL[v] ?? v) : "직접 진입")),
     bySurface: tally(rows, "surface", (v) => (v ? (SURFACE_LABEL[v] ?? v) : "-")),
     byGift: tally(rows, "gift_id", (v) => v ?? "-").slice(0, 10),
