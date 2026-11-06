@@ -10,6 +10,7 @@ const MENU = [
   { href: "/admin/zodiac", label: "별자리", exact: false },
   { href: "/admin/tools", label: "이름·생일", exact: false },
   { href: "/admin/retention", label: "재방문", exact: false },
+  { href: "/admin/users", label: "사용자", exact: false },
 ];
 
 export default function AdminNav() {
