@@ -81,7 +81,7 @@ export default function BirthdayMatchApp({ maxYear }: { maxYear: number }) {
       {shown && (
         <div className="flex flex-col gap-3 rounded-3xl border-2 border-primary/20 bg-white p-4">
           <BirthdayResult a={shown[0]} b={shown[1]} />
-          <ShareButton path={birthdaySharePath(shown[0], shown[1])} title="우리 생일 궁합" />
+          <ShareButton path={birthdaySharePath(shown[0], shown[1])} title="우리 생일 궁합" where="birthday" />
           <button
             type="button"
             onClick={() => {

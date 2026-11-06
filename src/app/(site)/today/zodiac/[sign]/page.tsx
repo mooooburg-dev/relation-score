@@ -7,6 +7,7 @@ import { DailyView } from "@/components/daily-view";
 import { WeekFlow } from "@/components/week-flow";
 import MyToday from "@/components/my-today";
 import PushOptIn from "@/components/push-opt-in";
+import KakaoShareButton from "@/components/kakao-share";
 import { SITE_URL } from "@/lib/site";
 import { ZODIAC_IDS, isZodiac, zodiacInfo, zodiacName, zodiacTypePath, type Zodiac } from "@/lib/zodiac";
 import {
@@ -125,6 +126,8 @@ export default async function ZodiacTodayPage({ params }: { params: Promise<Para
       />
 
       <ArticleAd />
+
+      <KakaoShareButton path={path} where="today-zodiac" label={`${name} 오늘 운세 친구에게 보내기`} />
 
       <GoldboxCta
         campaign="family_today-cta"

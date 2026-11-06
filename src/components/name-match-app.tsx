@@ -73,6 +73,7 @@ export default function NameMatchApp() {
           <ShareButton
             path={nameSharePath(shown[0], shown[1])}
             title={`${shown[0]} ♥ ${shown[1]} 이름 궁합`}
+            where="name"
           />
         </div>
       )}

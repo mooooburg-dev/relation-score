@@ -7,6 +7,7 @@ import { FamilyCard } from "@/components/family";
 import { NameResult } from "@/components/name-result";
 import { decodeNameShare, nameMatch } from "@/lib/name-match";
 import { recordToolView } from "@/lib/tool-views";
+import KakaoShareButton from "@/components/kakao-share";
 
 type Params = { code: string };
 
@@ -30,7 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function NameSharePage({ params }: { params: Promise<Params> }) {
-  const names = decodeNameShare((await params).code);
+  const { code } = await params;
+  const names = decodeNameShare(code);
   if (!names) notFound();
   await recordToolView("name");
   const [a, b] = names;
@@ -52,6 +54,7 @@ export default async function NameSharePage({ params }: { params: Promise<Params
       >
         나도 이름 궁합 보기 💘
       </Link>
+      <KakaoShareButton path={`/name/r/${code}`} where="name-share" label="이 결과 카톡으로 보내기" />
       <GoldboxCta
         campaign="family_name-share-cta"
         content="name_share"

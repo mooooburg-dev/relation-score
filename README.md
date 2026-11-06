@@ -150,6 +150,15 @@ npm run tti-content -- all --force --provider openai
   없으면 알림 버튼이 숨고 크론은 발송하지 않는다
 - 어드민 `/admin/retention`: 구독자·띠 분포·발송 기록, GA 에서 볼 이벤트 목록
 
+### 카카오톡 공유
+
+`src/components/kakao-share.tsx` — 카카오 JS SDK(2.8.4, SRI 고정)의 `Share.sendScrap` 으로 공유한다. 카카오가 대상 페이지의
+OG 태그를 직접 읽어 카드를 만들기 때문에, 공유 결과 페이지(`/name/r`, `/birthday/r`)의 동적 OG 이미지가 그대로 미리보기가 된다.
+이름·생일 궁합 결과, 공유 결과 페이지, 시즌 이벤트, 띠·별자리 오늘의 운세에 있다. GA 이벤트 `kakao_share`(where).
+
+- 키: `NEXT_PUBLIC_KAKAO_JS_KEY` (JavaScript 키 — 공개용, 카카오 콘솔에 등록한 도메인 score.drawyourmind.com·localhost:3000 에서만 동작)
+- 키가 없거나 SDK 로드·SRI 검증에 실패하면 버튼을 숨기고 기존 링크 공유만 남는다. SDK 버전을 올리면 SRI 해시도 함께 바꿀 것
+
 ### 이름·생일 궁합
 
 입력형 도구라 본문 데이터가 없다. 계산은 순수 함수(`src/lib/name-match.ts`, `birthday-match.ts`)로
