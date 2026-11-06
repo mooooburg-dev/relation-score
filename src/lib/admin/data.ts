@@ -369,11 +369,8 @@ export interface GroupListResult {
 export const GROUPS_PER_PAGE = 10;
 const GROUP_SCAN_LIMIT = 5_000;
 
-/** User-Agent → 사람이 읽는 기기 이름 */
-export function deviceLabel(ua: string | null): string {
-  if (!ua) return "기기 미상";
-  if (isBotUa(ua)) return botLabel(ua);
-
+/** User-Agent → OS·브라우저 (봇이 아닌 UA 기준) */
+export function deviceParts(ua: string): { os: string; browser: string } {
   const os = /iPhone/i.test(ua)
     ? "iPhone"
     : /iPad/i.test(ua)
@@ -413,6 +410,14 @@ export function deviceLabel(ua: string | null): string {
                         ? "Safari"
                         : "기타";
 
+  return { os, browser };
+}
+
+/** User-Agent → 사람이 읽는 기기 이름 */
+export function deviceLabel(ua: string | null): string {
+  if (!ua) return "기기 미상";
+  if (isBotUa(ua)) return botLabel(ua);
+  const { os, browser } = deviceParts(ua);
   return `${os} · ${browser}`;
 }
 
@@ -1003,5 +1008,249 @@ export async function getPushStats(ttiLabel: (t: string) => string): Promise<Pus
     newLast7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
     byTti: tally(rows, "tti", (v) => (v ? ttiLabel(v) : "(띠 없음)")),
     log: (log ?? []) as PushStats["log"],
+  };
+}
+
+export interface CountItem {
+  key: string;
+  label: string;
+  count: number;
+}
+
+export interface UserStats {
+  /** 집계에 쓴 분석 수 (사람·운영자 제외) */
+  analyses: number;
+  /** IP·UA 로 묶은 추정 사용자 수 */
+  users: number;
+  /** 2회 이상 분석한 사용자 */
+  repeatUsers: number;
+  /** 사용자 기준 입력률 (본인 정보) */
+  filled: { age: number; gender: number; blood: number };
+  medianAge: number | null;
+  me: {
+    ageBands: CountItem[];
+    gender: CountItem[];
+    blood: CountItem[];
+    mbti: CountItem[];
+  };
+  /** 상대 정보는 사용자가 아니라 분석 한 건 단위 */
+  other: { ageBands: CountItem[]; gender: CountItem[]; blood: CountItem[] };
+  /** 본인 나이대별 많이 본 관계 */
+  relationByAge: { band: string; users: number; top: { relation: string; count: number }[] }[];
+  device: { kind: CountItem[]; os: CountItem[]; browser: CountItem[] };
+  /** KST 시간대별 분석 수 */
+  hours: CountItem[];
+  /** 조회 상한에 걸려 최근 일부만 집계했으면 그 건수 (전체는 analysesTotal) */
+  truncated: boolean;
+  analysesTotal: number;
+}
+
+const AGE_BANDS = ["10대 이하", "20대", "30대", "40대", "50대 이상"] as const;
+const BLOOD_ORDER = ["A형", "B형", "O형", "AB형"];
+const GENDER_ORDER = ["여자", "남자"];
+const HOUR_BANDS = [
+  { label: "새벽 0–6시", from: 0, to: 6 },
+  { label: "아침 6–9시", from: 6, to: 9 },
+  { label: "낮 9–12시", from: 9, to: 12 },
+  { label: "오후 12–18시", from: 12, to: 18 },
+  { label: "저녁 18–21시", from: 18, to: 21 },
+  { label: "밤 21–24시", from: 21, to: 24 },
+];
+const KST_HOUR = new Intl.DateTimeFormat("en-US", {
+  timeZone: "Asia/Seoul",
+  hour: "2-digit",
+  hour12: false,
+});
+
+/** 입력란이 자유 숫자라 1~99 밖은 장난 입력으로 보고 버린다 */
+function parseAge(v: string | undefined): number | null {
+  const n = parseInt(v ?? "", 10);
+  return Number.isFinite(n) && n >= 1 && n <= 99 ? n : null;
+}
+
+function ageBand(age: number): string {
+  if (age < 20) return AGE_BANDS[0];
+  if (age >= 50) return AGE_BANDS[4];
+  return AGE_BANDS[Math.floor(age / 10) - 1];
+}
+
+/** 정해진 순서가 있는 항목은 그 순서로, 0건도 빠짐없이 */
+function ordered(map: Map<string, number>, order: readonly string[]): CountItem[] {
+  return order.map((label) => ({ key: label, label, count: map.get(label) ?? 0 }));
+}
+
+function ranked(map: Map<string, number>, limit?: number): CountItem[] {
+  const list = [...map.entries()]
+    .map(([label, count]) => ({ key: label, label, count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  return limit ? list.slice(0, limit) : list;
+}
+
+/**
+ * 사용자 프로필 집계 — MBTI 분석에 입력한 본인 정보와 UA 기준.
+ *
+ * 가입이 없어서 "사용자"는 분석 목록의 사용자별 묶기와 같은 IP·UA 조합으로 추정한다.
+ * 본인 정보는 브라우저에 저장돼 매번 같이 오므로 사용자당 가장 최근 입력값 하나만 센다
+ * (한 사람이 분석을 20번 돌려도 1명). 상대 정보는 사람마다 달라서 분석 단위로 센다.
+ * 띠·별자리·이름·생일 도구는 계산이 브라우저에서 끝나 서버에 입력이 남지 않는다 — 여기 안 잡힌다.
+ */
+export async function getUserStats(days?: number): Promise<UserStats> {
+  await requireAdmin();
+
+  let query = supabaseAdmin
+    .from(SCORE_TABLE)
+    .select("id, created_at, relation, inputs, ip, user_agent", { count: "exact" })
+    .eq("is_admin", false)
+    .eq("is_bot", false);
+  if (days) {
+    query = query.gte("created_at", new Date(Date.now() - days * 86_400_000).toISOString());
+  }
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .limit(STAT_LIMIT);
+  if (error) throw new Error(`사용자 통계 조회 실패: ${error.message}`);
+  // Supabase API 의 max rows 설정이 limit 보다 작으면 조용히 잘린다 — count 와 비교해서 알린다
+  const fetched = (data ?? []).length;
+  const truncated = count !== null && fetched < count;
+
+  type Row = Pick<AnalysisRow, "id" | "created_at" | "relation" | "inputs" | "ip" | "user_agent">;
+  const rows = ((data ?? []) as Row[]).filter((r) => !isBotUa(r.user_agent));
+
+  const bump = (map: Map<string, number>, key: string) => map.set(key, (map.get(key) ?? 0) + 1);
+  // API 가 성별·혈액형 값을 검증하지 않는다 (URL 파라미터로도 채워진다). 모르는 값은 버리지 않고 '기타'로
+  const pick = (v: string | undefined, allowed: readonly string[]) =>
+    !v ? null : allowed.includes(v) ? v : "기타";
+
+  // 상대 정보·시간대: 분석 단위
+  const otherAge = new Map<string, number>();
+  const otherGender = new Map<string, number>();
+  const otherBlood = new Map<string, number>();
+  const hourCount = new Map<string, number>();
+
+  interface Visitor {
+    count: number;
+    age: number | null;
+    gender: string | null;
+    blood: string | null;
+    mbti: string | null;
+    ua: string | null;
+    relations: Map<string, number>;
+  }
+  const visitors = new Map<string, Visitor>();
+
+  for (const r of rows) {
+    const inp = r.inputs ?? ({} as AnalysisInputs);
+
+    const oa = parseAge(inp.otherAge);
+    bump(otherAge, oa === null ? "미입력" : ageBand(oa));
+    bump(otherGender, pick(inp.otherGender, GENDER_ORDER) ?? "미입력");
+    bump(otherBlood, pick(inp.otherBlood, BLOOD_ORDER) ?? "미입력");
+
+    const h = Number(KST_HOUR.format(new Date(r.created_at))) % 24;
+    bump(hourCount, HOUR_BANDS.find((b) => h >= b.from && h < b.to)!.label);
+
+    const key =
+      r.ip || r.user_agent ? `${r.ip ?? "-"}\u0000${r.user_agent ?? "-"}` : `unknown\u0000${r.id}`;
+    let v = visitors.get(key);
+    if (!v) {
+      v = { count: 0, age: null, gender: null, blood: null, mbti: null, ua: r.user_agent, relations: new Map() };
+      visitors.set(key, v);
+    }
+    v.count++;
+    bump(v.relations, r.relation || "(없음)");
+    // 행은 최신순 — 처음 만난 값이 가장 최근 입력이다. 비어 있으면 그 전 입력으로 채운다
+    v.age ??= parseAge(inp.myAge);
+    v.gender ??= pick(inp.myGender, GENDER_ORDER);
+    v.blood ??= pick(inp.myBlood, BLOOD_ORDER);
+    v.mbti ??= inp.myMbti?.toUpperCase() || null;
+  }
+
+  const meAge = new Map<string, number>();
+  const meGender = new Map<string, number>();
+  const meBlood = new Map<string, number>();
+  const meMbti = new Map<string, number>();
+  const kind = new Map<string, number>();
+  const os = new Map<string, number>();
+  const browser = new Map<string, number>();
+  const bandUsers = new Map<string, number>();
+  const bandRelations = new Map<string, Map<string, number>>();
+  const ages: number[] = [];
+  let repeatUsers = 0;
+
+  for (const v of visitors.values()) {
+    if (v.count >= 2) repeatUsers++;
+    const band = v.age === null ? "미입력" : ageBand(v.age);
+    if (v.age !== null) ages.push(v.age);
+    bump(meAge, band);
+    bump(meGender, v.gender ?? "미입력");
+    bump(meBlood, v.blood ?? "미입력");
+    if (v.mbti) bump(meMbti, v.mbti);
+
+    if (v.age !== null) {
+      bump(bandUsers, band);
+      const rel = bandRelations.get(band) ?? new Map<string, number>();
+      for (const [k, c] of v.relations) rel.set(k, (rel.get(k) ?? 0) + c);
+      bandRelations.set(band, rel);
+    }
+
+    if (v.ua) {
+      const d = deviceParts(v.ua);
+      // iPadOS 13+ 사파리는 Mac UA 를 보내서 Mac(PC)으로 잡힌다 — UA 로는 구분 불가
+      bump(os, d.os);
+      bump(browser, d.browser);
+      bump(kind, d.os === "iPad" ? "태블릿" : d.os === "iPhone" || d.os === "Android" ? "모바일" : "PC");
+    } else {
+      bump(kind, "미상");
+    }
+  }
+
+  ages.sort((a, b) => a - b);
+  const users = visitors.size;
+  const pct = (n: number) => (users ? Math.round((n / users) * 100) : 0);
+  const withMissing = (map: Map<string, number>, order: readonly string[]) => [
+    ...ordered(map, order),
+    ...["기타", "미입력"]
+      .filter((k) => map.get(k))
+      .map((k) => ({ key: k, label: k, count: map.get(k)! })),
+  ];
+  const mid = ages.length >> 1;
+
+  return {
+    analyses: rows.length,
+    users,
+    repeatUsers,
+    filled: {
+      age: pct(users - (meAge.get("미입력") ?? 0)),
+      gender: pct(users - (meGender.get("미입력") ?? 0)),
+      blood: pct(users - (meBlood.get("미입력") ?? 0)),
+    },
+    medianAge: !ages.length
+      ? null
+      : ages.length % 2
+        ? ages[mid]
+        : Math.round((ages[mid - 1] + ages[mid]) / 2),
+    me: {
+      ageBands: withMissing(meAge, AGE_BANDS),
+      gender: withMissing(meGender, GENDER_ORDER),
+      blood: withMissing(meBlood, BLOOD_ORDER),
+      mbti: ranked(meMbti, 16),
+    },
+    other: {
+      ageBands: withMissing(otherAge, AGE_BANDS),
+      gender: withMissing(otherGender, GENDER_ORDER),
+      blood: withMissing(otherBlood, BLOOD_ORDER),
+    },
+    relationByAge: AGE_BANDS.filter((b) => bandUsers.get(b)).map((band) => ({
+      band,
+      users: bandUsers.get(band)!,
+      top: [...(bandRelations.get(band) ?? new Map<string, number>()).entries()]
+        .map(([relation, count]) => ({ relation, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3),
+    })),
+    device: { kind: ranked(kind), os: ranked(os), browser: ranked(browser) },
+    hours: HOUR_BANDS.map((b) => ({ key: b.label, label: b.label, count: hourCount.get(b.label) ?? 0 })),
+    truncated,
+    analysesTotal: count ?? fetched,
   };
 }
