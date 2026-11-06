@@ -65,10 +65,10 @@ export default async function AdminDashboard() {
         <ColumnChart data={stats.daily} />
       </Panel>
 
-      <h2 className="mt-2 text-lg font-bold">패밀리 사이트 전환</h2>
+      <h2 className="mt-2 text-lg font-bold">🎁 패밀리 사이트 이동 (쿠팡 아님)</h2>
       <p className="-mt-2 text-xs text-foreground/50">
-        골드박스투데이·금리박스·월급박스로 나간 클릭 (/go/out 기록, 운영자·봇 제외).
-        버티컬별 상세는{" "}
+        골드박스투데이·금리박스·월급박스(우리 서비스)로 나간 클릭 (/go/out 기록, 운영자·봇 제외).
+        쿠팡 파트너스 실적과는 무관해 — 쿠팡과 비교할 숫자는 아래 &quot;쿠팡 선물 클릭&quot;이야. 버티컬별 상세는{" "}
         <Link href="/admin/tti" className="underline hover:text-primary">
           띠 궁합
         </Link>{" "}
@@ -82,7 +82,7 @@ export default async function AdminDashboard() {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <Stat label="누적 전환" value={outbound.total.toLocaleString()} />
+            <Stat label="누적 이동" value={outbound.total.toLocaleString()} />
             <Stat label="오늘" value={outbound.today.toLocaleString()} sub="KST 기준" />
             <Stat
               label="최근 7일"
@@ -109,13 +109,20 @@ export default async function AdminDashboard() {
         </>
       )}
 
-      <h2 className="mt-2 text-lg font-bold">선물 클릭</h2>
+      <h2 className="mt-2 text-lg font-bold">🛒 쿠팡 선물 클릭 (파트너스)</h2>
       <p className="-mt-2 text-xs text-foreground/50">
-        쿠팡으로 넘어간 클릭. subId 는 채널 귀속 때문에 scoregift 하나라
-        파트너스 리포트로는 화면 구분이 안 돼서, 여기서만 갈라 볼 수 있어.
+        쿠팡 파트너스 링크로 넘어간 클릭 (/go/gift 기록, 운영자·봇 제외). 파트너스 리포트의 &quot;지난 30일
+        클릭&quot;과는 &quot;최근 30일&quot;을 비교해. 쿠팡은 중복·무효 클릭을 한 번 더 거르므로 쿠팡 쪽이 적은 게 정상이고,
+        &quot;의심 제외&quot; 값에 가까우면 의심 표시가 맞다는 뜻이야. subId 가 scoregift 하나라 화면 구분은 여기서만 보여.
       </p>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat label="최근 30일" value={gift.last30.toLocaleString()} sub="어제까지 · 파트너스와 비교" />
+        <Stat
+          label="최근 30일 · 의심 제외"
+          value={gift.last30Clean.toLocaleString()}
+          sub="쿠팡 숫자가 여기 가까우면 의심 = 무효"
+        />
         <Stat label="누적 클릭" value={gift.total.toLocaleString()} />
         <Stat label="오늘" value={gift.today.toLocaleString()} sub="KST 기준" />
         <Stat label="최근 7일" value={gift.last7.toLocaleString()} />
