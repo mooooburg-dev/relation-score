@@ -165,7 +165,7 @@ export default function MyToday({ variant = "full" }: { variant?: "full" | "comp
         </b>{" "}
         평균 {best.score}점
       </p>
-      <PushOptIn tti={tti} zodiac={zodiac} />
+      <PushOptIn tti={tti} zodiac={zodiac} label={`${ttiInfo.ko}띠·${zInfo.ko}`} />
       <p className="mt-3 text-center text-[11px] text-foreground/45">
         {profile.y}.{profile.m}.{profile.d}생 기준 ·{" "}
         <button type="button" onClick={() => setEditing(true)} className="underline">

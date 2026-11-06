@@ -6,6 +6,7 @@ import { GoldboxCta } from "@/components/gift";
 import { DailyView } from "@/components/daily-view";
 import { WeekFlow } from "@/components/week-flow";
 import MyToday from "@/components/my-today";
+import PushOptIn from "@/components/push-opt-in";
 import { SITE_URL } from "@/lib/site";
 import { ZODIAC_IDS, isZodiac, zodiacInfo, zodiacName, zodiacTypePath, type Zodiac } from "@/lib/zodiac";
 import {
@@ -113,6 +114,9 @@ export default async function ZodiacTodayPage({ params }: { params: Promise<Para
         basisTitle={`${name}와 오늘 달(${moon})의 관계`}
         basisNote="달은 약 2.5일마다 별자리를 옮겨. 오늘 달이 있는 별자리와 내 별자리의 각도(별자리 궁합 규칙)로 계산했어."
       />
+
+      {/* 생일 저장 없이 이 띠·별자리 하나로 바로 아침 알림 구독 (리텐션 — 구독 단계를 줄인다) */}
+      <PushOptIn zodiac={z} label={name} syncOnMount={false} variant="card" />
 
       <WeekFlow
         week={weekScores((d) => zodiacDaily(z, d).score, today)}
