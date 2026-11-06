@@ -1187,6 +1187,23 @@
         "personal"
       ],
       "band": "mid"
+    },
+    "anniv-photobook": {
+      "label": "커플 포토북",
+      "query": "커플 포토북 제작",
+      "tags": [
+        "personal",
+        "hobby"
+      ],
+      "band": "mid"
+    },
+    "anniv-couple-mug": {
+      "label": "커플 머그컵",
+      "query": "커플 머그컵 세트",
+      "tags": [
+        "home"
+      ],
+      "band": "low"
     }
   },
   "types": {

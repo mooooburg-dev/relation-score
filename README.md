@@ -30,6 +30,8 @@ npm run lint
 | `/tti/[a]/[b]` | 띠 조합 상세 (78장, 정적 생성, 지지 순서 slug가 canonical — 역순은 308) |
 | `/today` | 오늘의 운세 허브 — 12띠·12별자리 오늘 순위, 내 운세 카드(생일 저장), 출석, 최근 본 궁합 (ISR 10분) |
 | `/today/tti/[animal]` · `/today/zodiac/[sign]` | 띠별·별자리별 오늘의 운세 (24장, ISR 10분) |
+| `/anniversary` | 커플 기념일 계산기 — D+N, 100일 단위·주년·500·1000일 날짜/D-day, .ics 캘린더, 다음 기념일 선물 |
+| `/anniversary/r/[code]` | 기념일 공유 결과 (noindex, 요청 시점 D-day 로 동적 OG — 사귄 날짜는 그리지 않음) |
 | `/event/[slug]` | 시즌 이벤트 (빼빼로데이·크리스마스·발렌타인데이·화이트데이) — 그날 연애운 순위·선물 (ISR 1시간) |
 | `/name` | 이름 궁합(획수 궁합) 계산기 — 계산은 브라우저에서, 이름은 서버로 보내지 않음 |
 | `/name/r/[code]` | 이름 궁합 공유 결과 (noindex, 동적 OG, 조회는 `tool_views`) |
@@ -149,6 +151,13 @@ npm run tti-content -- all --force --provider openai
 - 환경변수: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET` (Vercel production 등록 완료).
   없으면 알림 버튼이 숨고 크론은 발송하지 않는다
 - 어드민 `/admin/retention`: 구독자·띠 분포·발송 기록, GA 에서 볼 이벤트 목록
+
+### 커플 기념일 계산기
+
+`src/lib/anniversary.ts` — 사귄 날을 1일로 세는 게 기본(옵션으로 0일), 주년은 같은 날짜(2/29 → 평년 2/28).
+계산은 브라우저에서만, 사귄 날은 localStorage(`rs_anniversary`)에 기억해 재방문 시 바로 보여주고 내 운세 카드에 "💑 우리 D+N".
+다음 기념일 종류(100일·100일 단위·1주년·큰 기념일)에 맞춰 선물(`ANNIV_GIFTS`, `anniv-*`·`event-*` 카탈로그)을 고른다.
+캘린더(.ics)는 다가오는 기념일 12개 + 3일 전 알림. 공유 페이지는 매 요청 계산(`force-dynamic`)이라 D-day 가 늘 맞다.
 
 ### 카카오톡 공유
 

@@ -107,6 +107,13 @@ export default function Page() {
             <span className="text-sm font-extrabold">생일 궁합</span>
             <span className="block text-[11px] text-foreground/50">띠 + 별자리 한 번에</span>
           </Link>
+          <Link
+            href="/anniversary"
+            className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm transition hover:text-primary"
+          >
+            <span className="text-sm font-extrabold">💑 커플 기념일 계산기</span>
+            <span className="block text-[11px] text-foreground/50">우리 100일·1주년은 언제? D-day 바로 계산</span>
+          </Link>
         </div>
         <div className="rounded-3xl bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">

@@ -140,6 +140,11 @@ function feedItems(): FeedItem[] {
       description: "생년월일 두 개로 띠 궁합과 별자리 궁합을 함께 계산해 종합 점수로 보여주는 생일 궁합.",
     },
     {
+      title: "커플 기념일 계산기 - 100일·200일·1주년 날짜와 D-day 계산",
+      path: "/anniversary",
+      description: "사귄 날만 넣으면 100일·200일·1주년·1000일 날짜와 요일, D-day 를 계산. 캘린더 추가와 기념일 선물 추천까지.",
+    },
+    {
       title: "별자리 궁합표 - 12별자리 궁합 점수, 잘 맞는 별자리와 안 맞는 별자리",
       path: ZODIAC_INDEX_PATH,
       description:

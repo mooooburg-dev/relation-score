@@ -16,6 +16,7 @@ import { addDays, kstToday, ymdKey } from "./daily";
 const KEY_PROFILE = "rs_profile";
 const KEY_STREAK = "rs_streak";
 const KEY_HISTORY = "rs_history";
+const KEY_ANNIV = "rs_anniversary";
 /** 같은 탭 안의 다른 컴포넌트에 변경을 알린다 (storage 이벤트는 다른 탭에만 온다) */
 export const VISITOR_EVENT = "rs-visitor-change";
 
@@ -65,6 +66,26 @@ export function profileZodiac(p: Profile): Zodiac {
   return zodiacOf(p.m, p.d);
 }
 
+// ---- 커플 기념일 (사귄 날) ----
+
+export interface AnniversaryPref {
+  y: number;
+  m: number;
+  d: number;
+  includeStart: boolean;
+}
+
+export function getAnniversary(): AnniversaryPref | null {
+  const a = read<AnniversaryPref>(KEY_ANNIV);
+  return a && a.y > 1900 && a.m >= 1 && a.m <= 12 && a.d >= 1 ? a : null;
+}
+export function saveAnniversary(a: AnniversaryPref) {
+  write(KEY_ANNIV, a);
+}
+export function clearAnniversary() {
+  write(KEY_ANNIV, null);
+}
+
 // ---- 출석 ----
 
 export interface Streak {
@@ -97,7 +118,7 @@ export function touchStreak(): Streak {
 // ---- 최근 본 궁합 ----
 
 export interface HistoryItem {
-  kind: "name" | "birthday" | "mbti";
+  kind: "name" | "birthday" | "mbti" | "anniversary";
   label: string;
   path: string;
   at: number;

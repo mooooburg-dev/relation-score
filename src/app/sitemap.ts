@@ -75,6 +75,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${SITE_URL}/anniversary`,
+      lastModified: lastmodFor("/anniversary"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${SITE_URL}/gift`,
       lastModified: lastmodFor("/gift"),
       changeFrequency: "weekly",

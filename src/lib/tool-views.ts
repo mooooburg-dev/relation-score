@@ -9,7 +9,7 @@ import { isOperatorRequest } from "@/lib/admin/operator";
  * 응답 뒤(after)에 기록하고, 실패해도 페이지에는 영향이 없다.
  * 이름·생일·공유 코드는 저장하지 않는다.
  */
-export async function recordToolView(tool: "name" | "birthday") {
+export async function recordToolView(tool: "name" | "birthday" | "anniversary") {
   const h = await headers();
   const ua = h.get("user-agent");
   // isOperatorRequest 는 Request 의 Cookie 헤더만 본다
