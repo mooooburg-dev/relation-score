@@ -11,15 +11,16 @@ import { BarList, ColumnChart, Empty, Panel, Stat } from "../ui";
 export default async function AdminToolsPage() {
   if (!(await verifyAdmin())) return null;
 
-  const [views, nameOut, birthdayOut] = await Promise.all([
+  const [views, nameOut, birthdayOut, annivOut] = await Promise.all([
     getToolViewStats(),
     getOutboundStats({ vertical: "name" }),
     getOutboundStats({ vertical: "birthday" }),
+    getOutboundStats({ vertical: "anniversary" }),
   ]);
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">이름·생일 궁합</h1>
+      <h1 className="text-xl font-bold">이름·생일 궁합 · 기념일 계산기</h1>
 
       <h2 className="mt-2 text-lg font-bold">공유 결과 조회</h2>
       <p className="-mt-2 text-xs text-foreground/50">
@@ -49,6 +50,7 @@ export default async function AdminToolsPage() {
         {[
           { title: "💘 이름 궁합", s: nameOut },
           { title: "🎂 생일 궁합", s: birthdayOut },
+          { title: "💑 커플 기념일", s: annivOut },
         ].map(({ title, s }) => (
           <Panel key={title} title={title} hint={s.error ? "" : `누적 ${s.total} · 7일 ${s.last7}`}>
             {s.error ? (

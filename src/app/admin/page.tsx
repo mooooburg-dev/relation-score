@@ -202,6 +202,8 @@ export default async function AdminDashboard() {
                               ? "별자리"
                               : c.entry === "event"
                                 ? "이벤트"
+                                : c.entry === "anniversary"
+                                  ? "기념일"
                                 : "직접"}
                 </span>
               </li>

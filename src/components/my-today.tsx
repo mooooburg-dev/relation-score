@@ -19,11 +19,13 @@ import {
 } from "@/lib/daily";
 import { TTI_LIST } from "@/lib/tti-rules";
 import PushOptIn from "@/components/push-opt-in";
+import { dayCount, daysUntil, dLabel, upcoming } from "@/lib/anniversary";
 import { ZODIAC_LIST } from "@/lib/zodiac-rules";
 import {
   VISITOR_EVENT,
   clearProfile,
   getProfile,
+  getAnniversary,
   getStreak,
   profileTti,
   profileZodiac,
@@ -165,6 +167,7 @@ export default function MyToday({ variant = "full" }: { variant?: "full" | "comp
         </b>{" "}
         평균 {best.score}점
       </p>
+      <CoupleLine />
       <PushOptIn tti={tti} zodiac={zodiac} label={`${ttiInfo.ko}띠·${zInfo.ko}`} />
       <p className="mt-3 text-center text-[11px] text-foreground/45">
         {profile.y}.{profile.m}.{profile.d}생 기준 ·{" "}
@@ -269,5 +272,29 @@ function ProfileForm({
         )}
       </div>
     </form>
+  );
+}
+
+/** 사귄 날을 기억해 뒀으면 "우리 D+N · 다음 기념일" 한 줄 (커플 기념일 계산기 재방문 연결) */
+function CoupleLine() {
+  const a = getAnniversary();
+  if (!a) return null;
+  const today = kstToday();
+  const start = { y: a.y, m: a.m, d: a.d };
+  const n = dayCount(start, today, a.includeStart);
+  const next = upcoming(start, today, a.includeStart, 1)[0];
+  return (
+    <Link
+      href="/anniversary"
+      className="mt-2 block rounded-xl bg-white/70 py-2 text-center text-xs font-semibold text-foreground/70"
+    >
+      💑 우리 <b className="text-primary">D+{n}</b>
+      {next && (
+        <>
+          {" "}
+          · {next.label}까지 {dLabel(daysUntil(next.date, today))}
+        </>
+      )}
+    </Link>
   );
 }

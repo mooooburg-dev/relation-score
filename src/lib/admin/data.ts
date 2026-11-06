@@ -564,6 +564,7 @@ const ENTRY_LABEL: Record<string, string> = {
   fortune: "신년운세 페이지",
   zodiac: "별자리 궁합 페이지",
   event: "시즌 이벤트",
+  anniversary: "커플 기념일",
 };
 const SURFACE_LABEL: Record<string, string> = {
   list: "본문 목록",
@@ -670,6 +671,7 @@ const VERTICAL_LABEL: Record<string, string> = {
   birthday: "생일 궁합",
   today: "오늘의 운세",
   event: "시즌 이벤트",
+  anniversary: "커플 기념일",
   gift: "선물 페이지",
   result: "분석 결과",
   shared: "공유 결과",
@@ -933,7 +935,11 @@ export interface ToolViewStats {
   daily: { date: string; count: number }[];
 }
 
-const TOOL_LABEL: Record<string, string> = { name: "💘 이름 궁합", birthday: "🎂 생일 궁합" };
+const TOOL_LABEL: Record<string, string> = {
+  name: "💘 이름 궁합",
+  birthday: "🎂 생일 궁합",
+  anniversary: "💑 커플 기념일",
+};
 
 /**
  * 공유 링크가 열린 횟수 (tool_views). 계산 자체는 브라우저에서 끝나 서버 기록이 없어서,

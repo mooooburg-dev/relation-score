@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { VISITOR_EVENT, clearHistory, getHistory, track, type HistoryItem } from "@/lib/visitor";
 
-const KIND_EMOJI: Record<HistoryItem["kind"], string> = { name: "💘", birthday: "🎂", mbti: "🔮" };
+const KIND_EMOJI: Record<HistoryItem["kind"], string> = {
+  name: "💘",
+  birthday: "🎂",
+  mbti: "🔮",
+  anniversary: "💑",
+};
 
 /** 최근 본 궁합 (이 브라우저에만 저장). 기록이 없으면 아무것도 그리지 않는다 */
 export default function RecentHistory({ limit = 5 }: { limit?: number }) {

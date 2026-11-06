@@ -158,6 +158,10 @@ export default function SiteLayout({
             <Link href="/birthday" className="hover:text-primary">
               생일 궁합
             </Link>
+            {" · "}
+            <Link href="/anniversary" className="hover:text-primary">
+              기념일 계산기
+            </Link>
           </p>
           <ul className="flex flex-wrap justify-center gap-x-2 gap-y-1">
             {TTI_IDS.map((t) => (
