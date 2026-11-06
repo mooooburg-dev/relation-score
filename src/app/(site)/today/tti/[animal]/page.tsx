@@ -6,6 +6,7 @@ import { GoldboxCta } from "@/components/gift";
 import { DailyView } from "@/components/daily-view";
 import { WeekFlow } from "@/components/week-flow";
 import MyToday from "@/components/my-today";
+import PushOptIn from "@/components/push-opt-in";
 import { SITE_URL } from "@/lib/site";
 import { TTI_IDS, isTti, ttiInfo, ttiName, ttiTypePath, type Tti } from "@/lib/tti";
 import {
@@ -107,6 +108,9 @@ export default async function TtiTodayPage({ params }: { params: Promise<Params>
         basisTitle={`${name}와 오늘(${p.ganji})의 관계`}
         basisNote="오늘 일진의 지지와 내 띠의 관계(띠 궁합 규칙)에, 일간의 오행이 내 띠를 살리는지 누르는지를 더했어."
       />
+
+      {/* 생일 저장 없이 이 띠·별자리 하나로 바로 아침 알림 구독 (리텐션 — 구독 단계를 줄인다) */}
+      <PushOptIn tti={t} label={name} syncOnMount={false} variant="card" />
 
       <WeekFlow
         week={weekScores((d) => ttiDaily(t, d).score, today)}

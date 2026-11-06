@@ -137,6 +137,9 @@ npm run tti-content -- all --force --provider openai
 
 - `/today` 내 운세 카드에 "매일 아침 8시 알림 받기"(`src/components/push-opt-in.tsx`). 아이폰 사파리는 홈 화면 추가 후에만
   웹 푸시가 되므로 추가 방법을 안내하고, 안드로이드 크롬은 `beforeinstallprompt` 가 오면 홈 화면 추가 버튼을 보여준다
+- 띠·별자리 오늘의 운세 페이지(`/today/tti/*`, `/today/zodiac/*`)에도 "매일 아침 ○○띠 운세 받기" 카드가 있어 생일 저장 없이 바로
+  구독한다(구독 0명이던 원인: 생일 저장 뒤에만 버튼이 보였다). 이미 구독 중이면 다른 띠 페이지를 구경해도 바뀌지 않고
+  "○○띠 운세로 바꾸기"를 눌렀을 때만 바뀐다. 현재 구독 대상 이름은 localStorage `rs_push_label`
 - 구독(`/api/push/subscribe`)은 엔드포인트·키·띠·별자리만 저장한다(생일·IP·UA 없음). 엔드포인트는 브라우저 푸시 서비스
   호스트(FCM·Mozilla·Apple·Windows)만 받는다 — 크론이 임의 주소로 POST 하지 않게(SSRF)
 - 발송: `vercel.json` 크론 `0 23 * * *`(UTC) = 08:00 KST → `/api/cron/push-daily`(`CRON_SECRET` Bearer 필수).
