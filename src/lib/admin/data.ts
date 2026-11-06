@@ -538,6 +538,10 @@ export interface GiftClickStats {
   last7: number;
   /** 최근 7일 중 의심 표시된 클릭 — 집계에서 빼지 않고 따로 보여 준다 */
   suspectLast7: number;
+  /** 최근 30일(KST, 어제까지) — 쿠팡 파트너스 "지난 30일" 리포트와 같은 구간 */
+  last30: number;
+  /** 그중 의심 표시가 없는 클릭 */
+  last30Clean: number;
   /** 어느 게이트를 타고 들어와 눌렀나 (직접 진입 포함) */
   byEntry: { key: string; label: string; count: number }[];
   /** 선물 페이지의 어느 자리에서 눌렀나 */
@@ -596,9 +600,17 @@ export async function getGiftClickStats(): Promise<GiftClickStats> {
   const rows = (data ?? []) as GiftClickRow[];
   const today = kstDate(new Date());
   const weekAgo = kstDateBefore(6);
+  // 쿠팡 리포트의 "지난 30일"은 어제까지 30일이다 (오늘은 아직 집계 전)
+  const from30 = kstDateBefore(30);
+  const in30 = rows.filter((r) => {
+    const d = kstDate(r.created_at);
+    return d >= from30 && d < today;
+  });
 
   return {
     total: rows.length,
+    last30: in30.length,
+    last30Clean: in30.filter((r) => !r.suspect).length,
     today: rows.filter((r) => kstDate(r.created_at) === today).length,
     last7: rows.filter((r) => kstDate(r.created_at) >= weekAgo).length,
     suspectLast7: rows.filter((r) => r.suspect && kstDate(r.created_at) >= weekAgo)

@@ -32,6 +32,7 @@ const RELATIONS = new Set([
   "연인", "썸", "친구", "직장동료", "가족", "소개팅",
 ]);
 const TYPES = new Set<string>(MBTI_LIST);
+const FETCH_SITES = new Set(["same-origin", "same-site", "cross-site", "none"]);
 /** 1분 안에 이만큼 앞선 클릭이 있으면 burst — 새 탭으로 선물 몇 개 열어 보는 정도는 넘는다 */
 const BURST_PRIOR_CLICKS = 4;
 
@@ -61,6 +62,8 @@ export async function GET(
   const isBot = !userAgent || isBotUa(userAgent);
   // 봇 목록엔 없지만 의심스러운 클릭 — 막지 않고 표시만 한다 (lib/bot.ts 참고)
   const suspect = !isBot && userAgent ? suspectUaReasons(userAgent) : [];
+  // 사람이 우리 페이지에서 누르면 same-origin, 봇이 /go 를 바로 부르면 none·없음. 의심 판단 근거로만 남긴다
+  const fetchSite = req.headers.get("sec-fetch-site");
 
   after(async () => {
     try {
@@ -86,6 +89,7 @@ export async function GET(
         // 어떤 봇이 오는지 보려고 남긴다. IP 는 저장하지 않는다.
         user_agent: userAgent ? userAgent.slice(0, 200) : null,
         suspect: suspect.length ? suspect.join(",") : null,
+        fetch_site: fetchSite && FETCH_SITES.has(fetchSite) ? fetchSite : null,
         // 띠 선물일 때만 키를 넣는다. 20261011-gift-clicks-tti.sql 적용 전에 tti 키가
         // 들어가면 insert 전체가 실패해 MBTI 선물 클릭 기록까지 잃는다.
         ...(tti && isTti(tti) ? { tti } : {}),
