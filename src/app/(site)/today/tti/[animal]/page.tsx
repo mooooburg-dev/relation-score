@@ -7,6 +7,7 @@ import { DailyView } from "@/components/daily-view";
 import { WeekFlow } from "@/components/week-flow";
 import MyToday from "@/components/my-today";
 import PushOptIn from "@/components/push-opt-in";
+import KakaoShareButton from "@/components/kakao-share";
 import { SITE_URL } from "@/lib/site";
 import { TTI_IDS, isTti, ttiInfo, ttiName, ttiTypePath, type Tti } from "@/lib/tti";
 import {
@@ -119,6 +120,8 @@ export default async function TtiTodayPage({ params }: { params: Promise<Params>
       />
 
       <ArticleAd />
+
+      <KakaoShareButton path={path} where="today-tti" label={`${name} 오늘 운세 친구에게 보내기`} />
 
       <GoldboxCta
         campaign="family_today-cta"

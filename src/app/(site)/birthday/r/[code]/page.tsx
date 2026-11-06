@@ -10,6 +10,7 @@ import { birthdayLabel, birthdayMatch, decodeBirthdayShare } from "@/lib/birthda
 import { ttiName, YEAR_MAX } from "@/lib/tti";
 import { zodiacName } from "@/lib/zodiac";
 import { recordToolView } from "@/lib/tool-views";
+import KakaoShareButton from "@/components/kakao-share";
 
 type Params = { code: string };
 
@@ -31,7 +32,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 export default async function BirthdaySharePage({ params }: { params: Promise<Params> }) {
-  const dates = decodeBirthdayShare((await params).code, YEAR_MAX);
+  const { code } = await params;
+  const dates = decodeBirthdayShare(code, YEAR_MAX);
   if (!dates) notFound();
   await recordToolView("birthday");
   const r = birthdayMatch(dates[0], dates[1]);
@@ -51,6 +53,7 @@ export default async function BirthdaySharePage({ params }: { params: Promise<Pa
       >
         나도 생일 궁합 보기 🎂
       </Link>
+      <KakaoShareButton path={`/birthday/r/${code}`} where="birthday-share" label="이 결과 카톡으로 보내기" />
       <ZodiacGiftCard signs={[r.zodiacA, r.zodiacB]} />
       <GoldboxCta
         campaign="family_birthday-share-cta"

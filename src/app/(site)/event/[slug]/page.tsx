@@ -5,6 +5,7 @@ import { ArticleAd, Breadcrumb, Card, FaqList, JsonLd, SectionTitle, breadcrumbL
 import { GoldboxCta } from "@/components/gift";
 import { SymbolGiftCard } from "@/components/symbol-gift";
 import EventMyLuck from "@/components/event-my-luck";
+import KakaoShareButton from "@/components/kakao-share";
 import { SITE_URL } from "@/lib/site";
 import { catalogPick, type GiftPick } from "@/lib/gifts";
 import { EVENTS, daysUntil, ddayLabel, eventPath, getEvent, nextOccurrence } from "@/lib/events";
@@ -122,6 +123,8 @@ export default async function EventPage({ params }: { params: Promise<Params> })
         lead={ev.giftLead}
         sets={[{ key: ev.slug, emoji: ev.emoji, name: `${ev.name} 선물`, items: gifts, query: { f: "event", ev: ev.slug } }]}
       />
+
+      <KakaoShareButton path={path} where={`event-${ev.slug}`} label={`${ev.name} 연애운 친구에게 보내기`} />
 
       <GoldboxCta
         campaign="family_event-cta"
